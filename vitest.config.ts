@@ -27,5 +27,7 @@ export default defineVitestConfig({
     // du fichier paie aussi ce coût de montage (mountSuspended) : testTimeout relevé de même.
     hookTimeout: 60_000,
     testTimeout: 20_000,
+    // Les specs Playwright (tests/e2e/**) sont lancées par `playwright test`, jamais par vitest.
+    exclude: ['**/node_modules/**', 'tests/e2e/**'],
   },
 })

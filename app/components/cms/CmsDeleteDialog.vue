@@ -3,7 +3,6 @@
 // (interdite dans le dashboard, voir CLAUDE.md).
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -11,6 +10,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
+import { Button } from '@/components/ui/button'
 
 withDefaults(
   defineProps<{
@@ -34,20 +34,30 @@ const emit = defineEmits<{
 
 <template>
   <AlertDialog :open="open" @update:open="(v) => emit('update:open', v)">
-    <AlertDialogContent>
+    <AlertDialogContent
+      @escape-key-down="(e) => { if (submitting) e.preventDefault() }"
+    >
       <AlertDialogHeader>
         <AlertDialogTitle>{{ titre }}</AlertDialogTitle>
         <AlertDialogDescription>{{ description }}</AlertDialogDescription>
       </AlertDialogHeader>
       <AlertDialogFooter>
         <AlertDialogCancel :disabled="submitting">Annuler</AlertDialogCancel>
-        <AlertDialogAction
-          class="bg-destructive text-white hover:bg-destructive/90"
+        <!--
+          Bouton natif (pas AlertDialogAction) : AlertDialogAction est un DialogClose
+          reka-ui qui ferme TOUJOURS le dialog au clic (comportement interne non
+          annulable), avant même que le handler @click du consommateur ne s'exécute.
+          Le dialog reste donc entièrement piloté par le parent (`open`) et ne se
+          ferme qu'après résolution de la suppression (succès), jamais au clic.
+        -->
+        <Button
+          type="button"
+          variant="destructive"
           :disabled="submitting"
           @click="emit('confirm')"
         >
           {{ submitting ? 'Suppression…' : 'Supprimer' }}
-        </AlertDialogAction>
+        </Button>
       </AlertDialogFooter>
     </AlertDialogContent>
   </AlertDialog>

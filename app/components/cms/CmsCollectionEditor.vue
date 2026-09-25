@@ -111,21 +111,31 @@ function requestDelete(item: TItem): void {
 }
 
 function onDeleteDialogOpenChange(value: boolean): void {
+  // Le dialog ne se ferme jamais tout seul pendant la requête (bouton Annuler
+  // désactivé, Echap intercepté côté CmsDeleteDialog) ; ce garde est une
+  // sécurité supplémentaire pour ne jamais perdre la cible en cours de suppression.
+  if (deleteSubmitting.value) return
   if (!value) deleteTarget.value = null
 }
 
 async function handleDelete(): Promise<void> {
+  // La cible est capturée ici, indépendamment de tout événement de fermeture du
+  // dialog : le dialog ne se ferme plus automatiquement au clic sur « Supprimer »
+  // (CmsDeleteDialog n'utilise plus AlertDialogAction), donc deleteTarget ne peut
+  // pas avoir été remis à null avant l'exécution de ce handler.
   const target = deleteTarget.value
   if (!target) return
   deleteSubmitting.value = true
   try {
     await remove(target.uuid)
     toast.success('Fiche supprimée.')
+    deleteTarget.value = null
   } catch (e) {
+    // On laisse le dialog ouvert (cible conservée) pour permettre de réessayer
+    // sans avoir à resélectionner la fiche ; l'utilisateur peut aussi l'annuler.
     toast.error((e as { message: string }).message)
   } finally {
     deleteSubmitting.value = false
-    deleteTarget.value = null
   }
 }
 
