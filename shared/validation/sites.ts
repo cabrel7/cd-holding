@@ -2,6 +2,7 @@
 // dans AUCUN de ces schémas : c'est ce qui la rend non modifiable via cette route (`.strict()`
 // rejette un champ imprévu en 400), conformément à la décision non négociable §6.
 import { z } from 'zod'
+import { STORAGE_KEY_PATTERN } from '../config/upload'
 
 const STATUTS_SITE = ['ACTIF', 'EN_MAINTENANCE', 'EN_CONSTRUCTION'] as const
 export const statutSiteSchema = z.enum(STATUTS_SITE)
@@ -11,6 +12,9 @@ const emailSchema = z.string().trim().toLowerCase().email('Email invalide').max(
 const telephoneSchema = z.string().trim().max(30)
 const adresseSchema = z.string().trim().max(255)
 const effectifSchema = z.number().int().min(0).max(100_000)
+// Même forme que shared/validation/cms.ts (imageKeySchema) : une clé de stockage est un
+// UUID v4 + extension autorisée, jamais une chaîne libre — cohérence avec assertPublicImages.
+const heroImageKeySchema = z.string().regex(STORAGE_KEY_PATTERN, 'Clé de fichier invalide')
 const httpsUrlSchema = z
   .string()
   .trim()
@@ -33,7 +37,7 @@ const siteReglagesFilialeShape = {
   linkedinUrl: httpsUrlSchema.nullable().optional(),
   facebookUrl: httpsUrlSchema.nullable().optional(),
   instagramUrl: httpsUrlSchema.nullable().optional(),
-  heroImageKey: z.string().nullable().optional(),
+  heroImageKey: heroImageKeySchema.nullable().optional(),
 } as const
 
 export const siteReglagesFilialeSchema = exigerAuMoinsUnChamp(z.object(siteReglagesFilialeShape).strict())
