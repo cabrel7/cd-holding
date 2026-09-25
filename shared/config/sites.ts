@@ -40,13 +40,18 @@ export interface NavItem {
  * à la règle « pas d'ancre » (point ouvert #12) : elle vise la structure de la page d'accueil
  * de la holding, qui n'a pas de page dédiée pour la liste des filiales.
  */
+/** Chemin de la page contact d'un site : `/contact` (holding) ou `/<filiale>/contact`. */
+export function contactPath(slug: SiteSlug): string {
+  return slug === HOLDING_SLUG ? '/contact' : `/${slug}/contact`
+}
+
 export function publicNav(slug: SiteSlug): readonly NavItem[] {
   if (slug === HOLDING_SLUG) {
     return [
       { label: 'Nos filiales', to: '/', hash: '#filiales' },
       { label: 'Réalisations', to: '/realisations' },
       { label: 'À propos', to: '/a-propos' },
-      { label: 'Contact', to: '/contact' },
+      { label: 'Contact', to: contactPath(HOLDING_SLUG) },
     ]
   }
 
@@ -60,7 +65,7 @@ export function publicNav(slug: SiteSlug): readonly NavItem[] {
   items.push(
     { label: 'Réalisations', to: `${base}/realisations` },
     { label: 'À propos', to: `${base}/a-propos` },
-    { label: 'Contact', to: `${base}/contact` },
+    { label: 'Contact', to: contactPath(slug) },
   )
   return items
 }

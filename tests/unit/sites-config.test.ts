@@ -4,6 +4,7 @@ import {
   HOLDING_SLUG,
   isFilialeSlug,
   isSiteSlug,
+  contactPath,
   publicNav,
   SITE_EXTRA_PAGES,
   SITE_SLUGS,
@@ -85,5 +86,21 @@ describe('publicNav', () => {
   it('should end every filiale nav with Réalisations, À propos, Contact', () => {
     const nav = publicNav('transport')
     expect(nav.slice(-3).map((item) => item.label)).toEqual(['Réalisations', 'À propos', 'Contact'])
+  })
+})
+
+describe('contactPath', () => {
+  it('should return the root contact page for the holding', () => {
+    expect(contactPath('holding')).toBe('/contact')
+  })
+
+  it('should return the subsidiary contact page for a filiale', () => {
+    expect(contactPath('entretien')).toBe('/entretien/contact')
+  })
+
+  it('should match the Contact entry of each site navigation', () => {
+    for (const slug of ['holding', 'ccdpaa'] as const) {
+      expect(publicNav(slug).find((item) => item.label === 'Contact')?.to).toBe(contactPath(slug))
+    }
   })
 })
