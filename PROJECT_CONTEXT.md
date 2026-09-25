@@ -91,6 +91,8 @@ Structure de pages par filiale (5 pages + 1 pour CCDPAA) : Accueil, Services, R�
 - `DemandeClient` — demandes de personnel des entreprises clientes, devient une offre d'emploi publique quand `publiee = true`
 - `Candidature` — candidatures reçues via le site public (liées ou non à une `DemandeClient`)
 
+- **Assistant Import-Export (CCDPAA)** : questionnaire guidé à 5 étapes avec recommandation calculée par une règle fixe (volume) — **explicitement pas une IA, aucun appel LLM** (retour client). Structure du questionnaire en code, textes d'introduction et de recommandation éditables.
+
 ## 8. Stockage de fichiers
 
 Toute écriture/lecture de fichier (CV, documents, images de contenu) passe par `useStorage('uploads')` (driver `fs`, dossier hors de `public/`). Jamais de fichier servi statiquement sans passer par une route API qui vérifie la session. Clé de stockage = UUID généré côté serveur, jamais le nom de fichier fourni par l'utilisateur. Détail complet : voir le prompt de setup, section stockage.

@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
       sujet: true,
       message: true,
       produitSouhaite: true,
-      lu: true,
+      statut: true,
       createdAt: true,
       company: { select: { uuid: true, nom: true, slug: true } },
       // volontairement pas de "id" ni "companyId" dans le select — jamais exposés au client

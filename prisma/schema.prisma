@@ -44,6 +44,7 @@ enum StatutReservation {
 enum TypeMessage {
   CONTACT
   SUGGESTION_PRODUIT
+  ASSISTANT_IMPORT_EXPORT
 }
 
 // PUBLIC : images CMS affichées sur les sites publics (services, équipe, logos...).
@@ -53,16 +54,107 @@ enum VisibiliteFichier {
   PRIVE
 }
 
+// --- Phase 2 : fondations communes (nouveaux enums, spec §1.1) -------------------------
+
+enum StatutSite {
+  ACTIF
+  EN_MAINTENANCE
+  EN_CONSTRUCTION
+}
+
+enum PageSite {
+  COMMUN
+  ACCUEIL
+  SERVICES
+  REALISATIONS
+  A_PROPOS
+  CONTACT
+  RESTAURANT
+  OFFRES
+  CONFIDENTIALITE
+  MENTIONS_LEGALES
+}
+
+enum StatutMessage {
+  NOUVEAU
+  EN_COURS
+  TRAITE
+}
+
+enum CategoriePoste {
+  MANUTENTION
+  CHAUFFEUR_CLASSE_1
+  CHAUFFEUR_CLASSE_3
+  CHAUFFEUR_CLASSE_5
+  ENTRETIEN
+  AUTRE
+}
+
+enum NiveauExperience {
+  MOINS_1_AN
+  UN_A_TROIS_ANS
+  TROIS_A_CINQ_ANS
+  PLUS_5_ANS
+}
+
+enum StatutCandidat {
+  DISPONIBLE
+  EN_PROCESSUS
+  PLACE
+}
+
+enum OrigineCandidat {
+  LOCAL
+  INTERNATIONAL
+}
+
+enum TypeContrat {
+  TEMPS_PLEIN
+  TEMPS_PARTIEL
+  TEMPORAIRE
+}
+
+enum StatutDemande {
+  OUVERTE
+  POURVUE
+  ANNULEE
+}
+
+enum ForfaitComptable {
+  MENSUEL
+  TRIMESTRIEL
+  ANNUEL
+}
+
+enum StatutDossier {
+  A_JOUR
+  EN_RETARD
+  EN_TRAITEMENT
+}
+
 model Company {
   id            Int         @id @default(autoincrement())
   uuid          String      @unique @default(uuid(7)) @db.Uuid
   type          CompanyType
   slug          String      @unique
   nom           String
+  nomCourt      String?
   secteur       String?
   description   String?     @db.Text
   couleurAccent String?
+  ordre         Int         @default(0)
+  statutSite    StatutSite  @default(ACTIF)
+  effectif      Int?
+  email         String?
+  telephone     String?
+  adresse       String?
+  linkedinUrl   String?
+  facebookUrl   String?
+  instagramUrl  String?
   logoKey       String?
+  logo          Fichier?    @relation("CompanyLogo", fields: [logoKey], references: [key], onDelete: SetNull)
+  heroImageKey  String?
+  heroImage     Fichier?    @relation("CompanyHero", fields: [heroImageKey], references: [key], onDelete: SetNull)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -79,7 +171,12 @@ model Company {
   candidats              Candidat[]
   demandesClient         DemandeClient[]
   candidatures           Candidature[]
-  fichiers               Fichier[]
+  fichiers               Fichier[]               @relation("CompanyFichiers")
+  sections               SectionContenu[]
+  reglagesRestaurant     ReglagesRestaurant?
+  affectations           Affectation[]
+
+  @@index([type, ordre])
 }
 
 model User {
@@ -94,6 +191,8 @@ model User {
   actif        Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+
+  employe Employe?
 
   @@index([companyId])
 }
@@ -111,8 +210,18 @@ model Fichier {
   taille      Int
   visibilite  VisibiliteFichier @default(PRIVE)
   companyId   Int?
-  company     Company?          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company     Company?          @relation("CompanyFichiers", fields: [companyId], references: [id], onDelete: Cascade)
   createdAt   DateTime          @default(now())
+
+  // Relations inverses des FK de clé ajoutées en phase 2 (la clé reste l'identifiant externe).
+  companiesLogo  Company[]      @relation("CompanyLogo")
+  companiesHero  Company[]      @relation("CompanyHero")
+  services       Service[]
+  realisations   Realisation[]
+  membresEquipe  MembreEquipe[]
+  partenaires    Partenaire[]
+  candidatsCv    Candidat[]
+  candidaturesCv Candidature[]
 
   @@index([companyId])
 }
@@ -125,6 +234,8 @@ model Service {
   titre       String
   description String   @db.Text
   imageKey    String?
+  image       Fichier? @relation(fields: [imageKey], references: [key], onDelete: SetNull)
+  misEnAvant  Boolean  @default(false)
   ordre       Int      @default(0)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -139,7 +250,9 @@ model MembreEquipe {
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   nom       String
   poste     String
+  bio       String?  @db.Text
   photoKey  String?
+  photo     Fichier? @relation(fields: [photoKey], references: [key], onDelete: SetNull)
   ordre     Int      @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -155,7 +268,8 @@ model Realisation {
   titre           String
   description     String    @db.Text
   imageKey        String?
-  dateRealisation DateTime?
+  image           Fichier?  @relation(fields: [imageKey], references: [key], onDelete: SetNull)
+  dateRealisation DateTime? @db.Date
   ordre           Int       @default(0)
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -164,36 +278,84 @@ model Realisation {
 }
 
 model Partenaire {
-  id        Int      @id @default(autoincrement())
-  uuid      String   @unique @default(uuid(7)) @db.Uuid
-  companyId Int
-  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  nom       String
-  logoKey   String?
-  siteUrl   String?
-  ordre     Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int      @id @default(autoincrement())
+  uuid         String   @unique @default(uuid(7)) @db.Uuid
+  companyId    Int
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  nom          String
+  typeRelation String?
+  logoKey      String?
+  logo         Fichier? @relation(fields: [logoKey], references: [key], onDelete: SetNull)
+  siteUrl      String?
+  ordre        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   @@index([companyId, ordre])
 }
 
+// Contenu éditorial (héros, en-têtes de section, CTA, SEO, textes de formulaire, textes
+// légaux, menu, recommandations de l'assistant...) : une ligne par (company, page, clé).
+// `donnees` est validé par le schéma zod du type déclaré dans le catalogue versionné
+// shared/content/sections/ — jamais de clé créée depuis l'admin (spec §1.2).
+model SectionContenu {
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid(7)) @db.Uuid
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  page      PageSite
+  cle       String   @db.VarChar(64)
+  donnees   Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([companyId, page, cle])
+  @@index([companyId, updatedAt])
+}
+
+// Réglages du restaurant CCDPAA (1:1 avec Company) — consommés par la validation métier des
+// réservations côté serveur (colonnes typées plutôt qu'un JSON, pour ne jamais casser
+// silencieusement cette validation, spec §1.2).
+model ReglagesRestaurant {
+  id                     Int      @id @default(autoincrement())
+  uuid                   String   @unique @default(uuid(7)) @db.Uuid
+  companyId              Int      @unique
+  company                Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  nom                    String
+  adresse                String?
+  quartier               String?
+  joursOuverture         Int[]
+  heureOuverture         String
+  heureFermeture         String
+  dernierService         String
+  pasCreneauMinutes      Int      @default(30)
+  capaciteMaxReservation Int      @default(20)
+  delaiMinimumHeures     Int      @default(2)
+  horizonJours           Int      @default(90)
+  updatedAt              DateTime @updatedAt
+}
+
 model MessageContact {
-  id              Int         @id @default(autoincrement())
-  uuid            String      @unique @default(uuid(7)) @db.Uuid
+  id              Int           @id @default(autoincrement())
+  uuid            String        @unique @default(uuid(7)) @db.Uuid
   companyId       Int
-  company         Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  type            TypeMessage @default(CONTACT)
+  company         Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type            TypeMessage   @default(CONTACT)
   nom             String
   email           String
   telephone       String?
   sujet           String?
-  message         String      @db.Text
+  message         String        @db.Text
   produitSouhaite String?
-  lu              Boolean     @default(false)
-  createdAt       DateTime    @default(now())
+  entreprise      String?
+  details         Json?
+  paysOrigine     String?
+  statut          StatutMessage @default(NOUVEAU)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
-  @@index([companyId, createdAt])
+  @@index([companyId, statut])
+  @@index([companyId, type, createdAt])
 }
 
 model ReservationRestaurant {
@@ -209,8 +371,10 @@ model ReservationRestaurant {
   notes           String?           @db.Text
   statut          StatutReservation @default(EN_ATTENTE)
   createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
   @@index([companyId, dateReservation])
+  @@index([companyId, statut])
 }
 
 model Employe {
@@ -218,6 +382,8 @@ model Employe {
   uuid      String   @unique @default(uuid(7)) @db.Uuid
   companyId Int
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId    Int?     @unique
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   nom       String
   poste     String
   email     String?
@@ -238,7 +404,8 @@ model PlanningEntry {
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   employeId Int
   employe   Employe  @relation(fields: [employeId], references: [id], onDelete: Cascade)
-  titre     String
+  titre     String?
+  lieu      String
   dateDebut DateTime
   dateFin   DateTime
   notes     String?  @db.Text
@@ -265,56 +432,85 @@ model Client {
 
   dossierComptable DossierComptable?
 
+  @@unique([companyId, email])
   @@index([companyId])
 }
 
 // Étend Client plutôt qu'un modèle clientsComptables isolé et dupliqué —
 // voir PROJECT_STATE.md, "Décisions encore ouvertes", point 2 (à confirmer avec l'utilisateur).
 model DossierComptable {
-  id              Int       @id @default(autoincrement())
-  uuid            String    @unique @default(uuid(7)) @db.Uuid
-  clientId        Int       @unique
-  client          Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  id              Int               @id @default(autoincrement())
+  uuid            String            @unique @default(uuid(7)) @db.Uuid
+  clientId        Int               @unique
+  client          Client            @relation(fields: [clientId], references: [id], onDelete: Cascade)
   typeDeclaration String?
+  forfait         ForfaitComptable?
+  statut          StatutDossier     @default(A_JOUR)
   echeance        DateTime?
-  documentsKeys   String[]  @default([])
-  notes           String?   @db.Text
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  documentsKeys   String[]          @default([])
+  notes           String?           @db.Text
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
 
 model Candidat {
-  id             Int      @id @default(autoincrement())
-  uuid           String   @unique @default(uuid(7)) @db.Uuid
+  id             Int             @id @default(autoincrement())
+  uuid           String          @unique @default(uuid(7)) @db.Uuid
   companyId      Int
-  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
   nomComplet     String
   email          String
   telephone      String?
   posteRecherche String?
+  categorie      CategoriePoste
+  disponibilite  String?
+  statut         StatutCandidat  @default(DISPONIBLE)
+  origine        OrigineCandidat
   cvKey          String?
-  notes          String?  @db.Text
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  cv             Fichier?        @relation(fields: [cvKey], references: [key], onDelete: SetNull)
+  notes          String?         @db.Text
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
 
-  @@index([companyId])
+  candidatures Candidature[]
+  affectations Affectation[]
+
+  // Dédoublonnage « Ajouter au vivier » → 409 (une candidature devient un candidat unique par filiale/email).
+  @@unique([companyId, email])
+  @@index([companyId, statut])
 }
 
 model DemandeClient {
-  id                Int      @id @default(autoincrement())
-  uuid              String   @unique @default(uuid(7)) @db.Uuid
-  companyId         Int
-  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  entrepriseCliente String
-  posteRecherche    String
-  description       String   @db.Text
-  publiee           Boolean  @default(false)
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  id                       Int           @id @default(autoincrement())
+  uuid                     String        @unique @default(uuid(7)) @db.Uuid
+  companyId                Int
+  company                  Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  entrepriseCliente        String
+  posteRecherche           String
+  categorie                CategoriePoste
+  posteAutrePrecision      String?
+  recrutementInternational Boolean       @default(false)
+  contactNom               String
+  contactEmail             String
+  contactTelephone         String?
+  nombrePostes             Int           @default(1)
+  dateDebut                DateTime?     @db.Date
+  description              String        @db.Text
+  publiee                  Boolean       @default(false)
+  statut                   StatutDemande @default(OUVERTE)
+  titreOffre               String?
+  lieu                     String?
+  typeContrat              TypeContrat?
+  salaire                  String?
+  descriptionPublique      String?       @db.Text
+  publieeLe                DateTime?
+  createdAt                DateTime      @default(now())
+  updatedAt                DateTime      @updatedAt
 
   candidatures Candidature[]
+  affectations Affectation[]
 
-  @@index([companyId, publiee])
+  @@index([companyId, publiee, statut])
 }
 
 model Candidature {
@@ -324,17 +520,44 @@ model Candidature {
   company             Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   demandeId           Int?
   demande             DemandeClient?    @relation(fields: [demandeId], references: [id], onDelete: SetNull)
+  candidatId          Int?
+  candidat            Candidat?         @relation(fields: [candidatId], references: [id], onDelete: SetNull)
   nomComplet          String
   email               String
   telephone           String
   adresseComplete     String
   posteRecherche      String
   posteAutrePrecision String?
+  categorie           CategoriePoste
+  experience          NiveauExperience?
+  pays                String
+  message             String?           @db.Text
   cvKey               String
+  cv                  Fichier           @relation(fields: [cvKey], references: [key], onDelete: Restrict)
   autresDocumentsKeys String[]          @default([])
   statut              StatutCandidature @default(NOUVELLE)
+  consentementLe      DateTime
   dateEnvoi           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
 
   @@index([companyId, statut])
+  @@index([demandeId])
+}
+
+// Rapprochement d'un candidat à une demande cliente (DEC-24) : scopée par filiale comme
+// toutes les autres tables (companyId dénormalisé, fixé côté serveur depuis la demande).
+model Affectation {
+  id              Int           @id @default(autoincrement())
+  uuid            String        @unique @default(uuid(7)) @db.Uuid
+  companyId       Int
+  company         Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  candidatId      Int
+  candidat        Candidat      @relation(fields: [candidatId], references: [id], onDelete: Cascade)
+  demandeId       Int
+  demande         DemandeClient @relation(fields: [demandeId], references: [id], onDelete: Cascade)
+  dateAffectation DateTime      @default(now())
+
+  @@unique([candidatId, demandeId])
+  @@index([companyId])
   @@index([demandeId])
 }

@@ -1,7 +1,8 @@
 import tailwindcss from '@tailwindcss/vite'
-// Chemin relatif (pas l'alias `#shared`) : nuxt.config.ts est évalué avant que Nuxt
+// Chemins relatifs (pas l'alias `#shared`) : nuxt.config.ts est évalué avant que Nuxt
 // n'enregistre ses alias, l'alias `#shared/...` n'y est donc pas résolu.
 import { MAX_UPLOAD_BYTES, MULTIPART_OVERHEAD_BYTES } from './shared/config/upload'
+import { FILIALE_SLUGS } from './shared/config/sites'
 import { fileURLToPath } from 'node:url'
 
 const customErrorHandler = fileURLToPath(new URL('./server/error.ts', import.meta.url))
@@ -9,8 +10,13 @@ const customErrorHandler = fileURLToPath(new URL('./server/error.ts', import.met
 const ISR_TTL_SECONDS = 3600
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8 // 8 h
 const MAX_UPLOAD_REQUEST_BYTES = MAX_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES
+const FONT_CACHE_CONTROL = 'public, max-age=31536000, immutable'
 
-const publicSections = ['entretien', 'transport', 'comptable', 'placement', 'ccdpaa', 'boissons'] as const
+// Polices auto-hébergées (spec phase 2 §4.4). "v1" est notre propre révision d'asset (bump si
+// les fichiers dans public/fonts/ sont remplacés), pas le numéro de version fontsource — évite
+// un couplage fragile à un tag amont précis. Fichiers livrés par T3 (public/fonts/**).
+const FONT_POPPINS_700_LATIN = '/fonts/poppins-v1-700-normal-latin.woff2'
+const FONT_INTER_LATIN = '/fonts/inter-v1-variable-latin.woff2'
 
 export default defineNuxtConfig({
   compatibilityDate: '2026-01-01',
@@ -63,11 +69,17 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    // Pages publiques : ISR pour le SEO
+    // Pages publiques : ISR pour le SEO. Invalidation explicite à chaque écriture de contenu
+    // public (server/utils/isr.ts, T1) — ce TTL n'est qu'un filet de sécurité.
     '/': { isr: ISR_TTL_SECONDS },
     '/a-propos': { isr: ISR_TTL_SECONDS },
     '/contact': { isr: ISR_TTL_SECONDS },
-    ...Object.fromEntries(publicSections.map((s) => [`/${s}/**`, { isr: ISR_TTL_SECONDS }])),
+    '/realisations': { isr: ISR_TTL_SECONDS },
+    '/confidentialite': { isr: ISR_TTL_SECONDS },
+    ...Object.fromEntries(FILIALE_SLUGS.map((s) => [`/${s}/**`, { isr: ISR_TTL_SECONDS }])),
+
+    // Polices auto-hébergées : jamais invalidées (nom de fichier versionné, voir FONT_*).
+    '/fonts/**': { headers: { 'cache-control': FONT_CACHE_CONTROL } },
 
     // Dashboards : SPA pure, pas de SSR
     '/admin/**': { ssr: false },
@@ -76,6 +88,19 @@ export default defineNuxtConfig({
   runtimeConfig: {
     // Surchargé au runtime par NUXT_UPLOADS_DIR (lu au démarrage, pas au build)
     uploadsDir: './storage/uploads',
+    // Mailer (spec §4.7) : transport 'log' par défaut (aucune dépendance externe requise en
+    // dev). Surchargé par NUXT_MAIL_* ; validé par zod au démarrage (server/plugins/mailer.ts, T1).
+    mail: {
+      transport: 'log',
+      from: '',
+      smtp: {
+        host: '',
+        port: 587,
+        secure: false,
+        user: '',
+        password: '',
+      },
+    },
     session: {
       // Le mot de passe de scellement est lu depuis NUXT_SESSION_PASSWORD
       maxAge: SESSION_MAX_AGE_SECONDS,
@@ -90,6 +115,10 @@ export default defineNuxtConfig({
   app: {
     head: {
       htmlAttrs: { lang: 'fr' },
+      link: [
+        { rel: 'preload', href: FONT_POPPINS_700_LATIN, as: 'font', type: 'font/woff2', crossorigin: 'anonymous' },
+        { rel: 'preload', href: FONT_INTER_LATIN, as: 'font', type: 'font/woff2', crossorigin: 'anonymous' },
+      ],
     },
   },
 
