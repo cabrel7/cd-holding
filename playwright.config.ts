@@ -20,7 +20,11 @@ export default defineConfig({
   reporter: [['list']],
 
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:3200',
+    // `??` ne couvre pas le cas d'une variable présente mais vide (`E2E_BASE_URL=""` dans .env,
+    // constaté en pratique) : ce cas produit une baseURL vide et fait échouer `page.goto` avec
+    // "Cannot navigate to invalid URL" sur toutes les navigations relatives. `||` traite aussi
+    // la chaîne vide comme "non définie".
+    baseURL: process.env.E2E_BASE_URL || 'http://localhost:3200',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     actionTimeout: 20_000,

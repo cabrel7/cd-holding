@@ -125,7 +125,11 @@ test.describe('Parcours CMS admin — équipe (holding)', () => {
       await row.getByRole('button', { name: 'Supprimer' }).click()
       const confirmDialog = page.getByRole('alertdialog')
       await confirmDialog.getByRole('button', { name: 'Supprimer' }).click()
-      await expect(page.getByText('Fiche supprimée.')).toBeVisible()
+      // Le toast auto-dismiss peut disparaître avant l'assertion sur un flux aussi long
+      // (création + édition + 2 réordonnancements avant d'arriver ici) : on vérifie la
+      // disparition de la ligne dans la liste admin, une preuve plus fiable, puis l'état réel
+      // en base via l'API publique.
+      await expect(row).toHaveCount(0)
 
       await expect
         .poll(async () => {
@@ -196,7 +200,10 @@ test.describe('Parcours CMS admin — équipe (holding)', () => {
       const histoireRow = aProposGroup.locator('li', { hasText: 'histoire' })
       await histoireRow.getByRole('button', { name: 'Modifier' }).click()
       const dialog = page.getByRole('dialog')
-      await dialog.getByLabel('Titre').fill(titre)
+      // `getByLabel('Titre')` matche aussi "Surtitre *" (sous-chaîne, insensible à la casse) et
+      // l'accessible name réel inclut l'astérisque de champ requis ("Titre *", pas "Titre" exact) —
+      // regex ancrée en début de chaîne pour cibler uniquement ce champ.
+      await dialog.getByLabel(/^Titre/i).fill(titre)
       await dialog.getByRole('button', { name: 'Enregistrer' }).click()
       await expect(page.getByText('Section mise à jour.')).toBeVisible()
     }
@@ -261,7 +268,9 @@ test.describe('Parcours CMS admin — équipe (holding)', () => {
         .toBe(1)
 
       await publicPage.goto('/a-propos')
-      const partenairesNames = publicPage.locator('li p.font-display.font-bold')
+      // `.font-display.font-bold` seul matche aussi le chiffre "6" des repères (même classes,
+      // `text-3xl` au lieu de `text-xl`) — `.text-xl` désambiguïse vers les noms de partenaires.
+      const partenairesNames = publicPage.locator('li p.font-display.text-xl.font-bold')
       await expect(partenairesNames.nth(0)).toHaveText(second)
       await expect(partenairesNames.nth(1)).toHaveText(first)
     } finally {

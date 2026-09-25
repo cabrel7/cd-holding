@@ -45,7 +45,9 @@ test.describe('Mode maintenance d\'une filiale', () => {
     // Page de maintenance affichée à la place du contenu, sans navigation (header sans nav,
     // spec §4.3) : ni lien de nav, ni bouton menu mobile.
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Retour au Groupe CD' })).toBeVisible()
+    // Le lien "Retour au Groupe CD" existe dans le main ET le footer (comportement voulu) —
+    // on scope au main pour désambiguïser le locator.
+    await expect(page.getByRole('main').getByRole('link', { name: 'Retour au Groupe CD' })).toBeVisible()
     await expect(page.getByRole('link', { name: 'Services' })).toHaveCount(0)
     await expect(page.getByRole('button', { name: 'Menu' })).toHaveCount(0)
 
