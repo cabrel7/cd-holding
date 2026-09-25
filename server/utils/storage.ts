@@ -1,8 +1,11 @@
 import { randomUUID } from 'node:crypto'
 import type { VisibiliteFichier } from '../generated/prisma/client'
+// Source unique de la borne de taille (voir shared/config/upload.ts) — aussi utilisée par
+// nuxt.config.ts (requestSizeLimiter de nuxt-security) pour rester cohérente avec ce module.
+import { MAX_UPLOAD_BYTES } from '#shared/config/upload'
 
 export const UPLOADS_MOUNT = 'uploads'
-export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024 // 10 Mo
+export { MAX_UPLOAD_BYTES }
 
 // Type MIME autorisé -> extension de stockage. L'extension vient du type DÉTECTÉ,
 // jamais du nom de fichier fourni par l'utilisateur.
@@ -47,7 +50,7 @@ export interface UploadInput {
 }
 
 export interface SaveOptions {
-  companyId: string | null
+  companyId: number | null
   visibilite: VisibiliteFichier
 }
 

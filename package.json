@@ -13,7 +13,10 @@
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:seed": "prisma db seed",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "test:unit": "vitest run",
+    "test:e2e": "playwright test",
+    "build:check": "nuxt build && node --env-file=.env .output/server/index.mjs"
   },
   "dependencies": {
     "@lucide/vue": "^1.47.0",
@@ -27,8 +30,10 @@
     "@vueuse/nuxt": "^15.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "consola": "^3.4.2",
     "nuxt": "^4.5.2",
     "nuxt-auth-utils": "^0.5.30",
+    "nuxt-security": "2.6.0",
     "pinia": "^4.0.3",
     "reka-ui": "^2.10.5",
     "tailwind-merge": "^3.7.0",
@@ -43,12 +48,16 @@
   },
   "devDependencies": {
     "@adonisjs/hash": "^9.1.1",
+    "@nuxt/test-utils": "^4.3.2",
     "@playwright/test": "^1.63.0",
+    "@vue/test-utils": "^2.5.1",
     "dotenv": "^18.0.3",
+    "happy-dom": "^20.14.5",
     "prisma": "7.10.0",
     "shadcn-nuxt": "^2.8.2",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
+    "vitest": "^5.0.1",
     "vue-tsc": "^3.3.11"
   }
 }

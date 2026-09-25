@@ -54,7 +54,8 @@ enum VisibiliteFichier {
 }
 
 model Company {
-  id            String      @id @default(cuid())
+  id            Int         @id @default(autoincrement())
+  uuid          String      @unique @default(uuid(7)) @db.Uuid
   type          CompanyType
   slug          String      @unique
   nom           String
@@ -82,12 +83,13 @@ model Company {
 }
 
 model User {
-  id           String   @id @default(cuid())
+  id           Int      @id @default(autoincrement())
+  uuid         String   @unique @default(uuid(7)) @db.Uuid
   email        String   @unique
   passwordHash String
   nom          String
   role         Role
-  companyId    String?
+  companyId    Int?
   company      Company? @relation(fields: [companyId], references: [id])
   actif        Boolean  @default(true)
   createdAt    DateTime @default(now())
@@ -99,14 +101,16 @@ model User {
 // Registre de tous les fichiers uploadés : porte le nom original (affichage uniquement),
 // le type MIME vérifié, la filiale propriétaire et la visibilité. C'est ce qui permet à
 // /api/files/[key] de vérifier l'appartenance à la filiale avant de servir un fichier.
+// Pas de champ `uuid` ici : `key` (UUID v4 + extension, généré côté serveur) est déjà
+// l'identifiant externe de ce modèle — `id` reste strictement interne (jointures).
 model Fichier {
-  id          String            @id @default(cuid())
+  id          Int               @id @default(autoincrement())
   key         String            @unique
   nomOriginal String
   mimeType    String
   taille      Int
   visibilite  VisibiliteFichier @default(PRIVE)
-  companyId   String?
+  companyId   Int?
   company     Company?          @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt   DateTime          @default(now())
 
@@ -114,8 +118,9 @@ model Fichier {
 }
 
 model Service {
-  id          String   @id @default(cuid())
-  companyId   String
+  id          Int      @id @default(autoincrement())
+  uuid        String   @unique @default(uuid(7)) @db.Uuid
+  companyId   Int
   company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   titre       String
   description String   @db.Text
@@ -128,8 +133,9 @@ model Service {
 }
 
 model MembreEquipe {
-  id        String   @id @default(cuid())
-  companyId String
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid(7)) @db.Uuid
+  companyId Int
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   nom       String
   poste     String
@@ -142,8 +148,9 @@ model MembreEquipe {
 }
 
 model Realisation {
-  id              String    @id @default(cuid())
-  companyId       String
+  id              Int       @id @default(autoincrement())
+  uuid            String    @unique @default(uuid(7)) @db.Uuid
+  companyId       Int
   company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
   titre           String
   description     String    @db.Text
@@ -157,8 +164,9 @@ model Realisation {
 }
 
 model Partenaire {
-  id        String   @id @default(cuid())
-  companyId String
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid(7)) @db.Uuid
+  companyId Int
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   nom       String
   logoKey   String?
@@ -171,8 +179,9 @@ model Partenaire {
 }
 
 model MessageContact {
-  id              String      @id @default(cuid())
-  companyId       String
+  id              Int         @id @default(autoincrement())
+  uuid            String      @unique @default(uuid(7)) @db.Uuid
+  companyId       Int
   company         Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
   type            TypeMessage @default(CONTACT)
   nom             String
@@ -188,8 +197,9 @@ model MessageContact {
 }
 
 model ReservationRestaurant {
-  id              String            @id @default(cuid())
-  companyId       String
+  id              Int               @id @default(autoincrement())
+  uuid            String            @unique @default(uuid(7)) @db.Uuid
+  companyId       Int
   company         Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   nom             String
   email           String
@@ -204,8 +214,9 @@ model ReservationRestaurant {
 }
 
 model Employe {
-  id        String   @id @default(cuid())
-  companyId String
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid(7)) @db.Uuid
+  companyId Int
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   nom       String
   poste     String
@@ -221,10 +232,11 @@ model Employe {
 }
 
 model PlanningEntry {
-  id        String   @id @default(cuid())
-  companyId String
+  id        Int      @id @default(autoincrement())
+  uuid      String   @unique @default(uuid(7)) @db.Uuid
+  companyId Int
   company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  employeId String
+  employeId Int
   employe   Employe  @relation(fields: [employeId], references: [id], onDelete: Cascade)
   titre     String
   dateDebut DateTime
@@ -238,8 +250,9 @@ model PlanningEntry {
 }
 
 model Client {
-  id                  String       @id @default(cuid())
-  companyId           String
+  id                  Int          @id @default(autoincrement())
+  uuid                String       @unique @default(uuid(7)) @db.Uuid
+  companyId           Int
   company             Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
   nom                 String
   entreprise          String?
@@ -258,8 +271,9 @@ model Client {
 // Étend Client plutôt qu'un modèle clientsComptables isolé et dupliqué —
 // voir PROJECT_STATE.md, "Décisions encore ouvertes", point 2 (à confirmer avec l'utilisateur).
 model DossierComptable {
-  id              String    @id @default(cuid())
-  clientId        String    @unique
+  id              Int       @id @default(autoincrement())
+  uuid            String    @unique @default(uuid(7)) @db.Uuid
+  clientId        Int       @unique
   client          Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   typeDeclaration String?
   echeance        DateTime?
@@ -270,8 +284,9 @@ model DossierComptable {
 }
 
 model Candidat {
-  id             String   @id @default(cuid())
-  companyId      String
+  id             Int      @id @default(autoincrement())
+  uuid           String   @unique @default(uuid(7)) @db.Uuid
+  companyId      Int
   company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   nomComplet     String
   email          String
@@ -286,8 +301,9 @@ model Candidat {
 }
 
 model DemandeClient {
-  id                String   @id @default(cuid())
-  companyId         String
+  id                Int      @id @default(autoincrement())
+  uuid              String   @unique @default(uuid(7)) @db.Uuid
+  companyId         Int
   company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   entrepriseCliente String
   posteRecherche    String
@@ -302,10 +318,11 @@ model DemandeClient {
 }
 
 model Candidature {
-  id                  String            @id @default(cuid())
-  companyId           String
+  id                  Int               @id @default(autoincrement())
+  uuid                String            @unique @default(uuid(7)) @db.Uuid
+  companyId           Int
   company             Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  demandeId           String?
+  demandeId           Int?
   demande             DemandeClient?    @relation(fields: [demandeId], references: [id], onDelete: SetNull)
   nomComplet          String
   email               String

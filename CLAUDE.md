@@ -29,16 +29,33 @@ Ces règles s'appliquent à **tout** le code produit dans ce dépôt, sans excep
 
 ### Backend / API (Nitro)
 
-- **Validation zod sur chaque route API**, sans exception, même si le formulaire frontend valide déjà côté client. Le frontend peut être contourné (devtools, requête directe) — le serveur ne fait jamais confiance à l'entrée.
+- **Validation zod sur chaque route API**, sans exception, même si le formulaire frontend valide déjà côté client. Les schémas partagés client/serveur vivent dans `shared/validation/` (import `#shared/validation/...`), une seule source de vérité. Le frontend peut être contourné (devtools, requête directe) — le serveur ne fait jamais confiance à l'entrée.
 - **Prisma uniquement** — jamais de SQL brut, jamais de concaténation de chaînes dans une requête.
 - Toute route sous `/api/admin/**` doit :
-  1. Appeler `requireUserSession(event)` en premier.
-  2. Vérifier le rôle (`super_admin` / `admin_filiale` / `employe`) et, pour `admin_filiale`/`employe`, vérifier que la ressource demandée appartient bien à `session.user.companyId`.
+  1. Appeler `requireRole(event, [...])` (`server/utils/auth.ts`) en premier — session + rôle, renvoie `{ user, secure }`.
+  2. Pour `ADMIN_FILIALE`/`EMPLOYE`, scoper via `companyScope(secure)` / `assertCompanyAccess(secure, …)`, qui s'appuient sur `secure.companyId` (id interne, jamais envoyé au client).
   3. Seulement ensuite exécuter la requête Prisma.
   Ce n'est jamais le frontend qui décide ce qu'un utilisateur peut voir — le filtrage par rôle/filiale est toujours refait côté serveur, même si le frontend filtre déjà pour l'ergonomie.
 - Tout fichier uploadé (CV, documents, images) passe par `useStorage('uploads')`, jamais écrit ou lu directement via `fs` en dehors de cette abstraction — c'est ce qui garde la migration vers S3/R2 possible sans réécrire le code applicatif.
 - Clé de stockage d'un fichier = UUID généré côté serveur. Le nom de fichier original de l'utilisateur n'est jamais utilisé comme chemin ou identifiant — seulement stocké comme métadonnée d'affichage.
 - Aucun fichier uploadé n'est servi de manière statique/publique. Toute lecture passe par une route API qui vérifie la session (sauf cas explicitement public et documenté comme tel).
+- **Erreurs** : le `statusMessage` de `createError` est toujours générique et affichable ("Identifiants invalides", "Introuvable") — jamais de détail technique (contrainte SQL, chemin, stack). Le détail va uniquement dans les logs, via `server/plugins/error-handler.ts` (5xx seulement). `server/error.ts` (branché par le hook `nitro:config`, jamais par `nitro.errorHandler` qui supprimerait la page d'erreur Nuxt) coupe le dump brut de Nitro sur les routes JSON/API.
+- **Logs sans donnée personnelle** : jamais de corps de requête, cookie, header d'auth, email, mot de passe, nom de fichier uploadé ni query string dans un log.
+
+### Identifiants — id interne / uuid externe
+
+- Chaque modèle Prisma : `id Int @id @default(autoincrement())` (interne : relations, jointures) + `uuid String @unique @default(uuid(7)) @db.Uuid` (seul identifiant exposé). Exception : `Fichier`, exposé par sa `key` de stockage.
+- Toute réponse API qui renvoie un enregistrement Prisma utilise un **`select` explicite** avec `uuid` — jamais `id`, `companyId`, `clientId`, `employeId`, `demandeId` ni aucune FK numérique.
+- Toute route dynamique est `[uuid].<méthode>.ts`, param validé par `z.string().uuid()` (un uuid malformé ferait sinon une erreur 500 Postgres), résolu via `where: { uuid }`. Jamais d'id numérique dans une URL ou un body client.
+- Session : `session.user` (visible client) = `uuid`, `nom`, `role`, `companyUuid`. Les ids internes (`userId`, `companyId`) vivent uniquement dans `session.secure` (scellé, serveur).
+
+### Tests — obligatoires avant de marquer une tâche terminée
+
+S'applique à toute tâche, pas seulement à la conversion des routes :
+1. `pnpm typecheck` passe.
+2. `pnpm test:unit` passe, avec des tests pour toute logique ajoutée ou modifiée (schémas zod, composables, helpers serveur).
+3. `pnpm build:check` : le **build de production** démarre et le parcours touché fonctionne contre lui — le dev (`nuxt dev`) ne suffit pas (bundling Nitro, variables d'env et `routeRules` ISR/SSR diffèrent en prod).
+4. Revue du diff par un agent qui n'a pas écrit le code (reviewer), confrontée à ce fichier.
 
 ### Conversion React → Vue
 

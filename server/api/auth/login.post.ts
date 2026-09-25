@@ -1,13 +1,11 @@
-import { z } from 'zod'
+import { loginSchema } from '#shared/validation/auth'
 
-const LOGIN_RATE_LIMIT = { scope: 'login', max: 10, windowMs: 15 * 60 * 1000 } as const
-const PASSWORD_MIN_LENGTH = 8
+const LOGIN_RATE_LIMIT = { scope: 'login', max: 5, windowMs: 15 * 60 * 1000 } as const
 const INVALID_CREDENTIALS = 'Identifiants invalides'
-
-const loginSchema = z.object({
-  email: z.string().trim().toLowerCase().email(),
-  password: z.string().min(PASSWORD_MIN_LENGTH),
-})
+// Corps JSON attendu : email + mot de passe, quelques centaines d'octets suffisent largement.
+// Rejeté avant lecture pour éviter qu'un corps non authentifié arbitrairement gros soit
+// entièrement chargé en mémoire par readValidatedBody (déni de service).
+const MAX_LOGIN_BODY_BYTES = 4 * 1024
 
 // Hash factice calculé une fois : vérifié quand l'email n'existe pas, pour que le temps
 // de réponse ne révèle pas si un compte existe (énumération par timing).
@@ -20,9 +18,25 @@ function getDummyHash(): Promise<string> {
 export default defineEventHandler(async (event) => {
   assertRateLimit(event, LOGIN_RATE_LIMIT)
 
+  const contentLength = Number(getRequestHeader(event, 'content-length') ?? 0)
+  if (!contentLength || contentLength > MAX_LOGIN_BODY_BYTES) {
+    throw createError({ statusCode: 413, statusMessage: 'Requête trop volumineuse' })
+  }
+
   const body = await readValidatedBody(event, loginSchema.parse)
 
-  const user = await prisma.user.findUnique({ where: { email: body.email } })
+  const user = await prisma.user.findUnique({
+    where: { email: body.email },
+    select: {
+      id: true,
+      uuid: true,
+      nom: true,
+      role: true,
+      passwordHash: true,
+      actif: true,
+      company: { select: { id: true, uuid: true } },
+    },
+  })
 
   const valid = user
     ? await verifyPassword(user.passwordHash, body.password)
@@ -36,11 +50,14 @@ export default defineEventHandler(async (event) => {
 
   await setUserSession(event, {
     user: {
-      id: user.id,
-      email: user.email,
+      uuid: user.uuid,
       nom: user.nom,
       role: user.role,
-      companyId: user.companyId,
+      companyUuid: user.company?.uuid ?? null,
+    },
+    secure: {
+      userId: user.id,
+      companyId: user.company?.id ?? null,
     },
     loggedInAt: Date.now(),
   })

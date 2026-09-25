@@ -1,20 +1,21 @@
 import { z } from 'zod'
+import { MULTIPART_OVERHEAD_BYTES } from '#shared/config/upload'
 
 // Upload depuis le dashboard (images CMS, documents). Sert aussi de route de test du scaffold.
 // L'upload public (candidatures Placement) aura sa propre route sous /api/public/**,
 // avec visibilite PRIVE forcée et companyId résolu côté serveur depuis le slug.
 const ALLOWED_ROLES = [ROLES.SUPER_ADMIN, ROLES.ADMIN_FILIALE] as const
 const FILE_FIELD = 'file'
-const MULTIPART_OVERHEAD_BYTES = 64 * 1024
 
 const fieldsSchema = z.object({
   visibilite: z.enum(['PUBLIC', 'PRIVE']).default('PRIVE'),
-  // Uniquement pris en compte pour SUPER_ADMIN ; ADMIN_FILIALE est forcé sur sa filiale.
-  companyId: z.string().cuid().optional(),
+  // Identifiant externe de filiale — uniquement pris en compte pour SUPER_ADMIN ;
+  // ADMIN_FILIALE est toujours forcé sur sa propre filiale (secure.companyId).
+  companyUuid: z.string().uuid().optional(),
 })
 
 export default defineEventHandler(async (event) => {
-  const user = await requireRole(event, ALLOWED_ROLES)
+  const { user, secure } = await requireRole(event, ALLOWED_ROLES)
 
   // Rejet avant lecture : readMultipartFormData charge tout le corps en mémoire
   const contentLength = Number(getRequestHeader(event, 'content-length') ?? 0)
@@ -37,9 +38,25 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: `Champ "${FILE_FIELD}" manquant` })
   }
 
-  const companyId = user.role === ROLES.SUPER_ADMIN ? (fields.companyId ?? null) : user.companyId
-  if (user.role !== ROLES.SUPER_ADMIN && !companyId) {
-    throw createError({ statusCode: 403, statusMessage: 'Compte non rattaché à une filiale' })
+  let companyId: number | null
+  if (user.role === ROLES.SUPER_ADMIN) {
+    if (fields.companyUuid) {
+      const company = await prisma.company.findUnique({
+        where: { uuid: fields.companyUuid },
+        select: { id: true },
+      })
+      if (!company) {
+        throw createError({ statusCode: 404, statusMessage: 'Société inconnue' })
+      }
+      companyId = company.id
+    } else {
+      companyId = null
+    }
+  } else {
+    if (secure.companyId === null) {
+      throw createError({ statusCode: 403, statusMessage: 'Compte non rattaché à une filiale' })
+    }
+    companyId = secure.companyId
   }
 
   return saveUploadedFile(

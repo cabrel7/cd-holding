@@ -1,25 +1,19 @@
 <script setup lang="ts">
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { z } from 'zod'
 import { toast } from 'vue-sonner'
+import { loginSchema } from '#shared/validation/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
-const PASSWORD_MIN_LENGTH = 8
 const HTTP_TOO_MANY_REQUESTS = 429
 
-// Pattern de référence : VeeValidate + zod côté client, zod ré-appliqué côté serveur (readValidatedBody).
-const schema = toTypedSchema(
-  z.object({
-    email: z.string({ required_error: 'Email requis' }).trim().email('Email invalide'),
-    password: z
-      .string({ required_error: 'Mot de passe requis' })
-      .min(PASSWORD_MIN_LENGTH, `${PASSWORD_MIN_LENGTH} caractères minimum`),
-  }),
-)
+// Source unique de validation (client + serveur) : shared/validation/auth.ts.
+// Note : le schéma applique .trim().toLowerCase() sur l'email, mais uniquement à la
+// soumission (via handleSubmit) — le v-model du champ garde la saisie brute de l'utilisateur.
+const schema = toTypedSchema(loginSchema)
 
 const { handleSubmit, errors, defineField, isSubmitting } = useForm({ validationSchema: schema })
 const [email, emailAttrs] = defineField('email')

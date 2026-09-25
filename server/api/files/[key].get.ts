@@ -19,8 +19,8 @@ export default defineEventHandler(async (event) => {
   }
 
   if (fichier.visibilite === 'PRIVE') {
-    const { user } = await requireUserSession(event)
-    assertCompanyAccess(user, fichier.companyId)
+    const { user, secure } = await requireAuth(event)
+    assertCompanyAccess(user, secure, fichier.companyId)
   }
 
   const data = await uploadsStorage().getItemRaw<Buffer>(key)

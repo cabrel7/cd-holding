@@ -21,7 +21,8 @@ CREATE TYPE "VisibiliteFichier" AS ENUM ('PUBLIC', 'PRIVE');
 
 -- CreateTable
 CREATE TABLE "Company" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
     "type" "CompanyType" NOT NULL,
     "slug" TEXT NOT NULL,
     "nom" TEXT NOT NULL,
@@ -37,12 +38,13 @@ CREATE TABLE "Company" (
 
 -- CreateTable
 CREATE TABLE "User" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
     "email" TEXT NOT NULL,
     "passwordHash" TEXT NOT NULL,
     "nom" TEXT NOT NULL,
     "role" "Role" NOT NULL,
-    "companyId" TEXT,
+    "companyId" INTEGER,
     "actif" BOOLEAN NOT NULL DEFAULT true,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -52,13 +54,13 @@ CREATE TABLE "User" (
 
 -- CreateTable
 CREATE TABLE "Fichier" (
-    "id" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
     "key" TEXT NOT NULL,
     "nomOriginal" TEXT NOT NULL,
     "mimeType" TEXT NOT NULL,
     "taille" INTEGER NOT NULL,
     "visibilite" "VisibiliteFichier" NOT NULL DEFAULT 'PRIVE',
-    "companyId" TEXT,
+    "companyId" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Fichier_pkey" PRIMARY KEY ("id")
@@ -66,8 +68,9 @@ CREATE TABLE "Fichier" (
 
 -- CreateTable
 CREATE TABLE "Service" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
     "titre" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "imageKey" TEXT,
@@ -80,8 +83,9 @@ CREATE TABLE "Service" (
 
 -- CreateTable
 CREATE TABLE "MembreEquipe" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
     "nom" TEXT NOT NULL,
     "poste" TEXT NOT NULL,
     "photoKey" TEXT,
@@ -94,8 +98,9 @@ CREATE TABLE "MembreEquipe" (
 
 -- CreateTable
 CREATE TABLE "Realisation" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
     "titre" TEXT NOT NULL,
     "description" TEXT NOT NULL,
     "imageKey" TEXT,
@@ -109,8 +114,9 @@ CREATE TABLE "Realisation" (
 
 -- CreateTable
 CREATE TABLE "Partenaire" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
     "nom" TEXT NOT NULL,
     "logoKey" TEXT,
     "siteUrl" TEXT,
@@ -123,8 +129,9 @@ CREATE TABLE "Partenaire" (
 
 -- CreateTable
 CREATE TABLE "MessageContact" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
     "type" "TypeMessage" NOT NULL DEFAULT 'CONTACT',
     "nom" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -140,8 +147,9 @@ CREATE TABLE "MessageContact" (
 
 -- CreateTable
 CREATE TABLE "ReservationRestaurant" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
     "nom" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "telephone" TEXT NOT NULL,
@@ -156,8 +164,9 @@ CREATE TABLE "ReservationRestaurant" (
 
 -- CreateTable
 CREATE TABLE "Employe" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
     "nom" TEXT NOT NULL,
     "poste" TEXT NOT NULL,
     "email" TEXT,
@@ -171,9 +180,10 @@ CREATE TABLE "Employe" (
 
 -- CreateTable
 CREATE TABLE "PlanningEntry" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
-    "employeId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
+    "employeId" INTEGER NOT NULL,
     "titre" TEXT NOT NULL,
     "dateDebut" TIMESTAMP(3) NOT NULL,
     "dateFin" TIMESTAMP(3) NOT NULL,
@@ -186,8 +196,9 @@ CREATE TABLE "PlanningEntry" (
 
 -- CreateTable
 CREATE TABLE "Client" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
     "nom" TEXT NOT NULL,
     "entreprise" TEXT,
     "email" TEXT,
@@ -202,8 +213,9 @@ CREATE TABLE "Client" (
 
 -- CreateTable
 CREATE TABLE "DossierComptable" (
-    "id" TEXT NOT NULL,
-    "clientId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "clientId" INTEGER NOT NULL,
     "typeDeclaration" TEXT,
     "echeance" TIMESTAMP(3),
     "documentsKeys" TEXT[] DEFAULT ARRAY[]::TEXT[],
@@ -216,8 +228,9 @@ CREATE TABLE "DossierComptable" (
 
 -- CreateTable
 CREATE TABLE "Candidat" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
     "nomComplet" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "telephone" TEXT,
@@ -232,8 +245,9 @@ CREATE TABLE "Candidat" (
 
 -- CreateTable
 CREATE TABLE "DemandeClient" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
     "entrepriseCliente" TEXT NOT NULL,
     "posteRecherche" TEXT NOT NULL,
     "description" TEXT NOT NULL,
@@ -246,9 +260,10 @@ CREATE TABLE "DemandeClient" (
 
 -- CreateTable
 CREATE TABLE "Candidature" (
-    "id" TEXT NOT NULL,
-    "companyId" TEXT NOT NULL,
-    "demandeId" TEXT,
+    "id" SERIAL NOT NULL,
+    "uuid" UUID NOT NULL,
+    "companyId" INTEGER NOT NULL,
+    "demandeId" INTEGER,
     "nomComplet" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "telephone" TEXT NOT NULL,
@@ -264,7 +279,13 @@ CREATE TABLE "Candidature" (
 );
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Company_uuid_key" ON "Company"("uuid");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Company_slug_key" ON "Company"("slug");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_uuid_key" ON "User"("uuid");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
@@ -279,25 +300,49 @@ CREATE UNIQUE INDEX "Fichier_key_key" ON "Fichier"("key");
 CREATE INDEX "Fichier_companyId_idx" ON "Fichier"("companyId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Service_uuid_key" ON "Service"("uuid");
+
+-- CreateIndex
 CREATE INDEX "Service_companyId_ordre_idx" ON "Service"("companyId", "ordre");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "MembreEquipe_uuid_key" ON "MembreEquipe"("uuid");
 
 -- CreateIndex
 CREATE INDEX "MembreEquipe_companyId_ordre_idx" ON "MembreEquipe"("companyId", "ordre");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Realisation_uuid_key" ON "Realisation"("uuid");
+
+-- CreateIndex
 CREATE INDEX "Realisation_companyId_ordre_idx" ON "Realisation"("companyId", "ordre");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Partenaire_uuid_key" ON "Partenaire"("uuid");
 
 -- CreateIndex
 CREATE INDEX "Partenaire_companyId_ordre_idx" ON "Partenaire"("companyId", "ordre");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "MessageContact_uuid_key" ON "MessageContact"("uuid");
+
+-- CreateIndex
 CREATE INDEX "MessageContact_companyId_createdAt_idx" ON "MessageContact"("companyId", "createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "ReservationRestaurant_uuid_key" ON "ReservationRestaurant"("uuid");
 
 -- CreateIndex
 CREATE INDEX "ReservationRestaurant_companyId_dateReservation_idx" ON "ReservationRestaurant"("companyId", "dateReservation");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Employe_uuid_key" ON "Employe"("uuid");
+
+-- CreateIndex
 CREATE INDEX "Employe_companyId_idx" ON "Employe"("companyId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PlanningEntry_uuid_key" ON "PlanningEntry"("uuid");
 
 -- CreateIndex
 CREATE INDEX "PlanningEntry_companyId_dateDebut_idx" ON "PlanningEntry"("companyId", "dateDebut");
@@ -306,16 +351,31 @@ CREATE INDEX "PlanningEntry_companyId_dateDebut_idx" ON "PlanningEntry"("company
 CREATE INDEX "PlanningEntry_employeId_idx" ON "PlanningEntry"("employeId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Client_uuid_key" ON "Client"("uuid");
+
+-- CreateIndex
 CREATE INDEX "Client_companyId_idx" ON "Client"("companyId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "DossierComptable_uuid_key" ON "DossierComptable"("uuid");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "DossierComptable_clientId_key" ON "DossierComptable"("clientId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Candidat_uuid_key" ON "Candidat"("uuid");
+
+-- CreateIndex
 CREATE INDEX "Candidat_companyId_idx" ON "Candidat"("companyId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "DemandeClient_uuid_key" ON "DemandeClient"("uuid");
+
+-- CreateIndex
 CREATE INDEX "DemandeClient_companyId_publiee_idx" ON "DemandeClient"("companyId", "publiee");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Candidature_uuid_key" ON "Candidature"("uuid");
 
 -- CreateIndex
 CREATE INDEX "Candidature_companyId_statut_idx" ON "Candidature"("companyId", "statut");

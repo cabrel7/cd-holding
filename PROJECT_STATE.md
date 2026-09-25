@@ -127,6 +127,39 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 - Storage `uploads` monté au runtime (`server/plugins/storage.ts`, `NUXT_UPLOADS_DIR`) au lieu de `nitro.storage` (figé au build).
 - Sécurité ajoutée : rate-limit login/contact, anti-énumération par timing au login, validation clé fichier (regex UUID), sniff magic bytes, limite taille multipart, anti open-redirect sur `/admin/login?redirect=`, honeypot contact.
 
+## Correctif post-setup (`POST_SETUP_PROMPT.md`, 2026-09-25)
+
+| Étape | Statut |
+|---|---|
+| 0. Outillage tests (vitest, @nuxt/test-utils, scripts `test:unit`/`test:e2e`/`build:check`) | ✅ vitest projects node/nuxt auto, `tests/unit/auth-validation.test.ts` 12/12 |
+| 1. id Int interne / uuid externe (schéma, migration, session, routes) | ✅ migration `init` Int+uuid(7), session sans id, API 24/24 dev + prod build (`scripts/api-check.mjs`) |
+| 2. Gestion centrale des erreurs (`server/plugins/error-handler.ts` + `server/error.ts`) | ✅ prod : 5xx API → 1 log consola (statut/méthode/route/message, sans stack ni dump Nitro), client générique ; 4xx non loggés |
+| 3. Validation mot de passe consolidée (`shared/validation/auth.ts`) | ✅ source unique client + serveur, 12 tests |
+| 4. Vérification (typecheck, unit, build prod, revue) | ✅ typecheck, 20 tests unit, build prod : API 19/19 + UI 6/6 + 5xx ; revues reviewer 8/10 (MAJOR corrigés) |
+
+## Décisions verrouillées récemment
+
+- 2026-09-25 — id `Int autoincrement` interne + `uuid(7) @db.Uuid` exposé ; `Fichier` exposé par sa `key`. Règle dans `CLAUDE.md` § Identifiants.
+- 2026-09-25 — Session : `user` = uuid/nom/role/companyUuid ; ids internes dans `secure` uniquement.
+- 2026-09-25 — Erreurs : log central 5xx via consola, 4xx non loggés, aucun PII. Règle dans `CLAUDE.md` § Backend.
+- 2026-09-25 — Tests obligatoires avant toute tâche "terminée" : typecheck + unit + build prod + revue. Règle dans `CLAUDE.md` § Tests.
+- 2026-09-25 — `nuxt-security` 2.6.0 (ajouté hors session) configuré : CSP/HSTS/headers actifs ; `rateLimiter: false` (bypass XFF, doublon de `server/utils/rate-limit.ts`), `corsHandler: false` (monolithe same-origin — rouvrir avec origin précise si app mobile), `xssValidator: false` (stringifie les octets des uploads ; XSS couvert par zod + échappement Vue + CSP), `requestSizeLimiter` aligné sur `shared/config/upload.ts`. Ne pas réactiver sans revue.
+- 2026-09-25 — `.nuxtrc` (setup @nuxt/test-utils) versionné.
+- 2026-09-25 — Écarts assumés au prompt correctif : schéma Prisma 7 existant conservé (pas remplacé), durcissement login conservé, `requireRole` conservé (pas de `?? -1`).
+
+## Revue sécurité scaffold (reviewer, 2026-09-25) — score 7.5/10
+
+Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si connexion depuis proxy loopback) · login 5/15 min · purge mémoire des buckets · bornes taille body login (4 Ko) / contact (32 Ko) · cookie session SameSite=Strict · headers nosniff / X-Frame-Options / Referrer-Policy.
+
+À faire :
+- [x] `nuxt-security` (HSTS + CSP) — installé + configuré (voir Décisions verrouillées)
+- [x] `server/plugins/error-handler.ts` (log central sans PII) — correctif post-setup
+- [ ] nginx prod : `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for` + app écoutant sur 127.0.0.1 uniquement
+- [ ] 5xx sur rendu de page HTML (hors `/api/**`) : Nitro loggue encore l'erreur brute (limite documentée dans `server/error.ts`)
+- [ ] `scripts/api-check.mjs` laisse ses données de test → nettoyer via `scripts/cleanup-test-data.ts` (auto-nettoyage à ajouter)
+- [ ] pagination `/api/admin/messages` (lors conversion `/admin/messages`)
+- [x] `PASSWORD_MIN_LENGTH` dupliqué → `shared/validation/auth.ts` (correctif post-setup)
+
 ## Décisions encore ouvertes (à trancher avec l'utilisateur)
 
 1. **Style visuel des dashboards** : question posée — les dashboards `/admin/**` doivent-ils adopter un style sombre inspiré Power BI (préférence connue de l'utilisateur sur d'autres projets), ou rester sur le même socle clair que les sites publics ? **Pas encore tranché.**
@@ -134,6 +167,8 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 3. **Nom officiel du groupe** : "Groupe CD" reste un nom de travail dans tous les documents — à remplacer partout si un nom officiel est choisi.
 
 ## Prochaine étape recommandée
+
+0. Correctif post-setup ✅ → démarrer `PROMPT_CONVERSION.md` phase 1 (inventaire `CONVERSION_INVENTORY.md`, aucun code).
 
 1. Conversion Holding, route par route (`/` d'abord) : socle visuel navy/or (§6) dans `app/assets/css/main.css`, puis layout public.
 2. Trancher décision ouverte n°1 (style dashboards) avant `/admin` shell.

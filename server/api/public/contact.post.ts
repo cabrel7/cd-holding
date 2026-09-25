@@ -3,6 +3,9 @@ import { z } from 'zod'
 // Exemple — sera dupliqué/adapté par filiale lors de la conversion des pages contact.
 const CONTACT_RATE_LIMIT = { scope: 'contact', max: 5, windowMs: 10 * 60 * 1000 } as const
 const MAX_MESSAGE_LENGTH = 5000
+// Borne la taille du corps avant lecture : sans ça, readValidatedBody charge en mémoire un
+// corps non authentifié arbitrairement gros avant que zod ne le rejette (déni de service).
+const MAX_CONTACT_BODY_BYTES = 32 * 1024
 
 const contactSchema = z.object({
   companySlug: z.string().min(1).max(50),
@@ -19,6 +22,11 @@ const contactSchema = z.object({
 
 export default defineEventHandler(async (event) => {
   assertRateLimit(event, CONTACT_RATE_LIMIT)
+
+  const contentLength = Number(getRequestHeader(event, 'content-length') ?? 0)
+  if (!contentLength || contentLength > MAX_CONTACT_BODY_BYTES) {
+    throw createError({ statusCode: 413, statusMessage: 'Requête trop volumineuse' })
+  }
 
   const { companySlug, website: _honeypot, ...data } = await readValidatedBody(event, contactSchema.parse)
 

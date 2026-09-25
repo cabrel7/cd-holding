@@ -16,6 +16,16 @@ page.setDefaultTimeout(NAV_TIMEOUT_MS)
 const results = []
 const check = (name, pass, detail = '') => results.push(`${pass ? 'PASS' : 'FAIL'} ${name}${detail ? ` (${detail})` : ''}`)
 
+// Diagnostic runtime (utile en prod : CSP `upgrade-insecure-requests` + cookie `Secure`
+// peuvent casser silencieusement le login/les assets sur http://localhost) — n'échoue
+// aucun check à lui seul, mais est reporté dans la sortie pour investigation.
+const consoleEvents = []
+page.on('console', (msg) => {
+  if (msg.type() === 'error' || msg.type() === 'warning') consoleEvents.push(`console.${msg.type()}: ${msg.text()}`)
+})
+page.on('pageerror', (err) => consoleEvents.push(`pageerror: ${err.message}`))
+page.on('requestfailed', (req) => consoleEvents.push(`requestfailed: ${req.method()} ${req.url()} — ${req.failure()?.errorText}`))
+
 try {
   await page.goto(`${BASE}/admin`)
   await page.waitForURL(/\/admin\/login/)
@@ -55,4 +65,8 @@ try {
 } finally {
   await browser.close()
   console.info(results.join('\n'))
+  if (consoleEvents.length) {
+    console.info('\n--- Diagnostic navigateur (console/pageerror/requestfailed) ---')
+    console.info(consoleEvents.join('\n'))
+  }
 }

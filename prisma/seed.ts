@@ -41,7 +41,7 @@ async function main(): Promise<void> {
     },
   })
 
-  const companies: Record<string, { id: string }> = { holding }
+  const companies: Record<string, { id: number }> = { holding }
   for (const f of FILIALES) {
     companies[f.slug] = await prisma.company.upsert({
       where: { slug: f.slug },
