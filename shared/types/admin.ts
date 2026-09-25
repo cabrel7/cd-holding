@@ -19,6 +19,8 @@ export interface AdminSiteSummary {
 
 export interface AdminSiteReglages extends AdminSiteSummary {
   readonly ordre: number
+  readonly secteur: string | null
+  readonly description: string | null
   readonly effectif: number | null
   readonly email: string | null
   readonly telephone: string | null

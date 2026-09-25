@@ -8,6 +8,8 @@ const STATUTS_SITE = ['ACTIF', 'EN_MAINTENANCE', 'EN_CONSTRUCTION'] as const
 export const statutSiteSchema = z.enum(STATUTS_SITE)
 
 const nomCourtSchema = z.string().trim().min(1).max(80)
+const secteurSchema = z.string().trim().min(2).max(160)
+const descriptionSchema = z.string().trim().min(10).max(600)
 const emailSchema = z.string().trim().toLowerCase().email('Email invalide').max(255)
 const telephoneSchema = z.string().trim().max(30)
 const adresseSchema = z.string().trim().max(255)
@@ -30,6 +32,8 @@ function exigerAuMoinsUnChamp<T extends z.ZodRawShape>(schema: z.ZodObject<T>) {
 // Champs modifiables par un ADMIN_FILIALE sur sa propre filiale.
 const siteReglagesFilialeShape = {
   nomCourt: nomCourtSchema.nullable().optional(),
+  secteur: secteurSchema.nullable().optional(),
+  description: descriptionSchema.nullable().optional(),
   effectif: effectifSchema.nullable().optional(),
   email: emailSchema.nullable().optional(),
   telephone: telephoneSchema.nullable().optional(),

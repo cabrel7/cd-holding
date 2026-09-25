@@ -83,6 +83,12 @@ const sectionFields: readonly CmsField[] = [
 ]
 
 // --- hero ---------------------------------------------------------------
+// `legende` : les 2 champs sont produits ensemble par le formulaire CMS (type 'liste' en
+// sous-objet, jamais un tableau). Si l'utilisateur laisse les deux champs vides, le preprocess
+// convertit l'objet en `undefined` avant validation — sinon `{surtitre:'', titre:''}` échouerait
+// sur les `.min(1)` alors que l'intention est "pas de légende" (spec phase 3 §2.2).
+const legendeSchema = z.object({ surtitre: z.string().trim().min(1), titre: z.string().trim().min(1) }).strict()
+
 export const heroSchema = z
   .object({
     surtitre: z.string().trim().min(1),
@@ -91,10 +97,13 @@ export const heroSchema = z
     ctaLibelle: z.string().trim().max(40).optional(),
     imageKey: imageKeySchema,
     imageAlt: imageAltSchema,
-    legende: z
-      .object({ surtitre: z.string().trim().min(1), titre: z.string().trim().min(1) })
-      .strict()
-      .optional(),
+    legende: z.preprocess(
+      (v) =>
+        v && typeof v === 'object' && Object.values(v).every((x) => typeof x === 'string' && x.trim() === '')
+          ? undefined
+          : v,
+      legendeSchema.optional(),
+    ),
     badgeLibelle: z.string().trim().max(40).optional(),
   })
   .strict()
@@ -104,8 +113,18 @@ const heroFields: readonly CmsField[] = [
   { key: 'titre', label: 'Titre', type: 'text', required: true },
   { key: 'texte', label: 'Texte', type: 'textarea', required: true },
   { key: 'ctaLibelle', label: "Libellé de l'appel à l'action", type: 'text', maxLength: 40 },
-  { key: 'imageKey', label: 'Image', type: 'image' },
+  { key: 'imageKey', label: 'Image', type: 'image', helpText: "Facultatif — à défaut, l'image principale du site est utilisée." },
   { key: 'imageAlt', label: 'Texte alternatif de l\'image', type: 'text', maxLength: 160 },
+  {
+    key: 'legende',
+    label: "Légende de l'image",
+    type: 'liste',
+    helpText: 'Facultatif — laisser les deux champs vides pour masquer la légende.',
+    itemFields: [
+      { key: 'surtitre', label: 'Surtitre', type: 'text', maxLength: 80 },
+      { key: 'titre', label: 'Titre', type: 'text', maxLength: 80 },
+    ],
+  },
   { key: 'badgeLibelle', label: 'Libellé du badge', type: 'text', maxLength: 40 },
 ]
 

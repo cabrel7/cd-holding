@@ -34,6 +34,8 @@ const DETAIL_SELECT = {
   ...SUMMARY_SELECT,
   id: true,
   ordre: true,
+  secteur: true,
+  description: true,
   effectif: true,
   email: true,
   telephone: true,
@@ -71,6 +73,8 @@ function toSummaryDto(row: SummaryRow): AdminSiteSummary {
 interface DetailRow extends SummaryRow {
   readonly id: number
   readonly ordre: number
+  readonly secteur: string | null
+  readonly description: string | null
   readonly effectif: number | null
   readonly email: string | null
   readonly telephone: string | null
@@ -85,6 +89,8 @@ function toReglagesDto(row: DetailRow): AdminSiteReglages {
   return {
     ...toSummaryDto(row),
     ordre: row.ordre,
+    secteur: row.secteur,
+    description: row.description,
     effectif: row.effectif,
     email: row.email,
     telephone: row.telephone,
@@ -98,6 +104,8 @@ function toReglagesDto(row: DetailRow): AdminSiteReglages {
 
 function applyFilialeFields(patch: Prisma.CompanyUpdateInput, data: SiteReglagesFilialeInput): void {
   if (data.nomCourt !== undefined) patch.nomCourt = data.nomCourt
+  if (data.secteur !== undefined) patch.secteur = data.secteur
+  if (data.description !== undefined) patch.description = data.description
   if (data.effectif !== undefined) patch.effectif = data.effectif
   if (data.email !== undefined) patch.email = data.email
   if (data.telephone !== undefined) patch.telephone = data.telephone

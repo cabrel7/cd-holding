@@ -28,6 +28,35 @@ describe('siteReglagesFilialeSchema', () => {
   })
 })
 
+describe('siteReglagesFilialeSchema — secteur / description (spec phase 3 §3)', () => {
+  it('should accept valid secteur and description', () => {
+    expect(
+      siteReglagesFilialeSchema.safeParse({ secteur: 'Entretien ménager', description: 'Ménage régulier, grand ménage et désinfection.' })
+        .success,
+    ).toBe(true)
+  })
+
+  it('should accept null (removal)', () => {
+    expect(siteReglagesFilialeSchema.safeParse({ secteur: null, description: null }).success).toBe(true)
+  })
+
+  it('should reject a secteur below the minimum length', () => {
+    expect(siteReglagesFilialeSchema.safeParse({ secteur: 'A' }).success).toBe(false)
+  })
+
+  it('should reject a secteur above the maximum length', () => {
+    expect(siteReglagesFilialeSchema.safeParse({ secteur: 'x'.repeat(161) }).success).toBe(false)
+  })
+
+  it('should reject a description below the minimum length', () => {
+    expect(siteReglagesFilialeSchema.safeParse({ description: 'court' }).success).toBe(false)
+  })
+
+  it('should reject a description above the maximum length', () => {
+    expect(siteReglagesFilialeSchema.safeParse({ description: 'x'.repeat(601) }).success).toBe(false)
+  })
+})
+
 describe('siteReglagesSuperAdminSchema', () => {
   it('should accept a valid heroImageKey and reject a malformed one', () => {
     expect(siteReglagesSuperAdminSchema.safeParse({ heroImageKey: VALID_IMAGE_KEY }).success).toBe(true)

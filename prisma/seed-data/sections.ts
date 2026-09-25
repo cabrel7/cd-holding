@@ -356,38 +356,46 @@ function commun(slug: SiteSlug): Record<string, Donnees> {
 function accueilHolding(): Record<string, Donnees> {
   return {
     seo: {
-      title: 'Groupe CD — Holding montréalaise, six filiales',
+      title: '{groupe} — Holding montréalaise, six filiales au Québec', // index.tsx:12
       description:
-        'Entretien, transport, comptabilité, placement, import-export et distribution : six filiales du Groupe CD au service du Québec.',
+        'Le {groupe} réunit six entreprises de services au Québec : entretien, transport, comptabilité, placement, import-export et distribution de boissons.', // index.tsx:13
     },
     hero: {
-      surtitre: 'Holding — Montréal, Québec',
-      titre: 'Six entreprises. *Une seule* exigence.',
+      surtitre: 'Holding — Montréal, Québec', // Hero.tsx:34
+      titre: 'Six entreprises.\n*Une seule* exigence.', // Hero.tsx:43-46 (<br/> conservé)
       texte:
-        "Le {groupe} est une holding diversifiée établie à Montréal. Entretien, transport, comptabilité, placement, import-export et distribution : nos six filiales servent le Québec avec la même rigueur et la même proximité.",
-      ctaLibelle: 'Découvrir nos filiales',
-      imageKey: null,
-      imageAlt: 'Vue sur Montréal, siège du Groupe CD',
-      legende: { surtitre: 'Siège social', titre: 'Montréal · Québec' },
-      badgeLibelle: '06 filiales actives',
+        'Le {groupe} est une holding diversifiée établie à Montréal. Entretien, transport, comptabilité, placement, import-export et distribution : nos six filiales servent le Québec avec la même rigueur et la même proximité.', // Hero.tsx:57-59
+      ctaLibelle: 'Découvrir nos filiales', // Hero.tsx:69
+      imageKey: null, // repli Company.heroImageKey (hero.imageKey ?? site.heroImageKey)
+      imageAlt: 'Vue sur Montréal, siège du {groupe}',
+      legende: { surtitre: 'Siège social', titre: 'Montréal · Québec' }, // Hero.tsx:98-101
+      badgeLibelle: 'Filiales actives', // le nombre (« 06 ») est calculé, voir HoldingHero
     },
     filiales: {
-      titre: 'Nos filiales',
-      texte: 'Six entreprises spécialisées, ancrées dans leur métier, réunies par une culture commune.',
+      // Companies.tsx:12-22
+      surtitre: 'Nos filiales',
+      titre: 'Six métiers,\nun même standard.',
+      texte:
+        'Chaque filiale du {groupe} est indépendante dans son opération, mais partage la même culture : proximité avec le client, exigence sur la qualité, engagement à long terme.',
     },
     chiffres: {
-      surtitre: 'En bref',
-      titre: 'Le {groupe} en chiffres',
+      // Stats.tsx:3-31
+      surtitre: 'Pourquoi le {groupe}',
+      titre: 'Un ancrage *montréalais*, une vision de *groupe*.',
+      texte:
+        'Fondé et opéré depuis Montréal, le {groupe} s’est bâti secteur par secteur, en acquérant l’expertise nécessaire pour livrer à chaque fois le même niveau de service — quel que soit le métier.',
       items: [
-        { type: 'filiales', libelle: 'filiales opérationnelles' },
-        { type: 'effectif', libelle: 'collaborateurs au Québec', arrondi: true },
-        { type: 'libre', valeur: 'Montréal', libelle: 'siège social' },
+        { type: 'libre', valeur: '12+', libelle: 'années d’existence' }, // À VALIDER CLIENT (Q-12)
+        { type: 'effectif', libelle: 'employés à travers le groupe', arrondi: true }, // Q-03 : source unique
+        { type: 'filiales', libelle: 'secteurs d’activité couverts' },
+        { type: 'libre', valeur: '100%', libelle: 'opéré depuis Montréal' },
       ],
     },
     cta: {
-      titre: 'Un projet, une filiale, une même exigence.',
-      texte: 'Notre équipe de Montréal reçoit vos demandes et vous oriente vers la bonne filiale.',
-      ctaLibelle: 'Nous contacter',
+      // index.tsx:31-41
+      titre: 'Parlons de votre projet.',
+      texte: 'Notre bureau de Montréal reçoit vos demandes et les redirige vers la filiale concernée.',
+      ctaLibelle: 'Nous joindre',
     },
   }
 }
