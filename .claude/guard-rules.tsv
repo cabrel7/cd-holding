@@ -4,3 +4,8 @@
 #
 *	*.md,*.env.example,*node_modules*	(sk-[A-Za-z0-9_-]{20,}|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36})	SECRET: clé/credential en dur → variable d'environnement + config
 *.ts,*.tsx,*.vue	*.d.ts,*node_modules*,*.config.ts	(:[[:space:]]*any([^a-zA-Z]|$)|as any)	TS: 'any' interdit → type strict ou unknown + type guard
+*/app/*.vue,*/app/*.ts,*/app/*.css	*node_modules*	(bg-gradient-|bg-linear-|bg-radial|bg-conic|(linear|radial|conic)-gradient\()	DESIGN gradient interdit (CLAUDE.md) → couleur unie du socle navy/or ou accent filiale
+*/app/*.vue,*/app/*.ts	*node_modules*	(^|[^a-zA-Z0-9_$.])(window\.)?(alert|confirm|prompt)\(|console\.log\(	DASHBOARD alert/confirm/prompt/console.log interdits (CLAUDE.md) → AlertDialog/Dialog shadcn + toast vue-sonner
+*.ts,*.vue	*node_modules*,*/server/generated/*	\$(queryRaw|executeRaw)(Unsafe)?|Prisma\.(sql|raw)\(	BACKEND SQL brut interdit (CLAUDE.md) → API Prisma typée (findMany/create/update…)
+*/server/*.ts	*node_modules*,*/server/generated/*	(from[[:space:]]+['"](node:)?fs(/promises)?['"]|require\(['"](node:)?fs(/promises)?['"]\))	STOCKAGE fs direct interdit dans server/ (CLAUDE.md) → useStorage(UPLOADS_MOUNT) / saveUploadedFile (server/utils/storage.ts)
+*.vue,*.ts,*/package.json	*node_modules*	lucide-vue-next	ICÔNES lucide-vue-next déprécié → @lucide/vue

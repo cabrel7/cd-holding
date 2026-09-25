@@ -31,3 +31,7 @@ logs
 
 # Prototype React Lovable — référence locale de conversion, jamais versionné
 /prototype_react
+
+# Claude Code
+.claude/settings.local.json
+.claude/worktrees/

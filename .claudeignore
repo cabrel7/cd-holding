@@ -21,3 +21,4 @@ __pycache__/
 storage/
 server/generated/
 .env
+.claude/worktrees/
