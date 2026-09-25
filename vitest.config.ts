@@ -19,4 +19,13 @@ import { defineVitestConfig } from '@nuxt/test-utils/config'
 // Le jour où un composable ou un plugin Nuxt doit être testé, son test va dans
 // `tests/nuxt/` (ou est nommé `*.nuxt.test.ts`) pour hériter de l'environnement
 // 'nuxt' automatiquement — sans configuration supplémentaire à ajouter ici.
-export default defineVitestConfig({})
+export default defineVitestConfig({
+  test: {
+    // Le boot Nuxt complet (project "nuxt" ci-dessus) dépasse le hookTimeout par défaut de
+    // vitest (10s) sur certaines machines/CI — relevé globalement plutôt que par fichier,
+    // sans effet sur le project "node" (rapide, jamais concerné par ce hook). Le premier test
+    // du fichier paie aussi ce coût de montage (mountSuspended) : testTimeout relevé de même.
+    hookTimeout: 60_000,
+    testTimeout: 20_000,
+  },
+})

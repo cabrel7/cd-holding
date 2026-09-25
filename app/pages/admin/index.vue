@@ -2,7 +2,7 @@
 import { LogOut } from '@lucide/vue'
 import { Button } from '@/components/ui/button'
 
-definePageMeta({ middleware: 'admin' })
+definePageMeta({ middleware: 'admin', layout: false })
 
 const authStore = useAuthStore()
 

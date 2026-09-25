@@ -5,6 +5,8 @@ import 'vue-sonner/style.css'
 
 <template>
   <NuxtRouteAnnouncer />
-  <NuxtPage />
+  <NuxtLayout>
+    <NuxtPage />
+  </NuxtLayout>
   <Toaster rich-colors position="top-right" />
 </template>

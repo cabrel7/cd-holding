@@ -8,7 +8,7 @@ Ce fichier est le **suivi vivant** du projet : il change à chaque session de tr
 
 ## Phase actuelle
 
-**Conversion — phase 1 (inventaire) terminée côté analyse, en attente de décisions.** Scaffold + correctif post-setup ✅. Voir `CONVERSION_INVENTORY.md` (DEC-xx, Q-xx).
+**Conversion — phase 2 (fondations communes) en cours.** Phase 1 ✅ (décisions tranchées). Spec : `docs/specs/phase2-foundations.md`.
 
 Le prototype React (Lovable) est **terminé et figé** : https://cd-holding-nexus.lovable.app/, source dans `prototype_react/`. Il ne sera plus modifié — c'est uniquement une référence de conversion.
 
@@ -24,7 +24,7 @@ Le prototype React (Lovable) est **terminé et figé** : https://cd-holding-nexu
 | Scaffold du projet Nuxt réellement exécuté | ✅ Fait et vérifié 2026-09-25 — migration `init`, seed, checklist étape 16 OK (API : `401/403/404/415`, scoping filiale, upload/lecture fichier ; UI Playwright : garde `/admin`, login/logout, validation, toast, Button) |
 | Conversion des routes — voir checklist ci-dessous | ❌ Pas commencé |
 | Phase 1 — Inventaire (`CONVERSION_INVENTORY.md`) | ✅ Décisions tranchées 2026-09-25 ; captures 54/54 routes (162 PNG, `conversion-captures/`, non versionné) |
-| Phase 2 — Fondations communes | 🔧 En cours : spec architect (migration schéma + fondations) |
+| Phase 2 — Fondations communes | 🔧 Spec ✅ · T0 ✅ (`8e9853d`, migration appliquée) · T1 API ✅ · T2 seed ✅ (7 sociétés, 26 services, 16 réalisations, 15 équipe, 15 partenaires, 138 sections, 20 images) · T3 layout/pages ✅ code · T4 CMS admin ✅ code · 283 tests unitaires ✅ · **typecheck : 8 erreurs en correction** (dont bug de scoping `GET /api/admin/sites`) · T5–T6 à venir |
 
 ## Checklist de conversion par route (à remplir au fur et à mesure)
 
@@ -161,6 +161,11 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 - [ ] nginx prod : `proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for` + app écoutant sur 127.0.0.1 uniquement
 - [ ] 5xx sur rendu de page HTML (hors `/api/**`) : Nitro loggue encore l'erreur brute (limite documentée dans `server/error.ts`)
 - [ ] `scripts/api-check.mjs` laisse ses données de test → nettoyer via `scripts/cleanup-test-data.ts` (auto-nettoyage à ajouter)
+- [x] Migration `phase2_foundations` appliquée (utilisateur) — seed à lancer après T2 : `SEED_DEMO_DATA=true pnpm db:seed`
+- [x] `.env.example` complété (utilisateur)
+- [ ] Dette schéma : `Candidat.posteRecherche` / `DemandeClient.posteRecherche` redondants avec `categorie` (nettoyage phase 3 placement)
+- [ ] `server/api/public/contact.post.ts` : aligner sur DEC-12/13/15 (zod par filiale, `entreprise`/`details`/`paysOrigine`, sujet calculé serveur, `queueMail`) — non attribué en phase 2
+- [ ] `DEFAULT_REALISATIONS_LIMIT = 12` (API publique réalisations) : défaut choisi par T1, à valider
 - [ ] pagination `/api/admin/messages` (lors conversion `/admin/messages`)
 - [x] `PASSWORD_MIN_LENGTH` dupliqué → `shared/validation/auth.ts` (correctif post-setup)
 
