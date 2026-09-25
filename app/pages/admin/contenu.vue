@@ -13,6 +13,7 @@ const route = useRoute()
 
 const TABS = [
   { to: '/admin/contenu', label: 'Sections' },
+  { to: '/admin/contenu/site', label: 'Site' },
   { to: '/admin/contenu/services', label: 'Services' },
   { to: '/admin/contenu/realisations', label: 'Réalisations' },
   { to: '/admin/contenu/equipe', label: 'Équipe' },
