@@ -38,3 +38,7 @@ logs
 
 # Captures de référence phase 1 (régénérables, volumineuses) — non versionnées
 /conversion-captures
+
+# Artefacts Playwright
+/test-results
+/playwright-report
