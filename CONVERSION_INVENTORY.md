@@ -4,7 +4,7 @@ Livrable de la **phase 1** de `PROMPT_CONVERSION.md` : analyse complète du prot
 
 - Rédigé le 2026-09-25 par 4 agents `architect` (lecture seule, un périmètre chacun) + 1 agent `e2e-tester` (captures), consolidé par le thread principal.
 - Parties détaillées (format par route imposé par le prompt) : [Partie 1 — Holding + Admin](#partie-1), [Partie 2 — Entretien + Transport](#partie-2), [Partie 3 — Comptable + Placement](#partie-3), [Partie 4 — CCDPAA + Boissons](#partie-4).
-- Captures de référence : `conversion-captures/<route>/<375|768|1440>.png` (non versionnées, régénérables via `scripts/capture-prototype.mjs`). Index : `conversion-captures/index.json`.
+- Captures de référence : `conversion-captures/<route>/<375x812|768x1024|1440x900>.png` (54 routes, 162 captures, dont vues admin par rôle : `-admin-filiale`, `-employe`) (non versionnées, régénérables via `scripts/capture-prototype.mjs`). Index : `conversion-captures/index.json`.
 - Les numéros d'écarts internes à chaque partie (ex. « écart 9 », « E14 ») renvoient à la section « Écarts détectés » de la partie concernée.
 
 **Règle d'arrêt (PROMPT_CONVERSION.md)** : la section « Écarts détectés » ci-dessous n'est pas vide → **aucune modification du schéma Prisma avant confirmation de l'utilisateur.** Les décisions à prendre sont regroupées et numérotées (`DEC-xx`), chacune avec la recommandation retenue par défaut.

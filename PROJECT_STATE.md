@@ -23,7 +23,7 @@ Le prototype React (Lovable) est **terminé et figé** : https://cd-holding-nexu
 | Prompt de setup Nuxt (scaffold, dépendances, schema Prisma, auth, upload) | ✅ Fait (`prompt_setup.md`) |
 | Scaffold du projet Nuxt réellement exécuté | ✅ Fait et vérifié 2026-09-25 — migration `init`, seed, checklist étape 16 OK (API : `401/403/404/415`, scoping filiale, upload/lecture fichier ; UI Playwright : garde `/admin`, login/logout, validation, toast, Button) |
 | Conversion des routes — voir checklist ci-dessous | ❌ Pas commencé |
-| Phase 1 — Inventaire (`CONVERSION_INVENTORY.md`) | ✅ Décisions tranchées 2026-09-25 (captures prototype en cours) |
+| Phase 1 — Inventaire (`CONVERSION_INVENTORY.md`) | ✅ Décisions tranchées 2026-09-25 ; captures 54/54 routes (162 PNG, `conversion-captures/`, non versionné) |
 | Phase 2 — Fondations communes | 🔧 En cours : spec architect (migration schéma + fondations) |
 
 ## Checklist de conversion par route (à remplir au fur et à mesure)
