@@ -8,7 +8,7 @@ Ce fichier est le **suivi vivant** du projet : il change à chaque session de tr
 
 ## Phase actuelle
 
-**Conversion — phase 2 (fondations communes) en cours.** Phase 1 ✅ (décisions tranchées). Spec : `docs/specs/phase2-foundations.md`.
+**Conversion — phase 2 (fondations communes) ✅ (2026-09-25) → phase 3 (route par route).** Phase 1 ✅ (décisions tranchées). Spec : `docs/specs/phase2-foundations.md`.
 
 Le prototype React (Lovable) est **terminé et figé** : https://cd-holding-nexus.lovable.app/, source dans `prototype_react/`. Il ne sera plus modifié — c'est uniquement une référence de conversion.
 
@@ -24,7 +24,7 @@ Le prototype React (Lovable) est **terminé et figé** : https://cd-holding-nexu
 | Scaffold du projet Nuxt réellement exécuté | ✅ Fait et vérifié 2026-09-25 — migration `init`, seed, checklist étape 16 OK (API : `401/403/404/415`, scoping filiale, upload/lecture fichier ; UI Playwright : garde `/admin`, login/logout, validation, toast, Button) |
 | Conversion des routes — voir checklist ci-dessous | ❌ Pas commencé |
 | Phase 1 — Inventaire (`CONVERSION_INVENTORY.md`) | ✅ Décisions tranchées 2026-09-25 ; captures 54/54 routes (162 PNG, `conversion-captures/`, non versionné) |
-| Phase 2 — Fondations communes | 🔧 Spec ✅ · T0 ✅ (`8e9853d`, migration appliquée) · T1 API ✅ · T2 seed ✅ (7 sociétés, 26 services, 16 réalisations, 15 équipe, 15 partenaires, 138 sections, 20 images) · T3 layout/pages ✅ code · T4 CMS admin ✅ code · 283 tests unitaires ✅ · **typecheck : 8 erreurs en correction** (dont bug de scoping `GET /api/admin/sites`) · T5–T6 à venir |
+| Phase 2 — Fondations communes | ✅ 2026-09-25 — T0–T4 (`8e9853d`, `acdea64`) · T5 e2e (`dc46a64`, `bbbf334`) : 37 ✅ / 2 skip justifiés (desktop/mobile/tablet, build prod) · T6 reviewer 8.5/10 (`e1f0576`) + ux-reviewer (contrastes AA, `c08a66b`) · correctifs : suppression CMS inopérante (`116b6c9`), placeholders `{groupe}`/`{nomCourt}` non interpolés, `--site-accent-strong` figé sur navy · 299 tests unitaires ✅ |
 
 ## Checklist de conversion par route (à remplir au fur et à mesure)
 
@@ -35,11 +35,11 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | Route | Statut | Notes |
 |---|---|---|
 | `/` | ❌ | |
-| `/a-propos` | ❌ | Regroupe histoire + équipe + partenaires |
+| `/a-propos` | 👀 | Histoire + équipe + partenaires, contenu DB/CMS. e2e ✅. Captures 3 breakpoints faites avant correctif contrastes → à refaire (scroll pas-à-pas : `v-motion` masque les sections en capture fullPage) |
 | `/contact` | ❌ | |
 | `/admin/login` | ❌ | |
 | `/admin` (shell dashboard) | ❌ | |
-| `/admin/contenu/*` (CMS services/réalisations/équipe/partenaires) | ❌ | |
+| `/admin/contenu/*` (CMS services/réalisations/équipe/partenaires) | 👀 | CRUD + réordonnancement + sections + réglages site, e2e ✅. Écart assumé : sections éditées un site à la fois (prototype : 7 sites sur une page) — contrainte API `GET …/sections` |
 | `/admin/messages` | ❌ | |
 | `/admin/clients` | ❌ | CRM |
 
@@ -50,7 +50,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/entretien` | ❌ | |
 | `/entretien/services` | ❌ | Inclut "Nettoyage et entretien des supermarchés" (retour client) |
 | `/entretien/realisations` | ❌ | |
-| `/entretien/a-propos` | ❌ | |
+| `/entretien/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
 | `/entretien/contact` | ❌ | |
 | `/admin/entretien/planning` | ❌ | Module planning partagé |
 
@@ -61,7 +61,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/transport` | ❌ | |
 | `/transport/services` | ❌ | |
 | `/transport/realisations` | ❌ | |
-| `/transport/a-propos` | ❌ | |
+| `/transport/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
 | `/transport/contact` | ❌ | |
 | `/admin/transport/planning` | ❌ | Module planning partagé |
 
@@ -72,7 +72,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/comptable` | ❌ | |
 | `/comptable/services` | ❌ | Services mis à jour (états financiers, T1/T2, création/régularisation d'entreprise) |
 | `/comptable/realisations` | ❌ | |
-| `/comptable/a-propos` | ❌ | |
+| `/comptable/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
 | `/comptable/contact` | ❌ | |
 | `/admin/comptable/dossiers` | ❌ | Module dossiers clients (`DossierComptable`) |
 
@@ -83,7 +83,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/placement` | ❌ | Double audience entreprises/candidats |
 | `/placement/services` | ❌ | |
 | `/placement/realisations` | ❌ | |
-| `/placement/a-propos` | ❌ | |
+| `/placement/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
 | `/placement/contact` | ❌ | |
 | `/placement/offres` | ❌ | Liste publique des offres publiées (`DemandeClient.publiee`) |
 | `/placement/offres/[id]/postuler` (ou modal) | ❌ | Formulaire complet : adresse complète, poste + "Autre" avec mini-champ, CV requis + autres documents optionnels |
@@ -98,7 +98,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/ccdpaa` | ❌ | |
 | `/ccdpaa/services` | ❌ | |
 | `/ccdpaa/realisations` | ❌ | |
-| `/ccdpaa/a-propos` | ❌ | |
+| `/ccdpaa/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
 | `/ccdpaa/contact` | ❌ | Inclut formulaire "Vous ne trouvez pas ce que vous cherchez ?" (suggestion produit) |
 | `/ccdpaa/restaurant` | ❌ | 6ᵉ page — "Les Ambassades d'Afrique" + réservation |
 | Widget "Assistant Import-Export" | ❌ | Scripté (Q&A pré-écrites), explicitement PAS une vraie IA — voir `PROJECT_CONTEXT.md` |
@@ -112,7 +112,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/boissons` | ❌ | |
 | `/boissons/services` | ❌ | |
 | `/boissons/realisations` | ❌ | |
-| `/boissons/a-propos` | ❌ | |
+| `/boissons/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
 | `/boissons/contact` | ❌ | Inclut formulaire suggestion produit |
 
 ## Écarts au prompt de setup (2026-09-24)
@@ -163,6 +163,11 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 - [ ] `scripts/api-check.mjs` laisse ses données de test → nettoyer via `scripts/cleanup-test-data.ts` (auto-nettoyage à ajouter)
 - [x] Migration `phase2_foundations` appliquée (utilisateur) — seed à lancer après T2 : `SEED_DEMO_DATA=true pnpm db:seed`
 - [x] `.env.example` complété (utilisateur)
+- [ ] Footer : `email`/`telephone` des 7 sociétés `null` en seed → à saisir via admin (réglages site) ou à ajouter au seed ; repli `'Montréal, Québec, Canada'` codé en dur dans `SiteFooter.vue` (contraire à « tout texte public éditable ») → à déplacer en seed
+- [ ] Initiales partenaires : algorithme différent du prototype (« CD » vs « CC ») — cosmétique
+- [ ] CMS admin : boutons Monter/Descendre/Modifier/Supprimer 32px + `gap-1` (< 44px) — OK desktop, à revoir si usage tablette
+- [ ] `resolveAccentColor` (`server/utils/site-scope.ts`) : regex hex sensible à la casse
+- [ ] `/admin/contenu` sans shell dashboard (lien retour seul) — dépend décision ouverte n°1
 - [ ] Dette schéma : `Candidat.posteRecherche` / `DemandeClient.posteRecherche` redondants avec `categorie` (nettoyage phase 3 placement)
 - [ ] `server/api/public/contact.post.ts` : aligner sur DEC-12/13/15 (zod par filiale, `entreprise`/`details`/`paysOrigine`, sujet calculé serveur, `queueMail`) — non attribué en phase 2
 - [ ] `DEFAULT_REALISATIONS_LIMIT = 12` (API publique réalisations) : défaut choisi par T1, à valider
@@ -177,10 +182,9 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 
 ## Prochaine étape recommandée
 
-0. Correctif post-setup ✅. `PROMPT_CONVERSION.md` phase 1 : `CONVERSION_INVENTORY.md` rédigé (2026-09-25) — **arrêt réglementaire : 39 décisions `DEC-xx` + 11 questions client `Q-xx` à trancher avant la phase 2** (voir section « Écarts détectés » de l'inventaire).
-
-1. Conversion Holding, route par route (`/` d'abord) : socle visuel navy/or (§6) dans `app/assets/css/main.css`, puis layout public.
-2. Trancher décision ouverte n°1 (style dashboards) avant `/admin` shell.
+1. Phase 3 — Holding `/` (accueil) : réutiliser layout public, `SectionHeading`, `TexteAccentue` (interpolation auto), tokens `-strong`/`gold-deep` pour petit texte sur fond clair.
+2. Recapturer `/a-propos` + `/entretien/a-propos` (3 breakpoints, scroll pas-à-pas) pour passer 👀 → ✅.
+3. Trancher décision ouverte n°1 (style dashboards) avant `/admin` shell.
 
 ## Outillage
 
