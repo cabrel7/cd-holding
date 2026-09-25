@@ -1,0 +1,323 @@
+// Prisma 7 : l'URL de connexion est dans prisma.config.ts (plus dans le datasource),
+// et le client runtime passe par le driver adapter @prisma/adapter-pg (server/utils/prisma.ts).
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../server/generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum CompanyType {
+  HOLDING
+  FILIALE
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN_FILIALE
+  EMPLOYE
+}
+
+enum StatutClient {
+  PROSPECT
+  CLIENT_ACTIF
+  INACTIF
+}
+
+enum StatutCandidature {
+  NOUVELLE
+  EN_REVISION
+  RETENUE
+  REJETEE
+}
+
+enum StatutReservation {
+  EN_ATTENTE
+  CONFIRMEE
+  ANNULEE
+}
+
+enum TypeMessage {
+  CONTACT
+  SUGGESTION_PRODUIT
+}
+
+// PUBLIC : images CMS affichées sur les sites publics (services, équipe, logos...).
+// PRIVE  : CV, documents de candidature, pièces comptables — session + scoping filiale obligatoires.
+enum VisibiliteFichier {
+  PUBLIC
+  PRIVE
+}
+
+model Company {
+  id            String      @id @default(cuid())
+  type          CompanyType
+  slug          String      @unique
+  nom           String
+  secteur       String?
+  description   String?     @db.Text
+  couleurAccent String?
+  logoKey       String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  users                  User[]
+  services               Service[]
+  membresEquipe          MembreEquipe[]
+  realisations           Realisation[]
+  partenaires            Partenaire[]
+  messagesContact        MessageContact[]
+  reservationsRestaurant ReservationRestaurant[]
+  employes               Employe[]
+  planningEntries        PlanningEntry[]
+  clients                Client[]
+  candidats              Candidat[]
+  demandesClient         DemandeClient[]
+  candidatures           Candidature[]
+  fichiers               Fichier[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  nom          String
+  role         Role
+  companyId    String?
+  company      Company? @relation(fields: [companyId], references: [id])
+  actif        Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([companyId])
+}
+
+// Registre de tous les fichiers uploadés : porte le nom original (affichage uniquement),
+// le type MIME vérifié, la filiale propriétaire et la visibilité. C'est ce qui permet à
+// /api/files/[key] de vérifier l'appartenance à la filiale avant de servir un fichier.
+model Fichier {
+  id          String            @id @default(cuid())
+  key         String            @unique
+  nomOriginal String
+  mimeType    String
+  taille      Int
+  visibilite  VisibiliteFichier @default(PRIVE)
+  companyId   String?
+  company     Company?          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  createdAt   DateTime          @default(now())
+
+  @@index([companyId])
+}
+
+model Service {
+  id          String   @id @default(cuid())
+  companyId   String
+  company     Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  titre       String
+  description String   @db.Text
+  imageKey    String?
+  ordre       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([companyId, ordre])
+}
+
+model MembreEquipe {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  nom       String
+  poste     String
+  photoKey  String?
+  ordre     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, ordre])
+}
+
+model Realisation {
+  id              String    @id @default(cuid())
+  companyId       String
+  company         Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  titre           String
+  description     String    @db.Text
+  imageKey        String?
+  dateRealisation DateTime?
+  ordre           Int       @default(0)
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([companyId, ordre])
+}
+
+model Partenaire {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  nom       String
+  logoKey   String?
+  siteUrl   String?
+  ordre     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, ordre])
+}
+
+model MessageContact {
+  id              String      @id @default(cuid())
+  companyId       String
+  company         Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  type            TypeMessage @default(CONTACT)
+  nom             String
+  email           String
+  telephone       String?
+  sujet           String?
+  message         String      @db.Text
+  produitSouhaite String?
+  lu              Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+
+  @@index([companyId, createdAt])
+}
+
+model ReservationRestaurant {
+  id              String            @id @default(cuid())
+  companyId       String
+  company         Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  nom             String
+  email           String
+  telephone       String
+  nombrePersonnes Int
+  dateReservation DateTime
+  notes           String?           @db.Text
+  statut          StatutReservation @default(EN_ATTENTE)
+  createdAt       DateTime          @default(now())
+
+  @@index([companyId, dateReservation])
+}
+
+model Employe {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  nom       String
+  poste     String
+  email     String?
+  telephone String?
+  actif     Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  planningEntries PlanningEntry[]
+
+  @@index([companyId])
+}
+
+model PlanningEntry {
+  id        String   @id @default(cuid())
+  companyId String
+  company   Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  employeId String
+  employe   Employe  @relation(fields: [employeId], references: [id], onDelete: Cascade)
+  titre     String
+  dateDebut DateTime
+  dateFin   DateTime
+  notes     String?  @db.Text
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([companyId, dateDebut])
+  @@index([employeId])
+}
+
+model Client {
+  id                  String       @id @default(cuid())
+  companyId           String
+  company             Company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  nom                 String
+  entreprise          String?
+  email               String?
+  telephone           String?
+  statut              StatutClient @default(PROSPECT)
+  notes               String?      @db.Text
+  dateAjout           DateTime     @default(now())
+  derniereInteraction DateTime?
+
+  dossierComptable DossierComptable?
+
+  @@index([companyId])
+}
+
+// Étend Client plutôt qu'un modèle clientsComptables isolé et dupliqué —
+// voir PROJECT_STATE.md, "Décisions encore ouvertes", point 2 (à confirmer avec l'utilisateur).
+model DossierComptable {
+  id              String    @id @default(cuid())
+  clientId        String    @unique
+  client          Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  typeDeclaration String?
+  echeance        DateTime?
+  documentsKeys   String[]  @default([])
+  notes           String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Candidat {
+  id             String   @id @default(cuid())
+  companyId      String
+  company        Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  nomComplet     String
+  email          String
+  telephone      String?
+  posteRecherche String?
+  cvKey          String?
+  notes          String?  @db.Text
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([companyId])
+}
+
+model DemandeClient {
+  id                String   @id @default(cuid())
+  companyId         String
+  company           Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  entrepriseCliente String
+  posteRecherche    String
+  description       String   @db.Text
+  publiee           Boolean  @default(false)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  candidatures Candidature[]
+
+  @@index([companyId, publiee])
+}
+
+model Candidature {
+  id                  String            @id @default(cuid())
+  companyId           String
+  company             Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  demandeId           String?
+  demande             DemandeClient?    @relation(fields: [demandeId], references: [id], onDelete: SetNull)
+  nomComplet          String
+  email               String
+  telephone           String
+  adresseComplete     String
+  posteRecherche      String
+  posteAutrePrecision String?
+  cvKey               String
+  autresDocumentsKeys String[]          @default([])
+  statut              StatutCandidature @default(NOUVELLE)
+  dateEnvoi           DateTime          @default(now())
+
+  @@index([companyId, statut])
+  @@index([demandeId])
+}

@@ -1,0 +1,33 @@
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# Fichiers uploadés (driver fs local) — jamais versionnés
+/storage
+
+# Client Prisma généré (prisma generate)
+/server/generated
+
+# Prototype React Lovable — référence locale de conversion, jamais versionné
+/prototype_react
