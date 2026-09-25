@@ -35,3 +35,6 @@ logs
 # Claude Code
 .claude/settings.local.json
 .claude/worktrees/
+
+# Captures de référence phase 1 (régénérables, volumineuses) — non versionnées
+/conversion-captures

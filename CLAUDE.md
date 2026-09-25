@@ -23,6 +23,8 @@ Ces règles s'appliquent à **tout** le code produit dans ce dépôt, sans excep
 
 ### Dashboard — fonctionnel, jamais simulé au rabais
 
+- **Tout contenu affiché sur les sites publics est éditable depuis l'admin** (textes marketing, sections, coordonnées, horaires, textes légaux, services mis en avant, effectif…) — décision client 2026-09-25. Le code fournit des valeurs par défaut (seed), jamais du texte public figé en dur dans un composant. Seules exceptions : la structure des formulaires (couplée au zod serveur) et les libellés d'interface.
+
 - **Interdit** : `alert()`, `confirm()`, `console.log()` en production dans le code du dashboard. Utiliser `Dialog`/`AlertDialog` (shadcn-vue) pour toute confirmation, et un système de `toast` pour tout retour utilisateur (succès, erreur).
 - Tout modal, formulaire ou popup dans un dashboard doit être réellement fonctionnel — pas un bouton qui ne fait rien. Si une fonctionnalité n'est pas encore branchée au backend, elle n'apparaît pas dans l'UI plutôt que d'exister comme façade.
 - Toutes les données fictives utilisées pendant le développement (avant que le backend réel soit branché) vivent dans un seul endroit identifié dans le code — jamais éparpillées en dur dans les composants.

@@ -8,7 +8,7 @@ Ce fichier est le **suivi vivant** du projet : il change à chaque session de tr
 
 ## Phase actuelle
 
-**Phase 1 — Conversion des routes.** Scaffold Nuxt terminé et vérifié (voir Avancement + Écarts au prompt). Prochaine route : Holding.
+**Conversion — phase 1 (inventaire) terminée côté analyse, en attente de décisions.** Scaffold + correctif post-setup ✅. Voir `CONVERSION_INVENTORY.md` (DEC-xx, Q-xx).
 
 Le prototype React (Lovable) est **terminé et figé** : https://cd-holding-nexus.lovable.app/, source dans `prototype_react/`. Il ne sera plus modifié — c'est uniquement une référence de conversion.
 
@@ -23,6 +23,8 @@ Le prototype React (Lovable) est **terminé et figé** : https://cd-holding-nexu
 | Prompt de setup Nuxt (scaffold, dépendances, schema Prisma, auth, upload) | ✅ Fait (`prompt_setup.md`) |
 | Scaffold du projet Nuxt réellement exécuté | ✅ Fait et vérifié 2026-09-25 — migration `init`, seed, checklist étape 16 OK (API : `401/403/404/415`, scoping filiale, upload/lecture fichier ; UI Playwright : garde `/admin`, login/logout, validation, toast, Button) |
 | Conversion des routes — voir checklist ci-dessous | ❌ Pas commencé |
+| Phase 1 — Inventaire (`CONVERSION_INVENTORY.md`) | ✅ Décisions tranchées 2026-09-25 (captures prototype en cours) |
+| Phase 2 — Fondations communes | 🔧 En cours : spec architect (migration schéma + fondations) |
 
 ## Checklist de conversion par route (à remplir au fur et à mesure)
 
@@ -143,6 +145,8 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 - 2026-09-25 — Session : `user` = uuid/nom/role/companyUuid ; ids internes dans `secure` uniquement.
 - 2026-09-25 — Erreurs : log central 5xx via consola, 4xx non loggés, aucun PII. Règle dans `CLAUDE.md` § Backend.
 - 2026-09-25 — Tests obligatoires avant toute tâche "terminée" : typecheck + unit + build prod + revue. Règle dans `CLAUDE.md` § Tests.
+- 2026-09-25 — **Phase 1 tranchée** (page « Groupe CD — Décisions de conversion et questions client », rev 278). DEC-01…39 : recommandations retenues SAUF DEC-07 (textes marketing filiales **en base, éditables**), DEC-08 (sections de contenu **gardées + affichées sur leurs pages**), DEC-09 (statut de site **fonctionnel** : page maintenance — interprétation, précision non donnée), DEC-39 (réalisations holding **affichées sur une page dédiée**).
+- 2026-09-25 — Réponses client : principe **tout contenu éditable depuis l'admin** avec valeurs par défaut rédigées par nous. Q-01/Q-07 textes légaux (confidentialité Loi 25, mentions alcool) rédigés + éditables ; Q-02 coordonnées + nom du groupe éditables ; Q-03 effectif éditable ; Q-04 services éditables (CMS) ; Q-05 services « mis en avant » choisis dans l'admin, supermarchés par défaut ; Q-06 mention partenaire éditable, défaut neutre ; Q-08 infos restaurant (adresse, horaires, capacité) éditables ; Q-09 CV PDF uniquement ; Q-10 **courriels de confirmation à prévoir** (mailer) ; Q-11 libellé « Vous ne trouvez pas ce que vous cherchez ? ».
 - 2026-09-25 — `nuxt-security` 2.6.0 (ajouté hors session) configuré : CSP/HSTS/headers actifs ; `rateLimiter: false` (bypass XFF, doublon de `server/utils/rate-limit.ts`), `corsHandler: false` (monolithe same-origin — rouvrir avec origin précise si app mobile), `xssValidator: false` (stringifie les octets des uploads ; XSS couvert par zod + échappement Vue + CSP), `requestSizeLimiter` aligné sur `shared/config/upload.ts`. Ne pas réactiver sans revue.
 - 2026-09-25 — `.nuxtrc` (setup @nuxt/test-utils) versionné.
 - 2026-09-25 — Écarts assumés au prompt correctif : schéma Prisma 7 existant conservé (pas remplacé), durcissement login conservé, `requireRole` conservé (pas de `?? -1`).
@@ -168,7 +172,7 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 
 ## Prochaine étape recommandée
 
-0. Correctif post-setup ✅ → démarrer `PROMPT_CONVERSION.md` phase 1 (inventaire `CONVERSION_INVENTORY.md`, aucun code).
+0. Correctif post-setup ✅. `PROMPT_CONVERSION.md` phase 1 : `CONVERSION_INVENTORY.md` rédigé (2026-09-25) — **arrêt réglementaire : 39 décisions `DEC-xx` + 11 questions client `Q-xx` à trancher avant la phase 2** (voir section « Écarts détectés » de l'inventaire).
 
 1. Conversion Holding, route par route (`/` d'abord) : socle visuel navy/or (§6) dans `app/assets/css/main.css`, puis layout public.
 2. Trancher décision ouverte n°1 (style dashboards) avant `/admin` shell.
