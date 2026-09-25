@@ -63,13 +63,13 @@ function isActive(item: NavItem): boolean {
         <template v-if="variant === 'holding'">
           <NuxtLink to="/" class="inline-flex items-baseline gap-1">
             <span class="font-display text-2xl font-bold tracking-tight text-navy">{{ groupeLead }}</span>
-            <span class="font-display text-2xl font-bold tracking-tight text-gold">{{ groupeLast }}</span>
+            <span class="font-display text-2xl font-bold tracking-tight text-gold-deep">{{ groupeLast }}</span>
           </NuxtLink>
         </template>
         <template v-else>
           <NuxtLink
             to="/"
-            class="hidden items-center gap-1 text-xs font-medium uppercase tracking-widest text-ink/60 transition-colors hover:text-navy md:inline-flex"
+            class="hidden items-center gap-1 text-xs font-medium uppercase tracking-widest text-ink/75 transition-colors hover:text-navy md:inline-flex"
           >
             <ArrowLeft :size="14" aria-hidden="true" /> {{ groupe }}
           </NuxtLink>
@@ -92,7 +92,7 @@ function isActive(item: NavItem): boolean {
         </NuxtLink>
         <NuxtLink
           :to="contactTo"
-          class="inline-flex items-center rounded-full bg-site-accent px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
+          class="inline-flex items-center rounded-full bg-site-accent-strong px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
         >
           Nous joindre
         </NuxtLink>
@@ -101,7 +101,7 @@ function isActive(item: NavItem): boolean {
       <button
         v-if="showNav"
         type="button"
-        class="text-navy md:hidden"
+        class="rounded-sm text-navy outline-none md:hidden focus-visible:ring-2 focus-visible:ring-navy focus-visible:ring-offset-2"
         aria-label="Menu"
         :aria-expanded="open"
         :aria-controls="MOBILE_NAV_ID"
@@ -136,7 +136,7 @@ function isActive(item: NavItem): boolean {
           </NuxtLink>
           <NuxtLink
             :to="contactTo"
-            class="mt-2 inline-flex items-center justify-center rounded-full bg-site-accent px-5 py-2.5 text-sm font-semibold text-white"
+            class="mt-2 inline-flex items-center justify-center rounded-full bg-site-accent-strong px-5 py-2.5 text-sm font-semibold text-white"
           >
             Nous joindre
           </NuxtLink>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { interpoler, segmenterTexteAccentue, texteAccentueSegments } from '#shared/utils/texte'
+import { interpoler, mergerVars, segmenterTexteAccentue, texteAccentueSegments } from '#shared/utils/texte'
 
 describe('interpoler', () => {
   it('should replace known variables', () => {
@@ -18,6 +18,27 @@ describe('interpoler', () => {
 
   it('should leave a known variable untouched when its value is missing', () => {
     expect(interpoler('Bienvenue chez {groupe}', {})).toBe('Bienvenue chez {groupe}')
+  })
+})
+
+describe('mergerVars', () => {
+  it('should use base values when no override is provided', () => {
+    expect(mergerVars({ groupe: 'Groupe CD' })).toEqual({ groupe: 'Groupe CD' })
+  })
+
+  it('should keep the base value when an override is explicitly undefined', () => {
+    expect(mergerVars({ groupe: 'Groupe CD' }, { groupe: undefined })).toEqual({ groupe: 'Groupe CD' })
+  })
+
+  it('should let an explicit override win over the base value', () => {
+    expect(mergerVars({ groupe: 'Groupe CD' }, { groupe: 'Autre groupe' })).toEqual({ groupe: 'Autre groupe' })
+  })
+
+  it('should merge distinct keys from base and overrides', () => {
+    expect(mergerVars({ groupe: 'Groupe CD' }, { nomCourt: 'CCDPAA' })).toEqual({
+      groupe: 'Groupe CD',
+      nomCourt: 'CCDPAA',
+    })
   })
 })
 

@@ -2,7 +2,7 @@
 // filiale sur les 7 pages /a-propos (holding + 6 filiales). Lecture seule : aucune donnée n'est
 // modifiée, le test tourne donc sur les 3 largeurs (375/768/1440, voir playwright.config.ts).
 import { test, expect, type Locator, type Page } from '@playwright/test'
-import { SITE_ACCENTS, hexToRgb } from './fixtures/accents'
+import { SITE_ACCENTS } from './fixtures/accents'
 
 const PAGES: ReadonlyArray<{ slug: string; path: string }> = [
   { slug: 'holding', path: '/a-propos' },
@@ -54,8 +54,26 @@ test.describe('Accent de navigation par filiale — /a-propos (7 sites)', () => 
       expect(accentVar.toUpperCase()).toBe(SITE_ACCENTS[slug])
 
       const cta = await revealNavCta(page)
-      const backgroundColor = await cta.evaluate((el) => getComputedStyle(el).backgroundColor)
-      expect(backgroundColor).toBe(hexToRgb(SITE_ACCENTS[slug]))
+      // Le CTA utilise la variante assombrie de l'accent (`--site-accent-strong`, contraste AA du
+      // texte blanc) : on compare au rendu navigateur d'un élément témoin portant la même formule.
+      const [backgroundColor, expectedColor] = await cta.evaluate((el) => {
+        const probe = document.createElement('span')
+        probe.style.backgroundColor = 'var(--site-accent-strong)'
+        el.parentElement?.appendChild(probe)
+        const expected = getComputedStyle(probe).backgroundColor
+        probe.remove()
+        return [getComputedStyle(el).backgroundColor, expected]
+      })
+      expect(backgroundColor).toBe(expectedColor)
+      const strongAtRoot = await page.evaluate(() =>
+        getComputedStyle(document.documentElement).getPropertyValue('--site-accent-strong').trim(),
+      )
+      if (slug !== 'holding') {
+        const strongOnSite = await wrapper.evaluate((el) =>
+          getComputedStyle(el).getPropertyValue('--site-accent-strong').trim(),
+        )
+        expect(strongOnSite).not.toBe(strongAtRoot)
+      }
 
       // "Restaurant" et "Offres" : présents uniquement dans la nav des filiales concernées
       // (shared/config/sites.ts publicNav) — jamais ailleurs, quel que soit l'état du menu.

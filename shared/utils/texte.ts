@@ -19,6 +19,17 @@ export function interpoler(texte: string, vars: TexteVars = {}): string {
   })
 }
 
+/**
+ * Fusionne les variables par défaut du site courant avec des variables explicites d'appelant
+ * (celles-ci gagnent). Utilisé par `TexteAccentue` (T3) pour interpoler tout texte public sans
+ * que chaque site consommateur ait à repasser `{groupe}`/`{nomCourt}`/`{nom}` explicitement.
+ */
+export function mergerVars(base: TexteVars, overrides?: TexteVars): TexteVars {
+  // Une variable explicite absente (`undefined`) ne doit pas effacer la valeur du site.
+  const definies = Object.entries(overrides ?? {}).filter(([, valeur]) => valeur !== undefined)
+  return { ...base, ...Object.fromEntries(definies) }
+}
+
 export type TexteSegment =
   | { type: 'texte'; valeur: string }
   | { type: 'accent'; valeur: string }

@@ -121,7 +121,7 @@ async function handleSubmit(values: Record<string, unknown>): Promise<void> {
             :key="entry.uuid"
             class="grid grid-cols-1 gap-3 border-t border-border px-5 py-4 first:border-t-0 md:grid-cols-[auto_1fr_auto] md:items-center"
           >
-            <span class="w-fit rounded border border-border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+            <span class="w-fit rounded border border-border px-2 py-0.5 font-mono text-xs uppercase tracking-wider text-muted-foreground">
               {{ entry.cle }}
             </span>
             <div class="min-w-0">

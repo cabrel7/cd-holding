@@ -69,9 +69,12 @@ useSeoMeta({
       <div class="mx-auto max-w-7xl px-6">
         <div v-if="!histoire" class="h-96 animate-pulse rounded-3xl bg-secondary" aria-hidden="true" />
         <template v-else>
-          <p class="font-display text-sm font-semibold uppercase tracking-[0.25em] text-gold">
-            {{ histoire.surtitre }}
-          </p>
+          <TexteAccentue
+            :texte="histoire.surtitre"
+            :vars="vars"
+            as="p"
+            class="font-display text-sm font-semibold uppercase tracking-[0.25em] text-gold-deep"
+          />
           <TexteAccentue
             :texte="histoire.titre"
             :vars="vars"
@@ -80,10 +83,22 @@ useSeoMeta({
           />
           <div class="mt-14 grid grid-cols-1 gap-12 md:grid-cols-12">
             <div class="space-y-6 text-lg leading-relaxed text-ink/80 md:col-span-7">
-              <p v-for="(paragraphe, index) in histoire.paragraphes" :key="index">{{ paragraphe }}</p>
+              <TexteAccentue
+                v-for="(paragraphe, index) in histoire.paragraphes"
+                :key="index"
+                :texte="paragraphe"
+                :vars="vars"
+                as="p"
+              />
             </div>
             <aside v-if="reperes" class="rounded-3xl border border-border bg-white p-8 md:col-span-4 md:col-start-9">
-              <p class="font-display text-xs uppercase tracking-widest text-gold">{{ reperes.surtitre }}</p>
+              <TexteAccentue
+                v-if="reperes.surtitre"
+                :texte="reperes.surtitre"
+                :vars="vars"
+                as="p"
+                class="font-display text-xs uppercase tracking-widest text-gold-deep"
+              />
               <ul class="mt-4 space-y-4">
                 <li v-for="(item, index) in reperes.items" :key="index">
                   <p class="font-display text-3xl font-bold text-navy">{{ item.valeur }}</p>
@@ -158,7 +173,13 @@ useSeoMeta({
               :vars="vars"
             />
           </div>
-          <p v-if="partenairesHeading?.texte" class="max-w-md text-ink/70">{{ partenairesHeading.texte }}</p>
+          <TexteAccentue
+            v-if="partenairesHeading?.texte"
+            :texte="partenairesHeading.texte"
+            :vars="vars"
+            as="p"
+            class="max-w-md text-ink/70"
+          />
         </div>
 
         <EtatCollection
@@ -180,7 +201,7 @@ useSeoMeta({
               />
               <div class="flex-1">
                 <p class="font-display text-xl font-bold text-navy">{{ partenaire.nom }}</p>
-                <p v-if="partenaire.typeRelation" class="mt-1 text-xs uppercase tracking-widest text-ink/55">
+                <p v-if="partenaire.typeRelation" class="mt-1 text-xs uppercase tracking-widest text-ink/70">
                   {{ partenaire.typeRelation }}
                 </p>
               </div>

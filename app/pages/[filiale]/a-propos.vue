@@ -77,22 +77,26 @@ useSeoMeta({
         <div v-if="!histoire" class="h-96 animate-pulse rounded-3xl bg-secondary" aria-hidden="true" />
         <div v-else class="grid grid-cols-1 gap-10 md:grid-cols-12">
           <div class="md:col-span-7">
-            <p class="font-display text-xs font-semibold uppercase tracking-[0.3em] text-site-accent">
-              {{ histoire.surtitre }}
-            </p>
+            <TexteAccentue
+              :texte="histoire.surtitre"
+              :vars="vars"
+              as="p"
+              class="font-display text-xs font-semibold uppercase tracking-[0.3em] text-site-accent-strong"
+            />
             <TexteAccentue
               :texte="histoire.titre"
               :vars="vars"
               as="h1"
               class="mt-4 font-display text-5xl font-bold leading-[1.02] text-navy md:text-7xl"
             />
-            <p
+            <TexteAccentue
               v-for="(paragraphe, index) in histoire.paragraphes"
               :key="index"
+              :texte="paragraphe"
+              :vars="vars"
+              as="p"
               class="mt-6 max-w-2xl text-lg leading-relaxed text-ink/80 first:mt-8"
-            >
-              {{ paragraphe }}
-            </p>
+            />
           </div>
           <div class="md:col-span-5">
             <SiteImage
@@ -141,7 +145,7 @@ useSeoMeta({
                     />
                   </div>
                   <div class="col-span-9 md:col-span-10">
-                    <p class="text-xs uppercase tracking-widest text-site-accent">{{ membre.poste }}</p>
+                    <p class="text-xs uppercase tracking-widest text-cream/90">{{ membre.poste }}</p>
                     <h3 class="mt-1 font-display text-2xl font-bold">{{ membre.nom }}</h3>
                     <p v-if="membre.bio" class="mt-2 text-sm leading-relaxed text-cream/75">{{ membre.bio }}</p>
                   </div>
@@ -177,7 +181,7 @@ useSeoMeta({
               />
               <div>
                 <p class="font-display text-base font-semibold text-navy">{{ partenaire.nom }}</p>
-                <p v-if="partenaire.typeRelation" class="text-xs uppercase tracking-widest text-ink/55">
+                <p v-if="partenaire.typeRelation" class="text-xs uppercase tracking-widest text-ink/70">
                   {{ partenaire.typeRelation }}
                 </p>
               </div>

@@ -63,6 +63,13 @@
   --sidebar-ring: var(--gold);
 }
 
+/* Une propriété personnalisée dérivée est résolue là où elle est déclarée : déclarée seulement
+   sur :root, `-strong` resterait calculée depuis l'accent par défaut (navy) sur toutes les
+   filiales. On la redéclare sur le wrapper du layout public, qui porte `--site-accent`. */
+[data-site] {
+  --site-accent-strong: color-mix(in oklab, var(--site-accent) 72%, black);
+}
+
 @theme inline {
   --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;

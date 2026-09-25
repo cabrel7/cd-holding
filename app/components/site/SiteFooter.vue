@@ -4,6 +4,7 @@
 // Groupe CD" du prototype filiale (SubFooter.tsx).
 import { ArrowUpRight, ExternalLink, Mail, MapPin, Phone } from '@lucide/vue'
 import type { PublicSite, PublicSiteSummary } from '#shared/types/public'
+import TexteAccentue from './TexteAccentue.vue'
 
 const props = defineProps<{
   site: PublicSite
@@ -39,15 +40,18 @@ const reseaux = computed(() =>
             <span class="text-gold">{{ groupe.split(' ').at(-1) }}</span>
           </div>
           <template v-else>
-            <p class="font-display text-xs font-semibold uppercase tracking-[0.3em] text-site-accent">
+            <p class="font-display text-xs font-semibold uppercase tracking-[0.3em] text-cream/90">
               {{ site.secteur }}
             </p>
             <h4 class="mt-3 font-display text-3xl font-bold leading-tight">{{ site.nom }}</h4>
           </template>
 
-          <p v-if="piedDePageTexte" class="mt-4 max-w-md text-sm leading-relaxed text-cream/70">
-            {{ piedDePageTexte }}
-          </p>
+          <TexteAccentue
+            v-if="piedDePageTexte"
+            :texte="piedDePageTexte"
+            as="p"
+            class="mt-4 max-w-md text-sm leading-relaxed text-cream/70"
+          />
 
           <div v-if="isHolding" class="mt-6 space-y-2 text-sm text-cream/80">
             <p class="flex items-center gap-2">

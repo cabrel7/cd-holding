@@ -23,9 +23,11 @@ const texte = computed(() => props.section?.texte ?? DEFAUT_TEXTE)
 <template>
   <div class="flex min-h-[70vh] items-center justify-center px-6 py-24">
     <div class="max-w-lg text-center">
-      <p class="font-display text-sm font-semibold uppercase tracking-[0.25em] text-site-accent">
-        {{ surtitre }}
-      </p>
+      <TexteAccentue
+        :texte="surtitre"
+        as="p"
+        class="font-display text-sm font-semibold uppercase tracking-[0.25em] text-site-accent-strong"
+      />
       <TexteAccentue
         :texte="titre"
         as="h1"
