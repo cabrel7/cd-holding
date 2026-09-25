@@ -21,6 +21,31 @@ export interface SectionData {
   readonly texte?: string
 }
 
+/** Légende de l'image d'un hero (spec phase 3 §2.2) — présente seulement si les deux champs sont renseignés. */
+export interface HeroLegendeData {
+  readonly surtitre: string
+  readonly titre: string
+}
+
+/** Type catalogue `hero`, miroir de `heroSchema` (`shared/content/sections/types.ts`). */
+export interface HeroData {
+  readonly surtitre: string
+  readonly titre: string
+  readonly texte: string
+  readonly ctaLibelle?: string
+  readonly imageKey?: string | null
+  readonly imageAlt?: string
+  readonly legende?: HeroLegendeData
+  readonly badgeLibelle?: string
+}
+
+/** Type catalogue `cta`. */
+export interface CtaData {
+  readonly titre: string
+  readonly texte?: string
+  readonly ctaLibelle: string
+}
+
 /** Type catalogue `histoire`. */
 export interface HistoireData {
   readonly surtitre: string

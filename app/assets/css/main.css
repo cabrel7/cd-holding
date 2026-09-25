@@ -66,7 +66,8 @@
 /* Une propriété personnalisée dérivée est résolue là où elle est déclarée : déclarée seulement
    sur :root, `-strong` resterait calculée depuis l'accent par défaut (navy) sur toutes les
    filiales. On la redéclare sur le wrapper du layout public, qui porte `--site-accent`. */
-[data-site] {
+[data-site],
+[data-accent-scope] {
   --site-accent-strong: color-mix(in oklab, var(--site-accent) 72%, black);
 }
 

@@ -3,7 +3,7 @@
 // du prototype (Header.tsx / SubHeader.tsx) par un seul composant générique piloté par `variant`.
 import { ArrowLeft, Menu, X } from '@lucide/vue'
 import { useWindowScroll } from '@vueuse/core'
-import type { NavItem } from '#shared/config/sites'
+import { contactPath, type NavItem } from '#shared/config/sites'
 import type { PublicSite } from '#shared/types/public'
 
 const props = defineProps<{
@@ -44,9 +44,7 @@ const groupeWords = computed(() => props.groupe.trim().split(/\s+/).filter(Boole
 const groupeLead = computed(() => groupeWords.value.slice(0, -1).join(' '))
 const groupeLast = computed(() => groupeWords.value.at(-1) ?? props.groupe)
 
-const contactTo = computed(
-  () => props.nav.find((item) => item.label === 'Contact')?.to ?? '/contact',
-)
+const contactTo = computed(() => contactPath(props.site.slug))
 
 function isActive(item: NavItem): boolean {
   return !item.hash && route.path === item.to
@@ -84,7 +82,7 @@ function isActive(item: NavItem): boolean {
         <NuxtLink
           v-for="item in nav"
           :key="item.label"
-          :to="item.hash ? { path: item.to, hash: `#${item.hash}` } : item.to"
+          :to="item.hash ? { path: item.to, hash: item.hash } : item.to"
           class="text-sm font-medium transition-colors hover:text-navy"
           :class="isActive(item) ? 'text-navy' : 'text-ink/75'"
         >
@@ -129,7 +127,7 @@ function isActive(item: NavItem): boolean {
           <NuxtLink
             v-for="item in nav"
             :key="item.label"
-            :to="item.hash ? { path: item.to, hash: `#${item.hash}` } : item.to"
+            :to="item.hash ? { path: item.to, hash: item.hash } : item.to"
             class="py-2 text-base font-medium text-navy"
           >
             {{ item.label }}

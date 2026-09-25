@@ -13,8 +13,10 @@ const props = withDefaults(
     fallback: 'initiales' | 'aplat'
     initiales?: string
     class?: HTMLAttributes['class']
+    /** Image candidate LCP (ex. hero) : chargement immédiat plutôt que différé. */
+    priority?: boolean
   }>(),
-  { initiales: '' },
+  { initiales: '', priority: false },
 )
 </script>
 
@@ -23,7 +25,8 @@ const props = withDefaults(
     v-if="props.fileKey"
     :src="`/api/files/${props.fileKey}`"
     :alt="props.alt"
-    loading="lazy"
+    :loading="props.priority ? 'eager' : 'lazy'"
+    :fetchpriority="props.priority ? 'high' : undefined"
     :class="cn('object-cover', props.class)"
   />
   <div
