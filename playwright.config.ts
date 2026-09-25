@@ -34,13 +34,14 @@ export default defineConfig({
     },
   },
 
-  // 3 largeurs (375/768/1440, spec §5 T5). Seul `layout-accent.spec.ts` est un test visuel
-  // sensible au breakpoint (accent + CTA + nav responsive) : les autres fichiers (mutations
-  // CMS, sécurité API, maintenance) ne gagnent rien à tourner 3 fois sur un état DB partagé —
-  // ils ne tournent que sur le projet "desktop", comme le fait la config de référence de la
-  // spec (projet mobile filtré par `testMatch`).
+  // 3 largeurs (375/768/1440, spec §5 T5). `layout-accent.spec.ts` est un test visuel sensible
+  // au breakpoint (accent + CTA + nav responsive) ; `home.spec.ts` et `admin-site.spec.ts`
+  // (phase 3, docs/specs/phase3-holding-home.md §6) ont aussi un critère mobile-only (375px,
+  // critère 7) et doivent tourner desktop + mobile. Les autres fichiers (mutations CMS,
+  // sécurité API, maintenance) ne gagnent rien à tourner 3 fois sur un état DB partagé — ils ne
+  // tournent que sur le projet "desktop".
   projects: [
-    { name: 'mobile', use: { viewport: { width: 375, height: 812 } }, testMatch: /layout-accent\.spec\.ts/ },
+    { name: 'mobile', use: { viewport: { width: 375, height: 812 } }, testMatch: /(layout-accent|home|admin-site)\.spec\.ts/ },
     { name: 'tablet', use: { viewport: { width: 768, height: 1024 } }, testMatch: /layout-accent\.spec\.ts/ },
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
   ],
