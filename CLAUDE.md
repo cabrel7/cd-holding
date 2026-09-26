@@ -69,17 +69,18 @@ S'applique à toute tâche, pas seulement à la conversion des routes :
 
 - Utiliser systématiquement la table de correspondance de `PROJECT_CONTEXT.md` §9 (`useState`→`ref`, Context API→Pinia store, etc.).
 - Ne jamais improviser une structure de composant différente de celle du prototype sans raison documentée — le prototype a déjà été validé visuellement par le client, l'écart doit être justifié, pas accidentel.
-- Avant de marquer une route "✅ fait et vérifié" dans `PROJECT_STATE.md` :
-  1. Capturer la route Vue avec Playwright aux 3 breakpoints (375/768/1440) et comparer visuellement au prototype hébergé.
-  2. Pour les éléments chorégraphiés (modaux, toasts, accordéon FAQ, animations d'entrée) : capture vidéo courte via ffmpeg pour vérifier le comportement, pas seulement l'état statique.
-  3. Tester manuellement les interactions clés de la route (soumission de formulaire, ouverture de modal, changement d'onglet).
+- Avant de marquer une route (ou un lot) "✅ fait et vérifié" dans `PROJECT_STATE.md` — vérification faite **une fois par lot**, en fin de lot :
+  1. Captures Playwright aux 3 breakpoints (375/768/1440, défilement pas à pas) de chaque route du lot, comparées au prototype.
+  2. Vidéo courte ffmpeg **uniquement** pour les éléments chorégraphiés nouveaux dans le lot (modaux, toasts, accordéon, animations d'entrée) — pas de vidéo par route.
+  3. Interactions clés couvertes par les tests e2e du lot.
 
-## Workflow de conversion recommandé
+## Workflow de conversion (décision utilisateur 2026-09-26 : par lots)
 
-1. Traiter les routes **une par une**, jamais le projet entier d'un coup — le risque de dérive/hallucination augmente avec la taille du batch.
-2. Ordre recommandé : Holding d'abord (le socle design, l'auth et les composants CMS génériques y sont posés une fois, puis réutilisés), puis les 6 filiales dans l'ordre de `PROJECT_STATE.md`.
-3. Après chaque route terminée et vérifiée : mettre à jour `PROJECT_STATE.md` (statut de la ligne correspondante) avant de passer à la suivante.
-4. Si une ambiguïté apparaît entre ce que montre le prototype et ce que décrit `PROJECT_CONTEXT.md` (ou les retours client qui y sont intégrés) : le texte de `PROJECT_CONTEXT.md` fait foi, car il inclut les corrections post-démo que le prototype affiché ne reflète pas forcément à 100 %. En cas de doute réel, documenter la question dans `PROJECT_STATE.md` plutôt que de trancher seul silencieusement.
+1. Convertir **par type de page**, en lots : une page générique (`app/pages/[filiale]/<page>.vue`) couvre les 6 filiales à la fois, comme `[filiale]/a-propos.vue`. Pages spécifiques uniquement quand le prototype diverge réellement (restaurant, offres, planning, dossiers, CRM…). Un lot reste borné (un type de page ou une zone admin cohérente), jamais « tout le projet ».
+2. Par lot : **une spec courte** (architect) → backend + frontend en parallèle (périmètres disjoints) → typecheck + tests unitaires + e2e ciblés du lot → **un seul** build prod, **une seule** revue (reviewer + ux-reviewer en parallèle), **une seule** passe de captures en fin de lot. Les corrections mineures sont regroupées avant le rebuild, jamais un rebuild par micro-correctif.
+3. Ordre : Holding d'abord, puis les pages génériques filiales, puis les pages spécifiques et l'admin, dans l'ordre de `PROJECT_STATE.md`.
+4. Après chaque lot vérifié : mettre à jour `PROJECT_STATE.md` (statut des lignes du lot) avant de passer au suivant.
+5. Si une ambiguïté apparaît entre ce que montre le prototype et ce que décrit `PROJECT_CONTEXT.md` (ou les retours client qui y sont intégrés) : le texte de `PROJECT_CONTEXT.md` fait foi, car il inclut les corrections post-démo que le prototype affiché ne reflète pas forcément à 100 %. En cas de doute réel, documenter la question dans `PROJECT_STATE.md` plutôt que de trancher seul silencieusement.
 
 ## Conventions de code
 
