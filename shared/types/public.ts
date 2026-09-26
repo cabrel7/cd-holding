@@ -45,7 +45,7 @@ export interface PublicSite {
   readonly adresse: string | null
   readonly reseaux: PublicSiteReseaux
   readonly statutSite: StatutSitePublic
-  readonly groupe: { readonly nom: string }
+  readonly groupe: { readonly nom: string; readonly mentionFormulaires: string | null }
   readonly commun: PublicSiteCommun
 }
 

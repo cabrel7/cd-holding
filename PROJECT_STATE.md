@@ -36,7 +36,8 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 |---|---|---|
 | `/` | ✅ | Converti et vérifié 2026-09-26 (spec `docs/specs/phase3-holding-home.md`, écarts assumés §4.3). e2e `home.spec.ts` ✅, captures 3 breakpoints + vidéos (reveal, ancre `#filiales`, menu mobile) ✅. Liens `/{filiale}`, `/contact`, `/realisations` en 404 jusqu'à leur conversion |
 | `/a-propos` | ✅ | Vérifié 2026-09-26 : captures 3 breakpoints (défilement pas à pas) + vidéo reveal équipe/partenaires, e2e ✅ |
-| `/contact` | ❌ | |
+| `/contact` | 🔧 | Spec `docs/specs/phase3-holding-contact.md` (2026-09-26) : endpoint à union discriminée, anti-spam, courriels, mention Loi 25 |
+| `/confidentialite` | ❌ | Ajoutée 2026-09-26 (Q-01) : lien déjà présent dans le footer et sous les formulaires publics, 404 tant que non convertie (rendu du type `legal`) |
 | `/admin/login` | ❌ | |
 | `/admin` (shell dashboard) | ❌ | |
 | `/admin/contenu/*` (CMS services/réalisations/équipe/partenaires + onglet Site) | 👀 | Onglet « Site » (fiche société : secteur, description, image, coordonnées, réseaux ; nom/ordre SUPER_ADMIN) ajouté 2026-09-26, e2e `admin-site.spec.ts` ✅. CRUD + réordonnancement + sections + réglages site, e2e ✅. Écart assumé : sections éditées un site à la fois (prototype : 7 sites sur une page) — contrainte API `GET …/sections` |

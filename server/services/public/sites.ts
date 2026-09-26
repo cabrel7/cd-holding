@@ -167,7 +167,7 @@ const detail = defineEventHandler(async (event): Promise<PublicSite> => {
       instagramUrl: company.instagramUrl,
     },
     statutSite: company.statutSite,
-    groupe: { nom: groupeNom },
+    groupe: { nom: groupeNom, mentionFormulaires: null }, // branché par T1 (spec contact §3.3)
     commun,
   }
 })
