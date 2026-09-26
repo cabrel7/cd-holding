@@ -76,6 +76,8 @@ export default defineNuxtConfig({
     '/contact': { isr: ISR_TTL_SECONDS },
     '/realisations': { isr: ISR_TTL_SECONDS },
     '/confidentialite': { isr: ISR_TTL_SECONDS },
+    // `/${s}/**` ne couvre pas l'accueil `/${s}` lui-même : règle explicite.
+    ...Object.fromEntries(FILIALE_SLUGS.map((s) => [`/${s}`, { isr: ISR_TTL_SECONDS }])),
     ...Object.fromEntries(FILIALE_SLUGS.map((s) => [`/${s}/**`, { isr: ISR_TTL_SECONDS }])),
 
     // Polices auto-hébergées : jamais invalidées (nom de fichier versionné, voir FONT_*).

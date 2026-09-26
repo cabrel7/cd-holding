@@ -62,6 +62,29 @@ export interface FormulaireData {
 }
 
 /** Un item de `chiffres`, résolu côté serveur (`resolveChiffres`, T1) : toujours `{valeur, libelle}`. */
+export interface DuoCoteData {
+  readonly surtitre?: string
+  readonly titre: string
+  readonly texte?: string
+  readonly lienLibelle: string
+  readonly imageKey?: string | null
+  readonly imageAlt?: string
+}
+
+/** Miroir de `duoSchema` (shared/content/sections/types.ts). */
+export interface DuoData {
+  readonly a: DuoCoteData
+  readonly b: DuoCoteData
+}
+
+/** Miroir de `legalSchema` (shared/content/sections/types.ts). */
+export interface LegalData {
+  readonly titre: string
+  readonly miseAJour: string
+  readonly introduction?: string
+  readonly sections: readonly { readonly titre: string; readonly paragraphes: readonly string[] }[]
+}
+
 export interface ChiffreResoluData {
   readonly valeur: string
   readonly libelle: string

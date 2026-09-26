@@ -18,7 +18,9 @@ export function useSiteCollection<TItem>(
   query: MaybeRefOrGetter<UseSiteCollectionQuery> = {},
 ) {
   return useFetch<TItem[]>(() => `/api/public/sites/${toValue(slug)}/${resource}`, {
-    key: () => `site-collection:${toValue(slug)}:${resource}`,
+    // La query fait partie de la clé : sans elle, l'aperçu d'accueil (misEnAvant, limit) et la
+    // page complète partageraient le même cache (liste tronquée après navigation client).
+    key: () => `site-collection:${toValue(slug)}:${resource}:${JSON.stringify(toValue(query))}`,
     query: () => toValue(query),
   })
 }

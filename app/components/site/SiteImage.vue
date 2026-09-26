@@ -20,8 +20,10 @@ const props = withDefaults(
      * navy il assombrit encore l'accent (≈1,5:1) — le repli passe alors en crème (WCAG AA).
      */
     tone?: 'clair' | 'sombre'
+    /** Image purement décorative : `alt` vide et repli masqué aux technologies d'assistance. */
+    decorative?: boolean
   }>(),
-  { initiales: '', priority: false, tone: 'clair' },
+  { initiales: '', priority: false, tone: 'clair', decorative: false },
 )
 
 const fondRepli = computed(() => (props.tone === 'sombre' ? 'bg-cream/15' : 'bg-site-accent/10'))
@@ -32,15 +34,16 @@ const texteInitiales = computed(() => (props.tone === 'sombre' ? 'text-cream' : 
   <img
     v-if="props.fileKey"
     :src="`/api/files/${props.fileKey}`"
-    :alt="props.alt"
+    :alt="props.decorative ? '' : props.alt"
     :loading="props.priority ? 'eager' : 'lazy'"
     :fetchpriority="props.priority ? 'high' : undefined"
     :class="cn('object-cover', props.class)"
   />
   <div
     v-else
-    role="img"
-    :aria-label="props.alt"
+    :role="props.decorative ? undefined : 'img'"
+    :aria-label="props.decorative ? undefined : props.alt"
+    :aria-hidden="props.decorative ? 'true' : undefined"
     :class="cn('flex items-center justify-center', fondRepli, props.class)"
   >
     <span

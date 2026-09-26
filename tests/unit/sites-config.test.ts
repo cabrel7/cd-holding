@@ -5,6 +5,7 @@ import {
   isFilialeSlug,
   isSiteSlug,
   contactPath,
+  FILIALE_DUO_LIENS,
   publicNav,
   SITE_EXTRA_PAGES,
   SITE_SLUGS,
@@ -102,5 +103,13 @@ describe('contactPath', () => {
     for (const slug of ['holding', 'ccdpaa'] as const) {
       expect(publicNav(slug).find((item) => item.label === 'Contact')?.to).toBe(contactPath(slug))
     }
+  })
+})
+
+describe('FILIALE_DUO_LIENS', () => {
+  it('should define duo links only for placement (audiences) and ccdpaa (metiers)', () => {
+    expect(Object.keys(FILIALE_DUO_LIENS).sort()).toEqual(['ccdpaa', 'placement'])
+    expect(FILIALE_DUO_LIENS.placement).toEqual({ cle: 'audiences', a: contactPath('placement'), b: '/placement/offres' })
+    expect(FILIALE_DUO_LIENS.ccdpaa?.cle).toBe('metiers')
   })
 })

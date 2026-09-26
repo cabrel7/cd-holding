@@ -69,3 +69,15 @@ export function publicNav(slug: SiteSlug): readonly NavItem[] {
   )
   return items
 }
+
+/**
+ * Cibles des liens du duo de la page d'accueil (placement : audiences, ccdpaa : métiers). Les
+ * textes du duo sont éditables (section ACCUEIL `audiences`/`metiers`) ; seules les routes, qui
+ * sont de la structure, vivent ici.
+ */
+export const FILIALE_DUO_LIENS: Partial<
+  Record<FilialeSlug, { readonly cle: 'audiences' | 'metiers'; readonly a: string; readonly b: string }>
+> = {
+  placement: { cle: 'audiences', a: contactPath('placement'), b: '/placement/offres' },
+  ccdpaa: { cle: 'metiers', a: '/ccdpaa/services', b: '/ccdpaa/restaurant' },
+}
