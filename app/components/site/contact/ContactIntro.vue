@@ -43,16 +43,16 @@ defineProps<{
       class="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 mt-8 space-y-1 text-sm text-ink/70 not-italic"
     >
       <p v-if="coordonnees.email">
-        <a :href="`mailto:${coordonnees.email}`" class="inline-flex items-center gap-2 py-2 hover:underline">
+        <a :href="`mailto:${coordonnees.email}`" class="inline-flex min-h-11 items-center gap-2 py-2 hover:underline">
           <Mail :size="16" aria-hidden="true" />{{ coordonnees.email }}
         </a>
       </p>
       <p v-if="coordonnees.telephone">
-        <a :href="`tel:${coordonnees.telephone}`" class="inline-flex items-center gap-2 py-2 hover:underline">
+        <a :href="`tel:${coordonnees.telephone}`" class="inline-flex min-h-11 items-center gap-2 py-2 hover:underline">
           <Phone :size="16" aria-hidden="true" />{{ coordonnees.telephone }}
         </a>
       </p>
-      <p v-if="coordonnees.adresse" class="inline-flex items-center gap-2 py-2">
+      <p v-if="coordonnees.adresse" class="inline-flex min-h-11 items-center gap-2 py-2">
         <MapPin :size="16" aria-hidden="true" />{{ coordonnees.adresse }}
       </p>
     </address>

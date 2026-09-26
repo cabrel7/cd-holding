@@ -11,6 +11,7 @@ import { ChevronDown, Send } from '@lucide/vue'
 import { holdingContactFormSchema, type HoldingContactFormValues } from '#shared/validation/contact'
 import { interpoler, type TexteVars } from '#shared/utils/texte'
 import type { PublicSiteSummary } from '#shared/types/public'
+import { isSiteSlug } from '#shared/config/sites'
 import { usePublicFormSubmit } from '@/composables/usePublicFormSubmit'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
@@ -34,11 +35,24 @@ const props = defineProps<{
 type HoldingContactBody = HoldingContactFormValues & { formulaire: 'holding' }
 
 const schema = toTypedSchema(holdingContactFormSchema)
-const { handleSubmit, defineField, resetForm } = useForm({ validationSchema: schema })
+// Valeurs initiales explicites : sans elles, les champs partent à `undefined` et zod renvoie son
+// message par défaut (« Required », en anglais) au lieu des messages `.min()` du schéma partagé.
+// `cible` reste `undefined` (aucun choix) : `cibleChoisie` le présente au <select> comme `''`,
+// la valeur de l'option d'invite, qui s'affiche donc au chargement et après `resetForm()`.
+const { handleSubmit, defineField, resetForm } = useForm({
+  validationSchema: schema,
+  initialValues: { nom: '', email: '', message: '', website: '' },
+})
 
 const [nom, nomAttrs] = defineField('nom')
 const [email, emailAttrs] = defineField('email')
 const [cible, cibleAttrs] = defineField('cible')
+const cibleChoisie = computed<string>({
+  get: () => cible.value ?? '',
+  set: (valeur) => {
+    cible.value = isSiteSlug(valeur) ? valeur : undefined
+  },
+})
 const [message, messageAttrs] = defineField('message')
 const [website] = defineField('website')
 
@@ -165,7 +179,7 @@ const onSubmit = handleSubmit(
             <FormControl>
               <select
                 ref="cibleSelectRef"
-                v-model="cible"
+                v-model="cibleChoisie"
                 v-bind="cibleAttrs"
                 class="h-12 w-full appearance-none rounded-xl border border-input bg-white px-4 pr-10 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
               >
@@ -179,7 +193,7 @@ const onSubmit = handleSubmit(
             <ChevronDown
               :size="18"
               aria-hidden="true"
-              class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink/50"
+              class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink/70"
             />
           </div>
           <FormMessage />

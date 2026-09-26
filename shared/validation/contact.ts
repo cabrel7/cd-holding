@@ -20,22 +20,25 @@ const NOM_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}'’. -]*$/u
 // eslint-disable-next-line no-control-regex
 const CONTROLE_PATTERN = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/
 
+// `required_error` : message français si le champ est absent (sinon zod renvoie « Required »).
+const CHAMP_REQUIS = 'Ce champ est requis.'
+
 export const nomContactSchema = z
-  .string()
+  .string({ required_error: CHAMP_REQUIS })
   .trim()
   .min(CONTACT_LIMITS.nomMin, 'Veuillez saisir votre nom.')
   .max(CONTACT_LIMITS.nomMax, `${CONTACT_LIMITS.nomMax} caractères au maximum.`)
   .regex(NOM_PATTERN, 'Utilisez uniquement des lettres, espaces, apostrophes ou traits d’union.')
 
 export const emailContactSchema = z
-  .string()
+  .string({ required_error: CHAMP_REQUIS })
   .trim()
   .toLowerCase()
   .max(CONTACT_LIMITS.emailMax, 'Adresse courriel trop longue.')
   .email('Adresse courriel invalide.')
 
 export const messageContactSchema = z
-  .string()
+  .string({ required_error: CHAMP_REQUIS })
   .trim()
   .min(CONTACT_LIMITS.messageMin, `Votre message doit contenir au moins ${CONTACT_LIMITS.messageMin} caractères.`)
   .max(CONTACT_LIMITS.messageMax, 'Votre message ne peut dépasser 5 000 caractères.')

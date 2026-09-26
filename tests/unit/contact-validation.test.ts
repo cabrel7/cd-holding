@@ -53,6 +53,17 @@ describe('holdingContactFormSchema', () => {
   })
 })
 
+describe('holdingContactFormSchema — missing fields', () => {
+  it('should report French messages for absent fields, never zod defaults', () => {
+    const result = holdingContactFormSchema.safeParse({})
+    expect(result.success).toBe(false)
+    const messages = result.success ? [] : result.error.issues.map((issue) => issue.message)
+    expect(messages).not.toContain('Required')
+    expect(messages).toContain('Ce champ est requis.')
+    expect(messages).toContain('Sélectionnez une filiale.')
+  })
+})
+
 describe('contactBodySchema', () => {
   it('should accept the holding variant', () => {
     expect(contactBodySchema.safeParse({ ...valide, formulaire: 'holding' }).success).toBe(true)
