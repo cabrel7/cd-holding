@@ -178,7 +178,7 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 
 0. **Q-12 (client)** : « 12+ années d'existence » (accueil holding, chiffres) repris du prototype, non vérifié — laissé éditable dans l'admin (décision utilisateur 2026-09-26), à confirmer par le client avant mise en production.
 
-1. **Style visuel des dashboards** : question posée — les dashboards `/admin/**` doivent-ils adopter un style sombre inspiré Power BI (préférence connue de l'utilisateur sur d'autres projets), ou rester sur le même socle clair que les sites publics ? **Pas encore tranché.**
+1. ~~**Style visuel des dashboards**~~ — **tranché 2026-09-26 : même socle clair que les sites publics** (tokens `main.css`, navy/or/crème, shadcn-vue new-york-v4). Pas de thème sombre type Power BI.
 2. **`DossierComptable` étend `Client`** : choix de modélisation introduit en rédigeant `PROJECT_CONTEXT.md` §7 (plutôt qu'un modèle `clientsComptables` isolé). Cohérent avec le carnet CRM général validé par l'utilisateur, mais n'a pas été explicitement validé dans ces termes précis — à confirmer si l'utilisateur relit le schéma Prisma de près.
 3. **Nom officiel du groupe** : "Groupe CD" reste un nom de travail dans tous les documents — à remplacer partout si un nom officiel est choisi.
 
@@ -186,7 +186,7 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 
 1. Vidéo ffmpeg (reveal filiales, ancre `#filiales`) sur `/`, `/a-propos` + recaptures `/a-propos` → passer 👀 → ✅.
 2. Phase 3 — Holding `/contact` (aligner `contact.post.ts` sur DEC-12/13/15), puis `/realisations`.
-3. Trancher décision ouverte n°1 (style dashboards) avant `/admin` shell.
+3. `/admin` shell : socle clair (décision ouverte n°1 tranchée).
 
 ## Outillage
 
