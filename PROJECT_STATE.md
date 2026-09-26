@@ -34,8 +34,8 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 
 | Route | Statut | Notes |
 |---|---|---|
-| `/` | 👀 | Converti 2026-09-26 (spec `docs/specs/phase3-holding-home.md`, écarts assumés §4.3). e2e `home.spec.ts` ✅ desktop+mobile, captures 375/768/1440 ✅, reviewer 9/10, ux-reviewer 8/10 (corrigé). Reste : vidéo ffmpeg du reveal des filiales + scroll ancre `#filiales` avant ✅. Liens `/{filiale}`, `/contact`, `/realisations` en 404 jusqu'à leur conversion |
-| `/a-propos` | 👀 | Histoire + équipe + partenaires, contenu DB/CMS. e2e ✅. Captures 3 breakpoints faites avant correctif contrastes → à refaire (scroll pas-à-pas : `v-motion` masque les sections en capture fullPage) |
+| `/` | ✅ | Converti et vérifié 2026-09-26 (spec `docs/specs/phase3-holding-home.md`, écarts assumés §4.3). e2e `home.spec.ts` ✅, captures 3 breakpoints + vidéos (reveal, ancre `#filiales`, menu mobile) ✅. Liens `/{filiale}`, `/contact`, `/realisations` en 404 jusqu'à leur conversion |
+| `/a-propos` | ✅ | Vérifié 2026-09-26 : captures 3 breakpoints (défilement pas à pas) + vidéo reveal équipe/partenaires, e2e ✅ |
 | `/contact` | ❌ | |
 | `/admin/login` | ❌ | |
 | `/admin` (shell dashboard) | ❌ | |
@@ -50,7 +50,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/entretien` | ❌ | |
 | `/entretien/services` | ❌ | Inclut "Nettoyage et entretien des supermarchés" (retour client) |
 | `/entretien/realisations` | ❌ | |
-| `/entretien/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
+| `/entretien/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/entretien/contact` | ❌ | |
 | `/admin/entretien/planning` | ❌ | Module planning partagé |
 
@@ -61,7 +61,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/transport` | ❌ | |
 | `/transport/services` | ❌ | |
 | `/transport/realisations` | ❌ | |
-| `/transport/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
+| `/transport/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/transport/contact` | ❌ | |
 | `/admin/transport/planning` | ❌ | Module planning partagé |
 
@@ -72,7 +72,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/comptable` | ❌ | |
 | `/comptable/services` | ❌ | Services mis à jour (états financiers, T1/T2, création/régularisation d'entreprise) |
 | `/comptable/realisations` | ❌ | |
-| `/comptable/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
+| `/comptable/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/comptable/contact` | ❌ | |
 | `/admin/comptable/dossiers` | ❌ | Module dossiers clients (`DossierComptable`) |
 
@@ -83,7 +83,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/placement` | ❌ | Double audience entreprises/candidats |
 | `/placement/services` | ❌ | |
 | `/placement/realisations` | ❌ | |
-| `/placement/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
+| `/placement/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/placement/contact` | ❌ | |
 | `/placement/offres` | ❌ | Liste publique des offres publiées (`DemandeClient.publiee`) |
 | `/placement/offres/[id]/postuler` (ou modal) | ❌ | Formulaire complet : adresse complète, poste + "Autre" avec mini-champ, CV requis + autres documents optionnels |
@@ -98,7 +98,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/ccdpaa` | ❌ | |
 | `/ccdpaa/services` | ❌ | |
 | `/ccdpaa/realisations` | ❌ | |
-| `/ccdpaa/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
+| `/ccdpaa/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/ccdpaa/contact` | ❌ | Inclut formulaire "Vous ne trouvez pas ce que vous cherchez ?" (suggestion produit) |
 | `/ccdpaa/restaurant` | ❌ | 6ᵉ page — "Les Ambassades d'Afrique" + réservation |
 | Widget "Assistant Import-Export" | ❌ | Scripté (Q&A pré-écrites), explicitement PAS une vraie IA — voir `PROJECT_CONTEXT.md` |
@@ -112,7 +112,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/boissons` | ❌ | |
 | `/boissons/services` | ❌ | |
 | `/boissons/realisations` | ❌ | |
-| `/boissons/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅ |
+| `/boissons/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/boissons/contact` | ❌ | Inclut formulaire suggestion produit |
 
 ## Écarts au prompt de setup (2026-09-24)
@@ -184,7 +184,7 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 
 ## Prochaine étape recommandée
 
-1. Vidéo ffmpeg (reveal filiales, ancre `#filiales`) sur `/`, `/a-propos` + recaptures `/a-propos` → passer 👀 → ✅.
+1. Recapture rapide des 6 `/{filiale}/a-propos` (même page générique) → ✅.
 2. Phase 3 — Holding `/contact` (aligner `contact.post.ts` sur DEC-12/13/15), puis `/realisations`.
 3. `/admin` shell : socle clair (décision ouverte n°1 tranchée).
 
