@@ -53,6 +53,14 @@ export interface HistoireData {
   readonly paragraphes: readonly string[]
 }
 
+/** Type catalogue `formulaire` (page CONTACT), miroir de `formulaireSchema` (`shared/content/sections/types.ts`). */
+export interface FormulaireData {
+  readonly surtitre?: string
+  readonly titre: string
+  readonly texte?: string
+  readonly messageSucces: string
+}
+
 /** Un item de `chiffres`, résolu côté serveur (`resolveChiffres`, T1) : toujours `{valeur, libelle}`. */
 export interface ChiffreResoluData {
   readonly valeur: string
