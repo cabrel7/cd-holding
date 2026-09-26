@@ -56,8 +56,8 @@ const colsClass = computed(() => {
         empty-message="Aucune réalisation à afficher pour le moment."
         @retry="$emit('retry')"
       >
-        <div class="grid grid-cols-1 gap-8" :class="colsClass">
-          <article v-for="(realisation, index) in realisations" :key="realisation.uuid" v-motion v-bind="reveal(index)">
+        <div class="grid grid-cols-1 gap-8" :class="colsClass" role="list">
+          <article role="listitem" v-for="(realisation, index) in realisations" :key="realisation.uuid" v-motion v-bind="reveal(index)">
             <div class="overflow-hidden rounded-2xl">
               <SiteImage
                 :file-key="realisation.imageKey"

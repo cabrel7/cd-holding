@@ -13,7 +13,7 @@ const props = defineProps<{ legal: LegalData }>()
 <template>
   <article class="mx-auto max-w-3xl px-6 pb-24 pt-32 md:pb-32 md:pt-40">
     <TexteAccentue :texte="props.legal.titre" as="h1" class="font-display text-4xl font-bold leading-[1.05] text-navy md:text-5xl" />
-    <p class="mt-4 text-sm text-ink/60">
+    <p class="mt-4 text-sm text-ink/75">
       Dernière mise à jour le <time :datetime="props.legal.miseAJour">{{ formatDateLongue(props.legal.miseAJour) }}</time>
     </p>
     <TexteAccentue
@@ -24,6 +24,7 @@ const props = defineProps<{ legal: LegalData }>()
     />
 
     <div class="mt-12 space-y-10">
+      <!-- Contenu texte édité d'un bloc, jamais réordonné élément par élément : l'index comme clé est sûr. -->
       <section v-for="(section, index) in props.legal.sections" :key="index">
         <TexteAccentue :texte="section.titre" as="h2" class="font-display text-2xl font-bold text-navy" />
         <TexteAccentue

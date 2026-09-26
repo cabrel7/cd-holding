@@ -55,9 +55,10 @@ function numero(index: number): string {
         empty-message="Aucun service à afficher pour le moment."
         @retry="$emit('retry')"
       >
-        <div class="space-y-10">
+        <div class="space-y-10" role="list">
           <div
             v-for="(service, index) in apercu"
+            role="listitem"
             :key="service.uuid"
             v-motion
             v-bind="reveal(index)"

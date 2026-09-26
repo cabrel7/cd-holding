@@ -50,7 +50,7 @@ const imageAlt = computed(() => interpoler(props.hero?.imageAlt ?? props.nomCour
       class="relative mx-auto grid max-w-7xl grid-cols-1 gap-14 px-6"
       :class="layout === 'image' ? 'lg:grid-cols-12 lg:items-center' : ''"
     >
-      <div :class="layout === 'image' ? 'lg:col-span-6' : 'max-w-3xl'">
+      <div :class="layout === 'image' ? 'lg:col-span-6' : 'max-w-3xl lg:max-w-[48%]'">
         <TexteAccentue
           :texte="hero.surtitre"
           as="p"

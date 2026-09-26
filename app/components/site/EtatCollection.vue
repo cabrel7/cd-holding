@@ -26,7 +26,7 @@ const emit = defineEmits<{ retry: [] }>()
   </div>
   <div v-else-if="error" class="flex flex-col items-start gap-3">
     <p :class="tone === 'sombre' ? 'text-cream/70' : 'text-ink/70'">Impossible de charger ce contenu pour le moment.</p>
-    <Button variant="outline" size="sm" @click="emit('retry')">Réessayer</Button>
+    <Button variant="outline" class="min-h-11" @click="emit('retry')">Réessayer</Button>
   </div>
   <p v-else-if="empty" :class="tone === 'sombre' ? 'text-cream/70' : 'text-ink/70'">{{ emptyMessage }}</p>
   <slot v-else />

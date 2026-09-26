@@ -42,7 +42,7 @@ useSeoMeta({
 <template>
   <div v-if="sectionsError" class="mx-auto max-w-xl px-6 py-40 text-center">
     <p class="text-ink/70">Impossible de charger cette page pour le moment.</p>
-    <Button variant="outline" class="mt-4" @click="refreshSections()">Réessayer</Button>
+    <Button variant="outline" class="mt-4 min-h-11" @click="refreshSections()">Réessayer</Button>
   </div>
 
   <template v-else>
@@ -81,8 +81,8 @@ useSeoMeta({
           empty-message="Aucun service à afficher pour le moment."
           @retry="refreshServices()"
         >
-          <div class="space-y-24">
-            <ServiceRangee v-for="(service, index) in services" :key="service.uuid" :service="service" :index="index" />
+          <div class="space-y-24" role="list">
+            <ServiceRangee role="listitem" v-for="(service, index) in services" :key="service.uuid" :service="service" :index="index" />
           </div>
         </EtatCollection>
       </div>

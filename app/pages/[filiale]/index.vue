@@ -34,13 +34,13 @@ const {
   status: servicesStatus,
   error: servicesError,
   refresh: refreshServices,
-} = await useSiteCollection<PublicServiceDto>(slug, 'services', { misEnAvant: true, limit: APERCU_COLLECTION })
+} = await useSiteCollection<PublicServiceDto, 'services'>(slug, 'services', { misEnAvant: true })
 const {
   data: realisations,
   status: realisationsStatus,
   error: realisationsError,
   refresh: refreshRealisations,
-} = await useSiteCollection<PublicRealisationDto>(slug, 'realisations', { limit: APERCU_COLLECTION })
+} = await useSiteCollection<PublicRealisationDto, 'realisations'>(slug, 'realisations', { limit: APERCU_COLLECTION })
 
 const nomCourt = computed(() => site.value?.nomCourt ?? site.value?.nom ?? String(route.params.filiale))
 
@@ -61,7 +61,7 @@ useSeoMeta({
 <template>
   <div v-if="sectionsError" class="mx-auto max-w-xl px-6 py-40 text-center">
     <p class="text-ink/70">Impossible de charger cette page pour le moment.</p>
-    <Button variant="outline" class="mt-4" @click="refreshSections()">Réessayer</Button>
+    <Button variant="outline" class="mt-4 min-h-11" @click="refreshSections()">Réessayer</Button>
   </div>
 
   <template v-else>

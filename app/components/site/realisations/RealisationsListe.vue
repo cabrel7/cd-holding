@@ -26,7 +26,7 @@ const {
   status: realisationsStatus,
   error: realisationsError,
   refresh: refreshRealisations,
-} = await useSiteCollection<PublicRealisationDto>(props.slug, 'realisations', { limit: REALISATIONS_MAX })
+} = await useSiteCollection<PublicRealisationDto, 'realisations'>(props.slug, 'realisations', { limit: REALISATIONS_MAX })
 
 const { reveal } = useReveal()
 
@@ -52,7 +52,7 @@ useSeoMeta({
 <template>
   <div v-if="sectionsError" class="mx-auto max-w-xl px-6 py-40 text-center">
     <p class="text-ink/70">Impossible de charger cette page pour le moment.</p>
-    <Button variant="outline" class="mt-4" @click="refreshSections()">Réessayer</Button>
+    <Button variant="outline" class="mt-4 min-h-11" @click="refreshSections()">Réessayer</Button>
   </div>
 
   <section v-else class="pb-24 pt-32 md:pb-32 md:pt-40">
@@ -85,8 +85,9 @@ useSeoMeta({
         empty-message="Aucune réalisation à afficher pour le moment."
         @retry="refreshRealisations()"
       >
-        <div class="grid grid-cols-1 gap-8 md:grid-cols-12">
+        <div class="grid grid-cols-1 gap-8 md:grid-cols-12" role="list">
           <article
+            role="listitem"
             v-for="({ realisation, classes }, index) in rangees"
             :key="realisation.uuid"
             v-motion
@@ -102,7 +103,7 @@ useSeoMeta({
                 class="h-full w-full transition-transform duration-700 group-hover:scale-[1.03]"
               />
             </div>
-            <p v-if="realisation.dateRealisation" class="mt-4 text-xs uppercase tracking-widest text-ink/55">
+            <p v-if="realisation.dateRealisation" class="mt-4 text-xs uppercase tracking-widest text-ink/75">
               {{ formatMoisAnnee(realisation.dateRealisation) }}
             </p>
             <h2 class="mt-2 font-display text-2xl font-bold text-navy">{{ realisation.titre }}</h2>
