@@ -158,8 +158,11 @@ const onSubmit = handleSubmit(
           <FormLabel class="font-display text-xs font-semibold uppercase tracking-widest text-navy">
             Filiale concernée
           </FormLabel>
-          <FormControl>
-            <div class="relative">
+          <!-- FormControl (Slot reka-ui) pose id / aria-invalid / aria-describedby sur son enfant
+               direct : ce doit être le <select>, pas l'enrobage de l'icône, sinon le label ne
+               désigne aucun contrôle. -->
+          <div class="relative">
+            <FormControl>
               <select
                 ref="cibleSelectRef"
                 v-model="cible"
@@ -172,13 +175,13 @@ const onSubmit = handleSubmit(
                   {{ filiale.nom }}
                 </option>
               </select>
-              <ChevronDown
-                :size="18"
-                aria-hidden="true"
-                class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink/50"
-              />
-            </div>
-          </FormControl>
+            </FormControl>
+            <ChevronDown
+              :size="18"
+              aria-hidden="true"
+              class="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-ink/50"
+            />
+          </div>
           <FormMessage />
         </FormItem>
       </FormField>
