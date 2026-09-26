@@ -36,7 +36,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 |---|---|---|
 | `/` | ✅ | Converti et vérifié 2026-09-26 (spec `docs/specs/phase3-holding-home.md`, écarts assumés §4.3). e2e `home.spec.ts` ✅, captures 3 breakpoints + vidéos (reveal, ancre `#filiales`, menu mobile) ✅. Liens `/{filiale}`, `/contact`, `/realisations` en 404 jusqu'à leur conversion |
 | `/a-propos` | ✅ | Vérifié 2026-09-26 : captures 3 breakpoints (défilement pas à pas) + vidéo reveal équipe/partenaires, e2e ✅ |
-| `/contact` | 🔧 | Spec `docs/specs/phase3-holding-contact.md` (2026-09-26) : endpoint à union discriminée, anti-spam, courriels, mention Loi 25 |
+| `/contact` | 👀 | Converti 2026-09-26 (spec `docs/specs/phase3-holding-contact.md`). Endpoint à union discriminée (contrats curl ✅ : 201, honeypot 201 sans écriture, NUL 400, 411/413/415, 429 + Retry-After), e2e `contact.spec.ts` ✅ desktop+mobile, reviewer 9/10, ux-reviewer corrigé. Reste : vidéo ffmpeg (erreurs sous champs, envoi, toast) + captures 768/375 à comparer. Base de dev : surtitre/SEO CONTACT holding encore aux anciennes valeurs (seed en amorçage) → éditer dans `/admin/contenu` |
 | `/confidentialite` | ❌ | Ajoutée 2026-09-26 (Q-01) : lien déjà présent dans le footer et sous les formulaires publics, 404 tant que non convertie (rendu du type `legal`) |
 | `/admin/login` | ❌ | |
 | `/admin` (shell dashboard) | ❌ | |
@@ -165,6 +165,8 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 - [x] Migration `phase2_foundations` appliquée (utilisateur) — seed à lancer après T2 : `SEED_DEMO_DATA=true pnpm db:seed`
 - [x] `.env.example` complété (utilisateur)
 - [ ] Footer : `email`/`telephone` des 7 sociétés `null` en seed → saisissables dans l'onglet admin « Site » (fait) ; repli `'Montréal, Québec, Canada'` codé en dur dans `SiteFooter.vue` (contraire à « tout texte public éditable ») → à déplacer en seed
+- [ ] **Bloquant mise en production (contact)** : renseigner `Company.email` (au moins holding) via onglet Site, convertir `/admin/messages` (DEC-38), SMTP réel (`NUXT_MAIL_TRANSPORT`) sinon `messageSucces` promet un courriel jamais envoyé ; mention Loi 25 (`COMMUN:mentionFormulaires`) à faire valider par un juriste
+- [ ] Rate-limit en mémoire : accusés de réception (fenêtre 24 h) partagent la `Map` du rate-limit IP — surveiller la croissance, Redis si multi-process
 - [ ] Initiales partenaires : algorithme différent du prototype (« CD » vs « CC ») — cosmétique
 - [ ] CMS admin : boutons Monter/Descendre/Modifier/Supprimer 32px + `gap-1` (< 44px) — OK desktop, à revoir si usage tablette
 - [ ] `resolveAccentColor` (`server/utils/site-scope.ts`) : regex hex sensible à la casse
@@ -186,7 +188,7 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 ## Prochaine étape recommandée
 
 1. Recapture rapide des 6 `/{filiale}/a-propos` (même page générique) → ✅.
-2. Phase 3 — Holding `/contact` (aligner `contact.post.ts` sur DEC-12/13/15), puis `/realisations`.
+2. `/contact` : vidéo + captures → ✅. Puis Holding `/realisations`, `/confidentialite`.
 3. `/admin` shell : socle clair (décision ouverte n°1 tranchée).
 
 ## Outillage
