@@ -243,7 +243,7 @@ useHead({ title: 'Site — Contenu des sites' })
       </dl>
 
       <div v-if="site.heroImageKey" class="flex items-center gap-3 border-t border-border px-5 py-4">
-        <img :src="`/api/files/${site.heroImageKey}`" alt="" class="h-16 w-16 rounded-md border border-border object-cover">
+        <img :src="`/api/files/${site.heroImageKey}`" alt="Aperçu de l’image de couverture" class="h-16 w-16 rounded-md border border-border object-cover">
         <p class="text-xs text-muted-foreground">Image de couverture, utilisée en repli pour le hero d'accueil.</p>
       </div>
     </div>

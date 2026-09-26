@@ -90,7 +90,7 @@ function isActive(item: NavItem): boolean {
         </NuxtLink>
         <NuxtLink
           :to="contactTo"
-          class="inline-flex items-center rounded-full bg-site-accent-strong px-5 py-2.5 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
+          class="inline-flex items-center rounded-full bg-site-accent-strong px-5 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
         >
           Nous joindre
         </NuxtLink>
@@ -99,7 +99,7 @@ function isActive(item: NavItem): boolean {
       <button
         v-if="showNav"
         type="button"
-        class="rounded-sm text-navy outline-none md:hidden focus-visible:ring-2 focus-visible:ring-navy focus-visible:ring-offset-2"
+        class="-m-2.5 rounded-sm p-2.5 text-navy outline-none md:hidden focus-visible:ring-2 focus-visible:ring-navy focus-visible:ring-offset-2"
         aria-label="Menu"
         :aria-expanded="open"
         :aria-controls="MOBILE_NAV_ID"
@@ -134,7 +134,7 @@ function isActive(item: NavItem): boolean {
           </NuxtLink>
           <NuxtLink
             :to="contactTo"
-            class="mt-2 inline-flex items-center justify-center rounded-full bg-site-accent-strong px-5 py-2.5 text-sm font-semibold text-white"
+            class="mt-2 inline-flex items-center justify-center rounded-full bg-site-accent-strong px-5 py-3 text-sm font-semibold text-white"
           >
             Nous joindre
           </NuxtLink>

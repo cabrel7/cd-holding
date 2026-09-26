@@ -79,7 +79,7 @@ const badge = computed(() => String(props.nombreFiliales).padStart(NUMERO_PAD, '
       <div class="relative lg:col-span-5">
         <div class="relative aspect-[4/3] overflow-hidden rounded-[2rem] shadow-2xl lg:aspect-[4/5]">
           <SiteImage :file-key="imageKey" :alt="imageAlt" fallback="aplat" priority class="h-full w-full" />
-          <div v-if="hero.legende" class="absolute inset-x-0 bottom-0 bg-navy/85 p-6 text-cream">
+          <div v-if="hero.legende" class="absolute inset-x-0 bottom-0 bg-navy p-6 text-cream">
             <p class="font-display text-xs uppercase tracking-widest text-gold">{{ hero.legende.surtitre }}</p>
             <p class="mt-1 font-display text-xl font-semibold">{{ hero.legende.titre }}</p>
           </div>

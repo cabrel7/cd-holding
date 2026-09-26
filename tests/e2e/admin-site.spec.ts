@@ -67,6 +67,9 @@ async function fetchEntretien(context: BrowserContext): Promise<AdminSiteReglage
 
 test.describe('Parcours CMS admin — fiche de la société (/admin/contenu/site)', () => {
   test('should let a SUPER_ADMIN edit the sector via the UI and reflect it on the home page immediately', async ({ browser }) => {
+    // Deux éditions complètes (modification + restauration) et un rendu public : dépasse
+    // le délai par défaut sur une machine lente, sans que l'application soit en cause.
+    test.slow()
     const adminContext = await browser.newContext()
     let originalSecteur: string | null = null
     let entretienNom = ''

@@ -107,7 +107,7 @@ const enTete = computed<SectionData | undefined>(() =>
 
               <NuxtLink
                 :to="`/${f.slug}`"
-                class="group mt-6 inline-flex items-center gap-2 font-display text-sm font-semibold text-navy"
+                class="group mt-3 -mb-3 inline-flex min-h-11 items-center gap-2 py-3 font-display text-sm font-semibold text-navy"
               >
                 <span class="border-b-2 border-site-accent pb-0.5 transition-colors">
                   Découvrir cette filiale
@@ -116,7 +116,7 @@ const enTete = computed<SectionData | undefined>(() =>
                 <ArrowUpRight
                   :size="18"
                   aria-hidden="true"
-                  class="text-site-accent transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+                  class="text-site-accent-strong transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
                 />
               </NuxtLink>
             </div>
