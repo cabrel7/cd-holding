@@ -39,6 +39,9 @@ export const CATALOG: readonly CatalogEntry[] = [
   { page: PAGE_SITE.COMMUN, cle: 'piedDePage', type: 'texte', portee: TOUS },
   { page: PAGE_SITE.COMMUN, cle: 'maintenance', type: 'section', portee: TOUS },
   { page: PAGE_SITE.COMMUN, cle: 'mentionAlcool', type: 'texte', portee: ['boissons'] },
+  // Mention Loi 25 unique pour le groupe (spec contact §2.1) : la politique /confidentialite
+  // est celle de la holding, exposée à tous les sites via `PublicSite.groupe.mentionFormulaires`.
+  { page: PAGE_SITE.COMMUN, cle: 'mentionFormulaires', type: 'texte', portee: 'holding' },
 
   // ACCUEIL — holding
   { page: PAGE_SITE.ACCUEIL, cle: 'seo', type: 'seo', portee: 'holding' },

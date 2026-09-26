@@ -6,7 +6,15 @@
 import { z } from 'zod'
 import { consola } from 'consola'
 import { HOLDING_SLUG, isSiteSlug, type SiteSlug } from '#shared/config/sites'
-import { catalogPourSite, sectionTypeDefinition, PAGE_SITE, type CatalogEntry, type ChiffreItem, type PageSiteKey } from '#shared/content/sections'
+import {
+  catalogPourSite,
+  sectionTypeDefinition,
+  trouverEntreeCatalogue,
+  PAGE_SITE,
+  type CatalogEntry,
+  type ChiffreItem,
+  type PageSiteKey,
+} from '#shared/content/sections'
 import { resolveChiffres, type ContexteChiffres } from '#shared/utils/chiffres'
 import type {
   PublicMembreEquipeDto,
@@ -128,10 +136,34 @@ async function resolveCommun(companyId: number, slug: SiteSlug): Promise<PublicS
   }
 }
 
-async function resolveGroupeNom(slug: SiteSlug, nomCourant: string): Promise<string> {
-  if (slug === HOLDING_SLUG) return nomCourant
-  const holding = await prisma.company.findUnique({ where: { slug: HOLDING_SLUG }, select: { nom: true } })
-  return holding?.nom ?? nomCourant
+interface GroupeDto {
+  readonly nom: string
+  readonly mentionFormulaires: string | null
+}
+
+/**
+ * Nom du groupe (repli sur `nomCourant` si la holding a disparu — anomalie de données) et
+ * mention Loi 25 (spec contact §2.3/§3.3), unique pour le groupe donc toujours lue via la
+ * holding même sur une page filiale — une seule requête `SectionContenu` supplémentaire,
+ * groupée avec la lecture du nom de la holding.
+ */
+async function resolveGroupe(slug: SiteSlug, company: { id: number; nom: string }): Promise<GroupeDto> {
+  const holding =
+    slug === HOLDING_SLUG ? company : await prisma.company.findUnique({ where: { slug: HOLDING_SLUG }, select: { id: true, nom: true } })
+  if (!holding) return { nom: company.nom, mentionFormulaires: null }
+
+  const entry = trouverEntreeCatalogue(PAGE_SITE.COMMUN, 'mentionFormulaires')
+  if (!entry) return { nom: holding.nom, mentionFormulaires: null }
+
+  const row = await prisma.sectionContenu.findUnique({
+    where: { companyId_page_cle: { companyId: holding.id, page: 'COMMUN', cle: 'mentionFormulaires' } },
+    select: { donnees: true },
+  })
+  if (!row) return { nom: holding.nom, mentionFormulaires: null }
+
+  const donnees = validateSection(entry, row.donnees, slug)
+  const mentionFormulaires = donnees && typeof donnees.texte === 'string' ? donnees.texte : null
+  return { nom: holding.nom, mentionFormulaires }
 }
 
 const detail = defineEventHandler(async (event): Promise<PublicSite> => {
@@ -144,9 +176,9 @@ const detail = defineEventHandler(async (event): Promise<PublicSite> => {
     throw createError({ statusCode: 404, statusMessage: 'Site introuvable' })
   }
 
-  const [commun, groupeNom] = await Promise.all([
+  const [commun, groupe] = await Promise.all([
     resolveCommun(company.id, slugParam),
-    resolveGroupeNom(slugParam, company.nom),
+    resolveGroupe(slugParam, { id: company.id, nom: company.nom }),
   ])
 
   return {
@@ -167,7 +199,7 @@ const detail = defineEventHandler(async (event): Promise<PublicSite> => {
       instagramUrl: company.instagramUrl,
     },
     statutSite: company.statutSite,
-    groupe: { nom: groupeNom, mentionFormulaires: null }, // branché par T1 (spec contact §3.3)
+    groupe,
     commun,
   }
 })

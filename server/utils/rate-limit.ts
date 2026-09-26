@@ -2,7 +2,7 @@ import type { H3Event } from 'h3'
 
 // Limiteur en mémoire — suffisant pour un VPS mono-process (PM2 fork).
 // Si passage en cluster PM2 : déplacer vers un storage partagé (Redis via unstorage).
-interface Bucket {
+export interface Bucket {
   count: number
   resetAt: number
 }
@@ -48,22 +48,56 @@ function getClientIp(event: H3Event): string {
   return socketIp
 }
 
-export function assertRateLimit(event: H3Event, { scope, max, windowMs }: RateLimitOptions): void {
-  const ip = getClientIp(event)
-  const key = `${scope}:${ip}`
-  const now = Date.now()
+export interface HitBucketOptions {
+  readonly max: number
+  readonly windowMs: number
+}
+
+export interface HitBucketResult {
+  /** `false` si `max` est dépassé pour cette fenêtre : l'appelant doit refuser la requête. */
+  readonly allowed: boolean
+  /** Millisecondes avant réinitialisation de la fenêtre — 0 si `allowed`. */
+  readonly retryAfterMs: number
+}
+
+/**
+ * Fenêtre glissante par clé, fonction pure (aucune dépendance à `H3Event`/l'horloge système) —
+ * testable directement (tests/unit/rate-limit.test.ts). Partagée par `assertRateLimit` (clé
+ * = IP) et `consumeRateLimit` (clé arbitraire, ex. accusé de réception par destinataire).
+ */
+export function hitBucket(buckets: Map<string, Bucket>, key: string, { max, windowMs }: HitBucketOptions, now: number): HitBucketResult {
   const bucket = buckets.get(key)
 
   if (!bucket || bucket.resetAt <= now) {
     buckets.set(key, { count: 1, resetAt: now + windowMs })
-    return
+    return { allowed: true, retryAfterMs: 0 }
   }
 
   bucket.count += 1
   if (bucket.count > max) {
-    setResponseHeader(event, 'Retry-After', Math.ceil((bucket.resetAt - now) / 1000))
+    return { allowed: false, retryAfterMs: bucket.resetAt - now }
+  }
+  return { allowed: true, retryAfterMs: 0 }
+}
+
+export function assertRateLimit(event: H3Event, { scope, max, windowMs }: RateLimitOptions): void {
+  const ip = getClientIp(event)
+  const key = `${scope}:${ip}`
+  const result = hitBucket(buckets, key, { max, windowMs }, Date.now())
+
+  if (!result.allowed) {
+    setResponseHeader(event, 'Retry-After', Math.ceil(result.retryAfterMs / 1000))
     throw createError({ statusCode: 429, statusMessage: 'Trop de tentatives, réessayez plus tard' })
   }
+}
+
+/**
+ * Limite non levante, par clé arbitraire (PAS l'IP) — ex. accusé de réception par destinataire
+ * (`cleAccuseReception`, server/lib/contact.ts). Même `Map`, même purge que `assertRateLimit` :
+ * un seul mécanisme de fenêtre glissante pour tout le process.
+ */
+export function consumeRateLimit(key: string, options: HitBucketOptions): boolean {
+  return hitBucket(buckets, key, options, Date.now()).allowed
 }
 
 export function resetRateLimit(event: H3Event, scope: string): void {

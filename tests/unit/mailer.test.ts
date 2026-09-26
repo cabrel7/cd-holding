@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { escapeHtml } from '../../server/lib/mail/escape'
 import { createLogTransport, type MailTransport, type OutgoingMail } from '../../server/lib/mail/transports'
 import { accuseReceptionTemplate } from '../../server/lib/mail/templates/accuse-reception'
+import { notificationInterneTemplate } from '../../server/lib/mail/templates/notification-interne'
 import { sendMailSafely } from '../../server/utils/mailer'
 
 const SAMPLE_MAIL: OutgoingMail = {
@@ -28,6 +29,23 @@ describe('accuseReceptionTemplate', () => {
     expect(content.html).not.toContain('<b>Claire</b>')
     expect(content.html).toContain('&lt;b&gt;Claire&lt;/b&gt;')
     expect(content.text).toContain('<b>Claire</b>')
+  })
+})
+
+describe('notificationInterneTemplate', () => {
+  const BASE_VARS = { nomEntreprise: 'CD Entretien', typeMessage: 'Contact', nomExpediteur: 'Jean Tremblay' }
+
+  it('omits the origin entirely when not provided (backward compatible)', () => {
+    const content = notificationInterneTemplate(BASE_VARS)
+    expect(content.text).not.toContain('(')
+    expect(content.html).not.toContain('(')
+  })
+
+  it('appends the origin, escaped in html but not in text', () => {
+    const content = notificationInterneTemplate({ ...BASE_VARS, origine: '<b>site du groupe</b>' })
+    expect(content.text).toContain('(<b>site du groupe</b>)')
+    expect(content.html).toContain('(&lt;b&gt;site du groupe&lt;/b&gt;)')
+    expect(content.html).not.toContain('<b>site du groupe</b>')
   })
 })
 

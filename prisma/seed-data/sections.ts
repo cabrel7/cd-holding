@@ -343,6 +343,14 @@ function commun(slug: SiteSlug): Record<string, Donnees> {
   }
 
   const result: Record<string, Donnees> = { piedDePage, maintenance }
+  if (slug === HOLDING_SLUG) {
+    // À FAIRE VALIDER PAR UN JURISTE — brouillon Loi 25 (Québec), même statut que
+    // CONFIDENTIALITE.politique. Mention unique pour le groupe (spec contact §2.2, Q-01).
+    result.mentionFormulaires = {
+      texte:
+        'Le {groupe} utilise les renseignements transmis par ce formulaire uniquement pour traiter votre demande et vous recontacter. Ils ne sont jamais vendus ni cédés.',
+    }
+  }
   if (slug === 'boissons') {
     // À FAIRE VALIDER PAR UN JURISTE — brouillon RACJ / Éduc'alcool.
     result.mentionAlcool = {
@@ -565,15 +573,20 @@ function aProposFiliale(slug: FilialeSlug): Record<string, Donnees> {
 
 function contactFiliale(slug: SiteSlug): Record<string, Donnees> {
   const seo = slug === HOLDING_SLUG
-    ? { title: 'Contact — Groupe CD', description: 'Contactez le Groupe CD ou l’une de ses six filiales à Montréal.' }
+    ? {
+        title: 'Contact — {groupe}', // contact.tsx:9
+        description: 'Écrivez au {groupe} à Montréal : nous vous redirigeons vers la bonne filiale.', // contact.tsx:10
+      }
     : FILIALES[slug as FilialeSlug].seo.contact
   const contact: Donnees =
     slug === HOLDING_SLUG
       ? {
-          surtitre: 'Nous joindre',
-          titre: 'Parlons de votre projet.',
-          texte: 'Notre bureau de Montréal reçoit vos demandes et les redirige vers la filiale concernée.',
-          messageSucces: MESSAGE_SUCCES,
+          surtitre: 'Contact', // Contact.tsx:60
+          titre: 'Parlons de votre projet.', // Contact.tsx:63
+          texte:
+            'Une question sur l’une de nos filiales, un partenariat, un mandat ? Écrivez-nous. Nous vous mettrons directement en lien avec la bonne équipe.', // Contact.tsx:66-67
+          messageSucces:
+            'Merci, votre message a bien été reçu. Notre équipe vous répondra rapidement. Un courriel de confirmation vous est envoyé.', // Contact.tsx:43 + Q-10
         }
       : {
           surtitre: FILIALES[slug as FilialeSlug].contactSurtitre,

@@ -230,13 +230,15 @@ async function main() {
     check('A.4 upload/fichiers — SKIP', true, 'skip-write actif')
   }
 
-  // --- A.5 : contact public ---
+  // --- A.5 : contact public (spec docs/specs/phase3-holding-contact.md §3.2 — union
+  // discriminée sur `formulaire`, cible = un SiteSlug réel) ---
   if (!SKIP_WRITE) {
     const res = await fetch(`${BASE}/api/public/contact`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       body: JSON.stringify({
-        companySlug: 'entretien',
+        formulaire: 'holding',
+        cible: 'entretien',
         nom: 'Test Runtime Check',
         email: 'test-runtime-check@example.com',
         message: 'Message de test automatisé — à nettoyer après vérification runtime.',
@@ -248,9 +250,24 @@ async function main() {
     const badRes = await fetch(`${BASE}/api/public/contact`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ companySlug: 'entretien', nom: 'x' }),
+      body: JSON.stringify({ formulaire: 'holding', cible: 'entretien', nom: 'x' }),
     })
     check('A.5 contact public payload invalide -> 400', badRes.status === 400, badRes.status)
+
+    // Ancien contrat (client-controlled `sujet`) : rejeté par `.strict()` (DEC-12/13/15).
+    const legacyRes = await fetch(`${BASE}/api/public/contact`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        formulaire: 'holding',
+        cible: 'entretien',
+        nom: 'Test Runtime Check',
+        email: 'test-runtime-check@example.com',
+        message: 'Message de test automatisé — à nettoyer après vérification runtime.',
+        sujet: 'Sujet imposé par le client',
+      }),
+    })
+    check('A.5 contact public clé "sujet" (contrat legacy) -> 400', legacyRes.status === 400, legacyRes.status)
   } else {
     check('A.5 contact public — SKIP', true, 'skip-write actif')
   }
