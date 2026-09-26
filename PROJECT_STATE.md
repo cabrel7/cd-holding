@@ -34,12 +34,12 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 
 | Route | Statut | Notes |
 |---|---|---|
-| `/` | ❌ | |
+| `/` | 👀 | Converti 2026-09-26 (spec `docs/specs/phase3-holding-home.md`, écarts assumés §4.3). e2e `home.spec.ts` ✅ desktop+mobile, captures 375/768/1440 ✅, reviewer 9/10, ux-reviewer 8/10 (corrigé). Reste : vidéo ffmpeg du reveal des filiales + scroll ancre `#filiales` avant ✅. Liens `/{filiale}`, `/contact`, `/realisations` en 404 jusqu'à leur conversion |
 | `/a-propos` | 👀 | Histoire + équipe + partenaires, contenu DB/CMS. e2e ✅. Captures 3 breakpoints faites avant correctif contrastes → à refaire (scroll pas-à-pas : `v-motion` masque les sections en capture fullPage) |
 | `/contact` | ❌ | |
 | `/admin/login` | ❌ | |
 | `/admin` (shell dashboard) | ❌ | |
-| `/admin/contenu/*` (CMS services/réalisations/équipe/partenaires) | 👀 | CRUD + réordonnancement + sections + réglages site, e2e ✅. Écart assumé : sections éditées un site à la fois (prototype : 7 sites sur une page) — contrainte API `GET …/sections` |
+| `/admin/contenu/*` (CMS services/réalisations/équipe/partenaires + onglet Site) | 👀 | Onglet « Site » (fiche société : secteur, description, image, coordonnées, réseaux ; nom/ordre SUPER_ADMIN) ajouté 2026-09-26, e2e `admin-site.spec.ts` ✅. CRUD + réordonnancement + sections + réglages site, e2e ✅. Écart assumé : sections éditées un site à la fois (prototype : 7 sites sur une page) — contrainte API `GET …/sections` |
 | `/admin/messages` | ❌ | |
 | `/admin/clients` | ❌ | CRM |
 
@@ -163,7 +163,7 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 - [ ] `scripts/api-check.mjs` laisse ses données de test → nettoyer via `scripts/cleanup-test-data.ts` (auto-nettoyage à ajouter)
 - [x] Migration `phase2_foundations` appliquée (utilisateur) — seed à lancer après T2 : `SEED_DEMO_DATA=true pnpm db:seed`
 - [x] `.env.example` complété (utilisateur)
-- [ ] Footer : `email`/`telephone` des 7 sociétés `null` en seed → à saisir via admin (réglages site) ou à ajouter au seed ; repli `'Montréal, Québec, Canada'` codé en dur dans `SiteFooter.vue` (contraire à « tout texte public éditable ») → à déplacer en seed
+- [ ] Footer : `email`/`telephone` des 7 sociétés `null` en seed → saisissables dans l'onglet admin « Site » (fait) ; repli `'Montréal, Québec, Canada'` codé en dur dans `SiteFooter.vue` (contraire à « tout texte public éditable ») → à déplacer en seed
 - [ ] Initiales partenaires : algorithme différent du prototype (« CD » vs « CC ») — cosmétique
 - [ ] CMS admin : boutons Monter/Descendre/Modifier/Supprimer 32px + `gap-1` (< 44px) — OK desktop, à revoir si usage tablette
 - [ ] `resolveAccentColor` (`server/utils/site-scope.ts`) : regex hex sensible à la casse
@@ -176,14 +176,16 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 
 ## Décisions encore ouvertes (à trancher avec l'utilisateur)
 
+0. **Q-12 (client)** : « 12+ années d'existence » (accueil holding, chiffres) repris du prototype, non vérifié — laissé éditable dans l'admin (décision utilisateur 2026-09-26), à confirmer par le client avant mise en production.
+
 1. **Style visuel des dashboards** : question posée — les dashboards `/admin/**` doivent-ils adopter un style sombre inspiré Power BI (préférence connue de l'utilisateur sur d'autres projets), ou rester sur le même socle clair que les sites publics ? **Pas encore tranché.**
 2. **`DossierComptable` étend `Client`** : choix de modélisation introduit en rédigeant `PROJECT_CONTEXT.md` §7 (plutôt qu'un modèle `clientsComptables` isolé). Cohérent avec le carnet CRM général validé par l'utilisateur, mais n'a pas été explicitement validé dans ces termes précis — à confirmer si l'utilisateur relit le schéma Prisma de près.
 3. **Nom officiel du groupe** : "Groupe CD" reste un nom de travail dans tous les documents — à remplacer partout si un nom officiel est choisi.
 
 ## Prochaine étape recommandée
 
-1. Phase 3 — Holding `/` (accueil) : réutiliser layout public, `SectionHeading`, `TexteAccentue` (interpolation auto), tokens `-strong`/`gold-deep` pour petit texte sur fond clair.
-2. Recapturer `/a-propos` + `/entretien/a-propos` (3 breakpoints, scroll pas-à-pas) pour passer 👀 → ✅.
+1. Vidéo ffmpeg (reveal filiales, ancre `#filiales`) sur `/`, `/a-propos` + recaptures `/a-propos` → passer 👀 → ✅.
+2. Phase 3 — Holding `/contact` (aligner `contact.post.ts` sur DEC-12/13/15), puis `/realisations`.
 3. Trancher décision ouverte n°1 (style dashboards) avant `/admin` shell.
 
 ## Outillage
