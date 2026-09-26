@@ -144,6 +144,7 @@ useSeoMeta({
                       :file-key="membre.photoKey"
                       :alt="membre.nom"
                       fallback="initiales"
+                      tone="sombre"
                       :initiales="initiales(membre.nom)"
                       class="aspect-[4/5] w-full"
                     />

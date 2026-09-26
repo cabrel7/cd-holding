@@ -15,9 +15,17 @@ const props = withDefaults(
     class?: HTMLAttributes['class']
     /** Image candidate LCP (ex. hero) : chargement immédiat plutôt que différé. */
     priority?: boolean
+    /**
+     * Fond de la section hôte. `--site-accent-strong` n'est lisible que sur fond clair : sur
+     * navy il assombrit encore l'accent (≈1,5:1) — le repli passe alors en crème (WCAG AA).
+     */
+    tone?: 'clair' | 'sombre'
   }>(),
-  { initiales: '', priority: false },
+  { initiales: '', priority: false, tone: 'clair' },
 )
+
+const fondRepli = computed(() => (props.tone === 'sombre' ? 'bg-cream/15' : 'bg-site-accent/10'))
+const texteInitiales = computed(() => (props.tone === 'sombre' ? 'text-cream' : 'text-site-accent-strong'))
 </script>
 
 <template>
@@ -33,11 +41,11 @@ const props = withDefaults(
     v-else
     role="img"
     :aria-label="props.alt"
-    :class="cn('flex items-center justify-center bg-site-accent/10', props.class)"
+    :class="cn('flex items-center justify-center', fondRepli, props.class)"
   >
     <span
       v-if="props.fallback === 'initiales'"
-      class="font-display text-lg font-bold text-site-accent-strong"
+      :class="['font-display text-lg font-bold', texteInitiales]"
     >
       {{ props.initiales }}
     </span>
