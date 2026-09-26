@@ -55,7 +55,7 @@ const FILIALES: Record<FilialeSlug, FilialeTextes> = {
     nomCourt: 'Chaudetcha Entretiens',
     tagline: 'Entretien ménager · Montréal',
     // subConfig.ts:38-40 (headlineLead/Accent/Tail)
-    heroTitre: 'Des espaces *impeccables,* sans y penser.',
+    heroTitre: 'Des espaces\n*impeccables,*\nsans y penser.',
     // subConfig.ts:42 — corrigé pour mentionner les supermarchés (retour client, Q-05).
     heroTexte:
       "Chaudetcha Entretiens et Sanitations prend soin des bureaux, résidences, supermarchés et chantiers du Grand Montréal. Une équipe formée, un protocole précis, un résultat constant.",
@@ -103,7 +103,7 @@ const FILIALES: Record<FilialeSlug, FilialeTextes> = {
   transport: {
     nomCourt: 'Chaudetcha Transport',
     tagline: 'Transport & logistique · Québec',
-    heroTitre: 'Transporter, *déménager,* livrer.', // subConfig.ts:62-64
+    heroTitre: 'Transporter,\n*déménager,*\nlivrer.', // subConfig.ts:62-64
     heroTexte:
       'Une flotte moderne et des équipes assurées pour vos déménagements, votre transport de marchandises et vos livraisons du dernier kilomètre, partout au Québec.',
     heroCta: 'Demander un devis',
@@ -148,7 +148,7 @@ const FILIALES: Record<FilialeSlug, FilialeTextes> = {
   comptable: {
     nomCourt: 'CD Tenue de Livre',
     tagline: 'Tenue de livres · Québec',
-    heroTitre: 'La rigueur *comptable,* au service de votre PME.', // subConfig.ts:88-90
+    heroTitre: 'La rigueur\n*comptable,*\nau service de votre PME.', // subConfig.ts:88-90
     // Corrigé (spec §3.3) : aligné sur PROJECT_CONTEXT §2 et les services (T1/T2, création/régularisation).
     heroTexte:
       'CD Tenue de Livre Comptable accompagne les PME et travailleurs autonomes québécois : tenue de livres et paie, états financiers, déclarations T1 et T2, création et régularisation d’entreprise.',
@@ -194,7 +194,7 @@ const FILIALES: Record<FilialeSlug, FilialeTextes> = {
   placement: {
     nomCourt: 'Placement CD Pro',
     tagline: 'Placement · Recrutement international',
-    heroTitre: 'Les bonnes personnes, *au bon* moment.', // subConfig.ts:113-115
+    heroTitre: 'Les bonnes personnes,\n*au bon*\nmoment.', // subConfig.ts:113-115
     heroTexte:
       'Placement CD Pro connecte les entreprises canadiennes à des manutentionnaires, chauffeurs et travailleurs étrangers temporaires qualifiés.',
     heroCta: 'Nous contacter',
@@ -239,7 +239,7 @@ const FILIALES: Record<FilialeSlug, FilialeTextes> = {
   ccdpaa: {
     nomCourt: 'CCDPAA',
     tagline: 'Import-export · Restauration',
-    heroTitre: 'De la *terre africaine* à la table québécoise.', // routes/ccdpaa.index.tsx:24-26
+    heroTitre: 'De la\n*terre africaine*\nà la table québécoise.', // routes/ccdpaa.index.tsx:24-26
     heroTexte:
       'Deux métiers, un même continent : import de produits agricoles africains vers le Canada, et restaurant panafricain Les Ambassades d’Afrique à Montréal.',
     heroCta: 'Recevoir le catalogue',
@@ -284,7 +284,7 @@ const FILIALES: Record<FilialeSlug, FilialeTextes> = {
   boissons: {
     nomCourt: "CD Boissons d'Afrique",
     tagline: 'Distribution de boissons · Canada',
-    heroTitre: 'Les boissons *d’Afrique* au Canada.', // subConfig.ts:155-157
+    heroTitre: 'Les boissons\n*d’Afrique*\nau Canada.', // subConfig.ts:155-157
     heroTexte:
       'Distribution et représentation exclusive au Canada de marques africaines de boissons alcoolisées et non alcoolisées, du SAQ agence au restaurant HoReCa.',
     heroCta: 'Devenir point de vente',
@@ -420,8 +420,8 @@ function accueilFilialeStandard(slug: FilialeSlug): Record<string, Donnees> {
       imageKey: null,
       imageAlt: t.heroImageAlt,
     },
-    services: { titre: t.servicesTitre, texte: t.servicesTexte },
-    realisations: { titre: t.realisationsTitre },
+    services: { surtitre: 'Nos services', titre: t.servicesTitre, texte: t.servicesTexte },
+    realisations: { surtitre: 'Nos réalisations', titre: t.realisationsTitre },
     cta: { titre: t.ctaTitre, texte: t.ctaTexte, ctaLibelle: t.heroCta },
   }
 }
@@ -454,8 +454,8 @@ function accueilPlacement(): Record<string, Donnees> {
         lienLibelle: 'Voir les offres',
       },
     },
-    services: { titre: t.servicesTitre, texte: t.servicesTexte },
-    realisations: { titre: t.realisationsTitre },
+    services: { surtitre: 'Nos services', titre: t.servicesTitre, texte: t.servicesTexte },
+    realisations: { surtitre: 'Nos réalisations', titre: t.realisationsTitre },
   }
 }
 
@@ -486,8 +486,8 @@ function accueilCcdpaa(): Record<string, Donnees> {
         lienLibelle: 'Réserver une table',
       },
     },
-    services: { titre: t.servicesTitre, texte: t.servicesTexte },
-    realisations: { titre: t.realisationsTitre },
+    services: { surtitre: 'Nos services', titre: t.servicesTitre, texte: t.servicesTexte },
+    realisations: { surtitre: 'Nos réalisations', titre: t.realisationsTitre },
   }
 }
 
@@ -495,7 +495,7 @@ function servicesFiliale(slug: FilialeSlug): Record<string, Donnees> {
   const t = FILIALES[slug]
   const result: Record<string, Donnees> = {
     seo: t.seo.services,
-    entete: { titre: t.servicesTitre, texte: t.servicesTexte },
+    entete: { surtitre: 'Nos services', titre: t.servicesTitre, texte: t.servicesTexte },
     cta: { titre: t.ctaTitre, texte: t.ctaTexte, ctaLibelle: t.heroCta },
   }
   if (slug === 'ccdpaa') {
@@ -520,7 +520,7 @@ function realisationsEntete(slug: SiteSlug): Record<string, Donnees> {
     slug === HOLDING_SLUG
       ? { title: 'Réalisations — Groupe CD', description: 'Les réalisations marquantes du Groupe CD et de ses six filiales, à Montréal.' }
       : FILIALES[slug as FilialeSlug].seo.realisations
-  return { seo, entete: { titre } }
+  return { seo, entete: { surtitre: 'Portfolio', titre } }
 }
 
 function aProposHolding(): Record<string, Donnees> {

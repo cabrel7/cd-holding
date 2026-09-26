@@ -5,6 +5,7 @@
 // jamais côté client (spec §1.4).
 import { z } from 'zod'
 import { consola } from 'consola'
+import { REALISATIONS_MAX } from '#shared/config/public'
 import { HOLDING_SLUG, isSiteSlug, type SiteSlug } from '#shared/config/sites'
 import {
   catalogPourSite,
@@ -237,7 +238,7 @@ const services = defineEventHandler(async (event): Promise<PublicServiceDto[]> =
 // --- GET /api/public/sites/[slug]/realisations -------------------------------------------------------------
 const DEFAULT_REALISATIONS_LIMIT = 12
 const realisationsQuerySchema = z
-  .object({ limit: z.coerce.number().int().min(1).max(50).optional() })
+  .object({ limit: z.coerce.number().int().min(1).max(REALISATIONS_MAX).optional() })
   .strict()
 
 const REALISATION_SELECT = { uuid: true, titre: true, description: true, imageKey: true, dateRealisation: true, ordre: true } as const
