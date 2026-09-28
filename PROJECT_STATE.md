@@ -53,7 +53,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/entretien/services` | ✅ | Lot 1 : `[filiale]/services.vue`, inclut "Nettoyage et entretien des supermarchés" (retour client), e2e (dont édition CMS immédiate) + captures ✅ |
 | `/entretien/realisations` | ✅ | Lot 1 : `[filiale]/realisations.vue`, e2e + captures ✅ |
 | `/entretien/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
-| `/entretien/contact` | ❌ | |
+| `/entretien/contact` | ✅ | Lot 2 (2026-09-28) : `[filiale]/contact.vue` piloté par `CONTACT_FORMS` (option supermarché, Q-05), e2e desktop+mobile + captures ✅ |
 | `/admin/entretien/planning` | ❌ | Module planning partagé |
 
 ### Chaudetcha Transport et Logistique (`transport`)
@@ -64,7 +64,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/transport/services` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/transport/realisations` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/transport/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
-| `/transport/contact` | ❌ | |
+| `/transport/contact` | ✅ | Lot 2 : date souhaitée bornée (aujourd’hui → +365 j, fuseau Québec), e2e + captures ✅ |
 | `/admin/transport/planning` | ❌ | Module planning partagé |
 
 ### CD Tenue de Livre Comptable (`comptable`)
@@ -75,7 +75,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/comptable/services` | ✅ | Lot 1 : services mis à jour (états financiers, T1/T2, création/régularisation d'entreprise), e2e + captures ✅ |
 | `/comptable/realisations` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/comptable/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
-| `/comptable/contact` | ❌ | |
+| `/comptable/contact` | ✅ | Lot 2 : options de besoin complétées (T1/T2, création, régularisation — Q-04), e2e + captures ✅ |
 | `/admin/comptable/dossiers` | ❌ | Module dossiers clients (`DossierComptable`) |
 
 ### Placement CD Pro (`placement`)
@@ -86,7 +86,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/placement/services` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/placement/realisations` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/placement/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
-| `/placement/contact` | ❌ | |
+| `/placement/contact` | ✅ | Lot 2 : formulaire employeur seul (candidats → `/placement/offres`, lot 3), e2e + captures ✅ |
 | `/placement/offres` | ❌ | Liste publique des offres publiées (`DemandeClient.publiee`) |
 | `/placement/offres/[id]/postuler` (ou modal) | ❌ | Formulaire complet : adresse complète, poste + "Autre" avec mini-champ, CV requis + autres documents optionnels |
 | `/admin/placement/candidats` | ❌ | Vivier interne |
@@ -101,7 +101,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/ccdpaa/services` | ✅ | Lot 1 : page générique, SANS l'assistant import-export (ligne dédiée ci-dessous), e2e ✅ |
 | `/ccdpaa/realisations` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/ccdpaa/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
-| `/ccdpaa/contact` | ❌ | Inclut formulaire "Vous ne trouvez pas ce que vous cherchez ?" (suggestion produit) |
+| `/ccdpaa/contact` | ✅ | Lot 2 : contact B2B + formulaire suggestion de produit (`SUGGESTION_PRODUIT`), e2e + captures ✅ |
 | `/ccdpaa/restaurant` | ❌ | 6ᵉ page — "Les Ambassades d'Afrique" + réservation |
 | Widget "Assistant Import-Export" | ❌ | Scripté (Q&A pré-écrites), explicitement PAS une vraie IA — voir `PROJECT_CONTEXT.md` |
 | `/admin/ccdpaa/planning` | ❌ | Planning restaurant |
@@ -115,7 +115,7 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/boissons/services` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/boissons/realisations` | ✅ | Lot 1 : page générique, e2e ✅. Mentions légales boissons non converties (hors lot) |
 | `/boissons/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
-| `/boissons/contact` | ❌ | Inclut formulaire suggestion produit |
+| `/boissons/contact` | ✅ | Lot 2 : contact point de vente + formulaire suggestion de produit, e2e + captures ✅ |
 
 ## Écarts au prompt de setup (2026-09-24)
 
@@ -190,7 +190,7 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 
 Conversion par lots (CLAUDE.md « Workflow de conversion ») — Lot 1 ✅ (2026-09-28, spec `docs/specs/lot1-pages-filiales.md`, suite e2e complète 127 ✅ + 1 relance ✅).
 
-1. **Lot 2** — contact des 6 filiales (`[filiale]/contact.vue`, variantes de `POST /api/public/contact`, formulaires suggestion produit ccdpaa/boissons). Réutilise `ContactIntro`, `HoneypotField`, `MentionConfidentialite`, `usePublicFormSubmit` (spec contact §4.4).
+1. ~~Lot 2~~ ✅ (2026-09-28, spec `docs/specs/lot2-contact-filiales.md`) — contact des 6 filiales + suggestion produit. Base de dev : textes contact placement / suggestion réalignés dans le seed seulement → saisir dans `/admin/contenu`.
 2. Lot 3 — pages spécifiques : `/placement/offres` + postuler, `/ccdpaa/restaurant` + réservation, assistant import-export.
 3. Lot 4 — admin socle : login, shell `/admin` (socle clair), messages, clients.
 4. Lot 5 — modules admin : planning ×3, dossiers comptables, placement ×3, réservations.
