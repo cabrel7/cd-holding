@@ -29,5 +29,7 @@ const emit = defineEmits<{ retry: [] }>()
     <Button variant="outline" class="min-h-11" @click="emit('retry')">Réessayer</Button>
   </div>
   <p v-else-if="empty" :class="tone === 'sombre' ? 'text-cream/70' : 'text-ink/70'">{{ emptyMessage }}</p>
-  <slot v-else />
+  <!-- Élément racine aussi dans l'état « succès » : sans lui, les classes passées par le parent
+       (espacement, ex. `mt-20`) seraient perdues, un slot n'ayant pas d'élément où les poser. -->
+  <div v-else><slot /></div>
 </template>

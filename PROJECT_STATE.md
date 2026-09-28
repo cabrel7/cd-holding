@@ -36,8 +36,9 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 |---|---|---|
 | `/` | ✅ | Converti et vérifié 2026-09-26 (spec `docs/specs/phase3-holding-home.md`, écarts assumés §4.3). e2e `home.spec.ts` ✅, captures 3 breakpoints + vidéos (reveal, ancre `#filiales`, menu mobile) ✅. Liens `/{filiale}`, `/contact`, `/realisations` en 404 jusqu'à leur conversion |
 | `/a-propos` | ✅ | Vérifié 2026-09-26 : captures 3 breakpoints (défilement pas à pas) + vidéo reveal équipe/partenaires, e2e ✅ |
-| `/contact` | 👀 | Converti 2026-09-26 (spec `docs/specs/phase3-holding-contact.md`). Endpoint à union discriminée (contrats curl ✅ : 201, honeypot 201 sans écriture, NUL 400, 411/413/415, 429 + Retry-After), e2e `contact.spec.ts` ✅ desktop+mobile, reviewer 9/10, ux-reviewer corrigé. Reste : vidéo ffmpeg (erreurs sous champs, envoi, toast) + captures 768/375 à comparer. Base de dev : surtitre/SEO CONTACT holding encore aux anciennes valeurs (seed en amorçage) → éditer dans `/admin/contenu` |
-| `/confidentialite` | ❌ | Ajoutée 2026-09-26 (Q-01) : lien déjà présent dans le footer et sous les formulaires publics, 404 tant que non convertie (rendu du type `legal`) |
+| `/contact` | ✅ | Vérifié 2026-09-28 (spec `docs/specs/phase3-holding-contact.md`). Contrats curl ✅ (201, honeypot 201 sans écriture, NUL 400, 411/413/415, 429 + Retry-After), e2e `contact.spec.ts` ✅, captures 3 breakpoints ✅, parcours vidéo (envoi vide → erreurs, envoi valide → 201 + toast) ✅. Base de dev : surtitre/SEO CONTACT holding encore aux anciennes valeurs (seed en amorçage) → éditer dans `/admin/contenu` |
+| `/realisations` | ✅ | Lot 1 (2026-09-28) : absente du prototype, page dédiée (DEC-39), réalisations propres à la holding, composant partagé `RealisationsListe` |
+| `/confidentialite` | ✅ | Lot 1 (2026-09-28) : section `legal`, accessible pendant une maintenance (`bypassMaintenance`), e2e + captures ✅. Texte à faire valider par un juriste (Q-01) |
 | `/admin/login` | ❌ | |
 | `/admin` (shell dashboard) | ❌ | |
 | `/admin/contenu/*` (CMS services/réalisations/équipe/partenaires + onglet Site) | 👀 | Onglet « Site » (fiche société : secteur, description, image, coordonnées, réseaux ; nom/ordre SUPER_ADMIN) ajouté 2026-09-26, e2e `admin-site.spec.ts` ✅. CRUD + réordonnancement + sections + réglages site, e2e ✅. Écart assumé : sections éditées un site à la fois (prototype : 7 sites sur une page) — contrainte API `GET …/sections` |
@@ -48,9 +49,9 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 
 | Route | Statut | Notes |
 |---|---|---|
-| `/entretien` | ❌ | |
-| `/entretien/services` | ❌ | Inclut "Nettoyage et entretien des supermarchés" (retour client) |
-| `/entretien/realisations` | ❌ | |
+| `/entretien` | ✅ | Lot 1 (2026-09-28) : page générique `[filiale]/index.vue`, e2e desktop+mobile ✅, captures 3 breakpoints ✅ |
+| `/entretien/services` | ✅ | Lot 1 : `[filiale]/services.vue`, inclut "Nettoyage et entretien des supermarchés" (retour client), e2e (dont édition CMS immédiate) + captures ✅ |
+| `/entretien/realisations` | ✅ | Lot 1 : `[filiale]/realisations.vue`, e2e + captures ✅ |
 | `/entretien/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/entretien/contact` | ❌ | |
 | `/admin/entretien/planning` | ❌ | Module planning partagé |
@@ -59,9 +60,9 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 
 | Route | Statut | Notes |
 |---|---|---|
-| `/transport` | ❌ | |
-| `/transport/services` | ❌ | |
-| `/transport/realisations` | ❌ | |
+| `/transport` | ✅ | Lot 1 (2026-09-28) : page générique, e2e ✅ (captures faites sur entretien/placement/ccdpaa, même page) |
+| `/transport/services` | ✅ | Lot 1 : page générique, e2e ✅ |
+| `/transport/realisations` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/transport/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/transport/contact` | ❌ | |
 | `/admin/transport/planning` | ❌ | Module planning partagé |
@@ -70,9 +71,9 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 
 | Route | Statut | Notes |
 |---|---|---|
-| `/comptable` | ❌ | |
-| `/comptable/services` | ❌ | Services mis à jour (états financiers, T1/T2, création/régularisation d'entreprise) |
-| `/comptable/realisations` | ❌ | |
+| `/comptable` | ✅ | Lot 1 (2026-09-28) : page générique, e2e ✅ |
+| `/comptable/services` | ✅ | Lot 1 : services mis à jour (états financiers, T1/T2, création/régularisation d'entreprise), e2e + captures ✅ |
+| `/comptable/realisations` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/comptable/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/comptable/contact` | ❌ | |
 | `/admin/comptable/dossiers` | ❌ | Module dossiers clients (`DossierComptable`) |
@@ -81,9 +82,9 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 
 | Route | Statut | Notes |
 |---|---|---|
-| `/placement` | ❌ | Double audience entreprises/candidats |
-| `/placement/services` | ❌ | |
-| `/placement/realisations` | ❌ | |
+| `/placement` | ✅ | Lot 1 (2026-09-28) : double audience via section `audiences` (duo), e2e + captures ✅. Lien « Offres » en 404 jusqu'au lot 3 |
+| `/placement/services` | ✅ | Lot 1 : page générique, e2e ✅ |
+| `/placement/realisations` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/placement/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/placement/contact` | ❌ | |
 | `/placement/offres` | ❌ | Liste publique des offres publiées (`DemandeClient.publiee`) |
@@ -96,9 +97,9 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 
 | Route | Statut | Notes |
 |---|---|---|
-| `/ccdpaa` | ❌ | |
-| `/ccdpaa/services` | ❌ | |
-| `/ccdpaa/realisations` | ❌ | |
+| `/ccdpaa` | ✅ | Lot 1 (2026-09-28) : duo métiers (section `metiers`), e2e + captures ✅. Lien « Restaurant » en 404 jusqu'au lot 3 |
+| `/ccdpaa/services` | ✅ | Lot 1 : page générique, SANS l'assistant import-export (ligne dédiée ci-dessous), e2e ✅ |
+| `/ccdpaa/realisations` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/ccdpaa/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/ccdpaa/contact` | ❌ | Inclut formulaire "Vous ne trouvez pas ce que vous cherchez ?" (suggestion produit) |
 | `/ccdpaa/restaurant` | ❌ | 6ᵉ page — "Les Ambassades d'Afrique" + réservation |
@@ -110,9 +111,9 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 
 | Route | Statut | Notes |
 |---|---|---|
-| `/boissons` | ❌ | |
-| `/boissons/services` | ❌ | |
-| `/boissons/realisations` | ❌ | |
+| `/boissons` | ✅ | Lot 1 (2026-09-28) : page générique, e2e ✅ |
+| `/boissons/services` | ✅ | Lot 1 : page générique, e2e ✅ |
+| `/boissons/realisations` | ✅ | Lot 1 : page générique, e2e ✅. Mentions légales boissons non converties (hors lot) |
 | `/boissons/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/boissons/contact` | ❌ | Inclut formulaire suggestion produit |
 
@@ -187,9 +188,15 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 
 ## Prochaine étape recommandée
 
-1. Recapture rapide des 6 `/{filiale}/a-propos` (même page générique) → ✅.
-2. `/contact` : vidéo + captures → ✅. Puis Holding `/realisations`, `/confidentialite`.
-3. `/admin` shell : socle clair (décision ouverte n°1 tranchée).
+Conversion par lots (CLAUDE.md « Workflow de conversion ») — Lot 1 ✅ (2026-09-28, spec `docs/specs/lot1-pages-filiales.md`, suite e2e complète 127 ✅ + 1 relance ✅).
+
+1. **Lot 2** — contact des 6 filiales (`[filiale]/contact.vue`, variantes de `POST /api/public/contact`, formulaires suggestion produit ccdpaa/boissons). Réutilise `ContactIntro`, `HoneypotField`, `MentionConfidentialite`, `usePublicFormSubmit` (spec contact §4.4).
+2. Lot 3 — pages spécifiques : `/placement/offres` + postuler, `/ccdpaa/restaurant` + réservation, assistant import-export.
+3. Lot 4 — admin socle : login, shell `/admin` (socle clair), messages, clients.
+4. Lot 5 — modules admin : planning ×3, dossiers comptables, placement ×3, réservations.
+5. À la volée : recapture des 6 `/{filiale}/a-propos` → ✅.
+
+Base de dev : les surtitres ajoutés au seed par le lot 1 (« Portfolio », « Nos services », sauts de ligne des H1 filiales) ne sont pas dans une base déjà semée → saisir dans `/admin/contenu` ou `migrate reset` + seed avec accord.
 
 ## Outillage
 
