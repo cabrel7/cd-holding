@@ -1,7 +1,8 @@
-// POST /api/public/contact (spec docs/specs/phase3-holding-contact.md §3.2) — route publique,
-// sans session. Handler mince : gardes de transport, délègue au registre FORMULAIRES
-// (server/lib/contact.ts, logique pure) puis à Prisma/queueMail. Une variante zod = une
-// entrée du registre (DEC-12/13) ; livrée ici : `holding`.
+// POST /api/public/contact (spec docs/specs/phase3-holding-contact.md §3.2,
+// docs/specs/lot2-contact-filiales.md §2) — route publique, sans session. Handler mince :
+// gardes de transport, délègue au registre FORMULAIRES (server/lib/contact.ts, logique pure)
+// puis à Prisma/queueMail. Une variante zod = une entrée du registre (DEC-12/13) : `holding`,
+// les 6 formulaires de filiale et `suggestion`.
 import { consola } from 'consola'
 import type { Prisma } from '../../generated/prisma/client'
 import { HOLDING_SLUG } from '#shared/config/sites'

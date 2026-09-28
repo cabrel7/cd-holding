@@ -66,6 +66,84 @@ describe('destinataireInterne', () => {
   })
 })
 
+const cdEntretien: CibleContact = { id: 3, slug: 'entretien', nom: 'CD Entretien', email: 'contact@entretien.ca' }
+const cdPlacement: CibleContact = { id: 4, slug: 'placement', nom: 'Placement CD Pro', email: 'contact@placement.ca' }
+const cdCcdpaa: CibleContact = { id: 5, slug: 'ccdpaa', nom: 'CCDPAA', email: 'contact@ccdpaa.ca' }
+
+const bodyFilialeEntretien = {
+  formulaire: 'entretien' as const,
+  nom: 'Marie Roy',
+  email: 'marie@exemple.ca',
+  telephone: '514-000-0000',
+  message: 'Nous cherchons un entretien hebdomadaire.',
+  details: { typePropriete: 'bureau-commerce', frequence: 'hebdomadaire' },
+}
+
+const bodyFilialePlacement = {
+  formulaire: 'placement' as const,
+  nom: 'Paul Dubé',
+  email: 'paul@exemple.ca',
+  entreprise: 'Entrepôts Dubé',
+  telephone: '514-111-1111',
+  message: 'Besoin de 5 manutentionnaires.',
+  details: { poste: 'manutention', nombrePostes: 5 },
+}
+
+const bodySuggestion = {
+  formulaire: 'suggestion' as const,
+  site: 'ccdpaa' as const,
+  nom: 'Awa Diop',
+  email: 'awa@exemple.ca',
+  produitSouhaite: 'Fonio précuit',
+  paysOrigine: 'Sénégal',
+  message: 'Ce serait formidable de le retrouver ici.',
+}
+
+describe('FORMULAIRES (filiales)', () => {
+  it('targets the fixed slug regardless of the body', () => {
+    expect(FORMULAIRES.entretien.cible(bodyFilialeEntretien)).toBe('entretien')
+  })
+
+  it('uses the subject from the config, never a client-supplied value', () => {
+    const data = FORMULAIRES.entretien.construire(bodyFilialeEntretien, cdEntretien, holding)
+    expect(data.sujet).toBe('Demande de soumission — entretien')
+    expect(data.type).toBe('CONTACT')
+  })
+
+  it('defaults telephone/entreprise to null when the filiale has no such field', () => {
+    const data = FORMULAIRES.entretien.construire(bodyFilialeEntretien, cdEntretien, holding)
+    expect(data.telephone).toBe('514-000-0000')
+    expect(data.entreprise).toBeNull()
+  })
+
+  it('passes entreprise through when the filiale has that field', () => {
+    const data = FORMULAIRES.placement.construire(bodyFilialePlacement, cdPlacement, holding)
+    expect(data.entreprise).toBe('Entrepôts Dubé')
+  })
+
+  it('spreads body.details and stamps formulaire last, never copying the honeypot', () => {
+    const data = FORMULAIRES.entretien.construire(bodyFilialeEntretien, cdEntretien, holding)
+    expect(data.details).toEqual({ typePropriete: 'bureau-commerce', frequence: 'hebdomadaire', formulaire: 'entretien' })
+    expect(Object.keys(data.details).at(-1)).toBe('formulaire')
+    expect(data).not.toHaveProperty('website')
+  })
+})
+
+describe('FORMULAIRES.suggestion', () => {
+  it('targets the site chosen in the body', () => {
+    expect(FORMULAIRES.suggestion.cible(bodySuggestion)).toBe('ccdpaa')
+  })
+
+  it('builds a SUGGESTION_PRODUIT message with the fixed subject and product fields', () => {
+    const data = FORMULAIRES.suggestion.construire(bodySuggestion, cdCcdpaa, holding)
+    expect(data.type).toBe('SUGGESTION_PRODUIT')
+    expect(data.sujet).toBe('Suggestion de produit')
+    expect(data.produitSouhaite).toBe('Fonio précuit')
+    expect(data.paysOrigine).toBe('Sénégal')
+    expect(data.details).toEqual({ formulaire: 'suggestion' })
+  })
+})
+
 describe('cleAccuseReception', () => {
   it('never contains the raw email address', () => {
     const cle = cleAccuseReception('jean@exemple.ca')

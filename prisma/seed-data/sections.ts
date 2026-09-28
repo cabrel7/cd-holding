@@ -209,9 +209,10 @@ const FILIALES: Record<FilialeSlug, FilialeTextes> = {
       'Placement CD Pro est une agence spécialisée dans le recrutement local et le programme des travailleurs étrangers temporaires. Nous connectons les employeurs canadiens à une main-d’œuvre qualifiée et fiable.',
     histoireP2:
       'Filiale du {groupe}, Placement CD Pro bénéficie du savoir-faire mutualisé de la holding tout en gardant sa spécialisation métier et son équipe dédiée.',
-    contactSurtitre: 'Nous contacter',
-    contactTitre: 'Employeurs et\ncandidats, à vous la parole.',
-    contactTexte: 'Écrivez-nous, notre équipe vous oriente vers la bonne ressource.',
+    contactSurtitre: 'Vous recrutez',
+    contactTitre: 'Parlez-nous de\nvos besoins en personnel.',
+    contactTexte:
+      'Manutention, transport, recrutement international : décrivez le poste, notre équipe vous rappelle rapidement.',
     seo: {
       accueil: {
         title: 'Placement CD Pro — Placement de personnel au Québec',
@@ -597,11 +598,17 @@ function contactFiliale(slug: SiteSlug): Record<string, Donnees> {
 
   const result: Record<string, Donnees> = { seo, contact }
   if (slug === 'ccdpaa' || slug === 'boissons') {
-    // Libellé confirmé (Q-11, PROJECT_STATE.md).
+    // Libellé confirmé (Q-11, PROJECT_STATE.md) ; texte par site, repris du prototype (lot 2 §3b).
+    const texteParSite: Record<'ccdpaa' | 'boissons', string> = {
+      ccdpaa:
+        'Dites-nous ce que vous aimeriez retrouver sur nos étals. Chaque suggestion est étudiée par notre équipe d’approvisionnement.',
+      boissons:
+        'Dites-nous ce que vous aimeriez retrouver dans notre portefeuille de marques. Chaque suggestion est étudiée par notre équipe d’approvisionnement.',
+    }
     result.suggestion = {
       surtitre: 'Un produit ne figure pas à notre catalogue ?',
       titre: 'Vous ne trouvez pas ce que vous cherchez ?',
-      texte: 'Proposez-nous un produit : nous étudions chaque suggestion avec notre réseau de producteurs.',
+      texte: texteParSite[slug],
       messageSucces: MESSAGE_SUCCES,
     }
   }

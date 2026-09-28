@@ -1,8 +1,10 @@
-// Logique pure du pipeline de contact public (spec docs/specs/phase3-holding-contact.md §3.3).
-// AUCUN accès à H3 ni à Prisma ici (skill nitro) : ce fichier est directement testable
-// (tests/unit/contact-mapping.test.ts) sans booter Nitro. `server/api/public/contact.post.ts`
-// orchestre (rate-limit, lecture Prisma, courriels) et n'y ajoute aucune règle métier.
+// Logique pure du pipeline de contact public (spec docs/specs/phase3-holding-contact.md §3.3,
+// docs/specs/lot2-contact-filiales.md §2). AUCUN accès à H3 ni à Prisma ici (skill nitro) : ce
+// fichier est directement testable (tests/unit/contact-mapping.test.ts) sans booter Nitro.
+// `server/api/public/contact.post.ts` orchestre (rate-limit, lecture Prisma, courriels) et n'y
+// ajoute aucune règle métier.
 import { createHash } from 'node:crypto'
+import { CONTACT_FORMS, SUGGESTION_FORM, type FormulaireFilialeSlug } from '#shared/config/contact-forms'
 import { HOLDING_SLUG, type SiteSlug } from '#shared/config/sites'
 import type { ContactBody, ContactFormulaire } from '#shared/validation/contact'
 
@@ -27,6 +29,8 @@ export interface MessageContactData {
   readonly details: { readonly formulaire: ContactFormulaire } & Record<string, unknown>
   readonly telephone?: string | null
   readonly entreprise?: string | null
+  readonly produitSouhaite?: string | null
+  readonly paysOrigine?: string | null
 }
 
 export interface FormulaireHandler<B extends ContactBody> {
@@ -63,12 +67,87 @@ const holdingHandler: FormulaireHandler<HoldingContactBody> = {
 }
 
 /**
- * Registre serveur : `satisfies` fait échouer le typecheck si une variante zod (`ContactBody`)
- * n'a pas son handler ici (DEC-12/13). Une seule entrée livrée pour l'instant (`holding`).
+ * Fabrique unique pour les 6 formulaires de filiale (spec lot 2 §2) : `cible` renvoie le slug
+ * lui-même (jamais une valeur du corps), `sujet` vient de la config (DEC-15, jamais du client),
+ * `formulaire` est réécrit en dernier dans `details` pour ne jamais être écrasé par le corps
+ * (le schéma zod est `.strict()`, donc `body.details` ne peut de toute façon pas contenir cette clé).
  */
-export const FORMULAIRES = { holding: holdingHandler } satisfies {
+function handlerFiliale<S extends FormulaireFilialeSlug>(
+  slug: S,
+): FormulaireHandler<Extract<ContactBody, { formulaire: S }>> {
+  return {
+    cible: () => slug,
+    construire: (bodyGenerique, cible) => {
+      // À l'intérieur d'une fonction générique, TS ne résout pas les propriétés d'un
+      // `Extract<Union, { discriminant: S }>` tant que `S` (type paramètre) n'est pas instancié
+      // (limitation connue des types conditionnels génériques). Ce recentrage sur le type concret
+      // `FormulaireFilialeSlug` (au lieu du `S` générique) est sans effet au runtime — les 6
+      // variantes de filiale partagent la même forme pour ces champs — et rend `body.*` lisible.
+      const body = bodyGenerique as Extract<ContactBody, { formulaire: FormulaireFilialeSlug }>
+      return {
+        companyId: cible.id,
+        type: 'CONTACT',
+        nom: body.nom,
+        email: body.email,
+        telephone: body.telephone ?? null,
+        entreprise: body.entreprise ?? null,
+        sujet: CONTACT_FORMS[slug].sujet,
+        message: body.message,
+        details: { ...body.details, formulaire: slug },
+      }
+    },
+    origine: 'site de la filiale',
+    typeLibelle: 'Contact',
+  }
+}
+
+type SuggestionContactBody = Extract<ContactBody, { formulaire: 'suggestion' }>
+
+const suggestionHandler: FormulaireHandler<SuggestionContactBody> = {
+  cible: (body) => body.site,
+  construire: (body, cible) => ({
+    companyId: cible.id,
+    type: 'SUGGESTION_PRODUIT',
+    nom: body.nom,
+    email: body.email,
+    sujet: SUGGESTION_FORM.sujet,
+    message: body.message,
+    produitSouhaite: body.produitSouhaite,
+    paysOrigine: body.paysOrigine,
+    details: { formulaire: 'suggestion' },
+  }),
+  origine: 'formulaire de suggestion',
+  typeLibelle: 'Suggestion de produit',
+}
+
+/**
+ * Registre serveur : `satisfies` fait échouer le typecheck si une variante zod (`ContactBody`)
+ * n'a pas son handler ici, ou si un handler ne traite pas correctement SA propre variante (DEC-12/13).
+ */
+const REGISTRE = {
+  holding: holdingHandler,
+  entretien: handlerFiliale('entretien'),
+  transport: handlerFiliale('transport'),
+  comptable: handlerFiliale('comptable'),
+  placement: handlerFiliale('placement'),
+  ccdpaa: handlerFiliale('ccdpaa'),
+  boissons: handlerFiliale('boissons'),
+  suggestion: suggestionHandler,
+} satisfies {
   [K in ContactFormulaire]: FormulaireHandler<Extract<ContactBody, { formulaire: K }>>
 }
+
+/**
+ * Vue exposée au point d'appel (`FORMULAIRES[body.formulaire]` dans `contact.post.ts`) : indexer
+ * un objet par un discriminant (union) ne corrèle pas, pour TS, la valeur retenue au paramètre de
+ * la fonction appelée avec le même `body` — limitation connue des tables de handlers sur union
+ * discriminée (l'intersection des paramètres se réduit à `never`). `REGISTRE` ci-dessus a déjà
+ * validé, via `satisfies`, qu'il existe un handler par variante et que chacun traite bien SA
+ * propre variante ; ce cast élargit la vue de consommation sans rien changer au runtime (mêmes
+ * objets). Couvert par `tests/unit/contact-mapping.test.ts` (un test par handler).
+ */
+export const FORMULAIRES: Record<ContactFormulaire, FormulaireHandler<ContactBody>> =
+  REGISTRE as Record<ContactFormulaire, FormulaireHandler<ContactBody>>
 
 /** Adresse de notification interne : la cible d'abord, la holding en repli, sinon aucun envoi. */
 export function destinataireInterne(cible: CibleContact, holding: CibleContact): string | null {
