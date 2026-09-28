@@ -38,7 +38,11 @@ export function isDateISOValide(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(new Date(`${value}T00:00:00Z`).getTime())
 }
 
-/** Fuseau de référence des formulaires publics (entreprises québécoises). */
+/**
+ * Fuseau de référence des formulaires publics (entreprises québécoises). `America/Toronto` est
+ * l'alias IANA à règles DST identiques à `America/Montreal` (Québec = heure de l'Est) ; on garde
+ * l'identifiant canonique, `America/Montreal` étant déprécié (lien de rétrocompatibilité).
+ */
 export const FUSEAU_QUEBEC = 'America/Toronto'
 
 const JOUR_QUEBEC_FORMATTER = new Intl.DateTimeFormat('en-CA', {

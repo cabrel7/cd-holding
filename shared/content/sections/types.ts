@@ -218,6 +218,10 @@ export const formulaireSchema = z
     titre: z.string().trim().min(1),
     texte: z.string().trim().max(1200).optional(),
     messageSucces: z.string().trim().min(1).max(200),
+    // Texte de la case de consentement Loi 25 (formulaire de candidature). Optionnel : les
+    // autres formulaires n'ont pas de case, et une ligne déjà en base (seed = amorçage seul)
+    // peut ne pas l'avoir — le composant garde un repli.
+    consentement: z.string().trim().min(1).max(400).optional(),
   })
   .strict()
 
@@ -226,6 +230,7 @@ const formulaireFields: readonly CmsField[] = [
   { key: 'titre', label: 'Titre', type: 'text', required: true },
   { key: 'texte', label: 'Texte', type: 'textarea', maxLength: 1200 },
   { key: 'messageSucces', label: 'Message de succès', type: 'textarea', required: true, maxLength: 200 },
+  { key: 'consentement', label: 'Texte de la case de consentement (candidature)', type: 'textarea', maxLength: 400 },
 ]
 
 // --- duo ---------------------------------------------------------------

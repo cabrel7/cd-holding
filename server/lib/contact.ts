@@ -194,10 +194,17 @@ export function destinataireInterne(cible: CibleContact, holding: CibleContact):
 }
 
 /**
+ * 3 accusés de réception / 24 h / destinataire (spec §3.2 point 9) : au-delà, un formulaire
+ * public devient un relais de spam vers cette adresse (nom + message contrôlés par l'expéditeur).
+ * Partagé par contact, candidatures et réservations.
+ */
+export const ACCUSE_RECEPTION_LIMIT = { max: 3, windowMs: 24 * 60 * 60 * 1000 } as const
+
+/**
  * Clé de rate-limit de l'accusé de réception, par destinataire — jamais l'adresse en clair
  * (CLAUDE.md « logs sans donnée personnelle » ; cette clé peut vivre longtemps en mémoire).
  * Déterministe : la même adresse produit toujours la même clé.
  */
 export function cleAccuseReception(email: string): string {
-  return `accuse:${createHash('sha256').update(email).digest('hex')}`
+  return `accuse:${createHash('sha256').update(email.trim().toLowerCase()).digest('hex')}`
 }

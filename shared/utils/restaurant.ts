@@ -22,9 +22,15 @@ const MINUTES_PAR_JOUR = 1440
 export const minutesDepuisMinuit = (h: string): number => Number(h.slice(0, 2)) * 60 + Number(h.slice(3, 5))
 const heureDepuisMinutes = (m: number): string => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`
 
+/** Entiers ISO 1..7, uniques (les doublons ou 0/8/1.5 signaleraient des réglages corrompus). */
+function joursOuvertureValides(jours: readonly number[]): boolean {
+  return Array.isArray(jours) && jours.every((j) => Number.isInteger(j) && j >= 1 && j <= 7) && new Set(jours).size === jours.length
+}
+
 /** Garde-fou (boucle infinie, créneaux absurdes) — le zod admin (lot 5) impose les mêmes règles. */
 export function reglagesValides(r: ReglagesReservation): boolean {
   return (
+    joursOuvertureValides(r.joursOuverture) &&
     HEURE_PATTERN.test(r.heureOuverture) &&
     HEURE_PATTERN.test(r.dernierService) &&
     HEURE_PATTERN.test(r.heureFermeture) &&

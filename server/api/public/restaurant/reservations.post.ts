@@ -9,6 +9,7 @@ import { consola } from 'consola'
 import { RESTAURANT_SLUG, reglagesValides, type ReglagesReservation } from '#shared/utils/restaurant'
 import { instantQuebec } from '#shared/utils/dates'
 import { reservationBaseSchema, reservationSchema } from '#shared/validation/reservation'
+import { ACCUSE_RECEPTION_LIMIT, cleAccuseReception } from '../../../lib/contact'
 import { RESTAURANT_SELECT, construireReservation, recapitulatifReservation } from '../../../lib/reservation'
 import { accuseReceptionTemplate } from '../../../lib/mail/templates/accuse-reception'
 import { notificationInterneTemplate } from '../../../lib/mail/templates/notification-interne'
@@ -84,9 +85,12 @@ export default defineEventHandler(async (event) => {
   // 8. Date murale Québec → instant UTC exact (heure d'été/hiver).
   const dateReservation = instantQuebec(validated.data.date, validated.data.heure)
 
+  // Courriel normalisé (casse/espaces) : clé d'idempotence et stockage cohérents.
+  const courriel = validated.data.email.trim().toLowerCase()
+
   // 9. Idempotence : même filiale/courriel/instant, statut non annulé → 201 sans écriture ni courriel.
   const existante = await prisma.reservationRestaurant.findFirst({
-    where: { companyId, email: validated.data.email, dateReservation, statut: { not: 'ANNULEE' } },
+    where: { companyId, email: courriel, dateReservation, statut: { not: 'ANNULEE' } },
     select: { uuid: true },
   })
   if (existante) {
@@ -95,7 +99,7 @@ export default defineEventHandler(async (event) => {
   }
 
   // 10. Persistance — select explicite, uuid non renvoyé au client.
-  const data = construireReservation(validated.data, companyId, dateReservation)
+  const data = construireReservation({ ...validated.data, email: courriel }, companyId, dateReservation)
   await prisma.reservationRestaurant.create({ data, select: { uuid: true } })
 
   // 11. Courriels, non bloquants.
@@ -103,7 +107,7 @@ export default defineEventHandler(async (event) => {
     queueMail(event, {
       template: 'notification-interne',
       to: email,
-      replyTo: validated.data.email,
+      replyTo: courriel,
       ...notificationInterneTemplate({
         nomEntreprise,
         typeMessage: 'Réservation',
@@ -113,16 +117,19 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  queueMail(event, {
-    template: 'accuse-reception',
-    to: validated.data.email,
-    ...accuseReceptionTemplate({
-      nomDestinataire: validated.data.nom,
-      nomEntreprise,
-      objet: 'demande de réservation',
-      recapitulatif: recapitulatifReservation(validated.data, dateReservation),
-    }),
-  })
+  // Limite par destinataire (3 / 24 h) : même garde que contact et candidatures.
+  if (consumeRateLimit(cleAccuseReception(courriel), ACCUSE_RECEPTION_LIMIT)) {
+    queueMail(event, {
+      template: 'accuse-reception',
+      to: courriel,
+      ...accuseReceptionTemplate({
+        nomDestinataire: validated.data.nom,
+        nomEntreprise,
+        objet: 'demande de réservation',
+        recapitulatif: recapitulatifReservation(validated.data, dateReservation),
+      }),
+    })
+  }
 
   // 12. Succès.
   setResponseStatus(event, 201)

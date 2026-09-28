@@ -159,6 +159,10 @@ describe('cleAccuseReception', () => {
     expect(cleAccuseReception('jean@exemple.ca')).toBe(attendu)
   })
 
+  it('ignores case and surrounding spaces (no bypass of the per-recipient limit)', () => {
+    expect(cleAccuseReception('  Jean@Exemple.CA ')).toBe(cleAccuseReception('jean@exemple.ca'))
+  })
+
   it('differs for two different addresses', () => {
     expect(cleAccuseReception('jean@exemple.ca')).not.toBe(cleAccuseReception('marie@exemple.ca'))
   })

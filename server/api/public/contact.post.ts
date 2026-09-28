@@ -7,15 +7,12 @@ import { consola } from 'consola'
 import type { Prisma } from '../../generated/prisma/client'
 import { HOLDING_SLUG } from '#shared/config/sites'
 import { contactBodySchema } from '#shared/validation/contact'
-import { FORMULAIRES, cleAccuseReception, destinataireInterne, type CibleContact } from '../../lib/contact'
+import { ACCUSE_RECEPTION_LIMIT, FORMULAIRES, cleAccuseReception, destinataireInterne, type CibleContact } from '../../lib/contact'
 import { accuseReceptionTemplate } from '../../lib/mail/templates/accuse-reception'
 import { notificationInterneTemplate } from '../../lib/mail/templates/notification-interne'
 import { toSiteSlug } from '../../utils/site-scope'
 
 const CONTACT_RATE_LIMIT = { scope: 'contact', max: 5, windowMs: 10 * 60 * 1000 } as const
-// 3 accusés de réception / 24 h / destinataire (spec §3.2 point 9) : au-delà, le formulaire
-// devient un relais de spam vers cette adresse (nom + message contrôlés par l'expéditeur).
-const ACCUSE_RECEPTION_LIMIT = { max: 3, windowMs: 24 * 60 * 60 * 1000 } as const
 // Borne la taille du corps AVANT lecture : sans ça, readValidatedBody charge en mémoire un
 // corps non authentifié arbitrairement gros avant que zod ne le rejette (déni de service).
 const MAX_CONTACT_BODY_BYTES = 32 * 1024

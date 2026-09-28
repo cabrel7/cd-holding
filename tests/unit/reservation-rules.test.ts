@@ -26,6 +26,14 @@ const VALEURS_BASE = {
 }
 
 describe('reglagesValides', () => {
+  it.each([[[0, 1]], [[1, 8]], [[1, 1, 2]], [[1.5]], [[-1]]])('should reject joursOuverture %j', (jours) => {
+    expect(reglagesValides({ ...REGLAGES, joursOuverture: jours })).toBe(false)
+  })
+
+  it('should accept unique ISO days 1..7', () => {
+    expect(reglagesValides({ ...REGLAGES, joursOuverture: [1, 7] })).toBe(true)
+  })
+
   it('should reject a step of 0 minutes (infinite loop guard)', () => {
     expect(reglagesValides({ ...REGLAGES, pasCreneauMinutes: 0 })).toBe(false)
   })

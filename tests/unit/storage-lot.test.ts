@@ -19,6 +19,11 @@ describe('nettoyerNomFichier', () => {
     expect(nettoyerNomFichier('cv\u001Fmalicious.pdf')).toBe('cvmalicious.pdf')
   })
 
+  it('strips bidi/format characters (RLO spoofing of the extension)', () => {
+    expect(nettoyerNomFichier('cv\u202Efdp.exe')).toBe('cvfdp.exe')
+    expect(nettoyerNomFichier('a\u200Bb\u200Fc\u2066d\u2069e\uFEFF.pdf')).toBe('abcde.pdf')
+  })
+
   it('normalizes to Unicode NFC', () => {
     const decompose = 'cve\u0301.pdf' // "é" décomposé (e + accent combinant)
     expect(nettoyerNomFichier(decompose)).toBe('cvé.pdf'.normalize('NFC'))

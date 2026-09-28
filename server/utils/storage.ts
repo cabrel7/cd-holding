@@ -1,3 +1,4 @@
+import { consola } from 'consola'
 import { randomUUID } from 'node:crypto'
 import { basename } from 'node:path'
 import type { VisibiliteFichier } from '../generated/prisma/client'
@@ -45,16 +46,19 @@ export interface SavedFile {
 // ici pour rester locale à ce fichier (pas d'import shared → server dans ce sens).
 // eslint-disable-next-line no-control-regex
 const CONTROLE_PATTERN = /[\u0000-\u001F\u007F]/g
+// Caractères de format Unicode (catégorie Cf : bidi U+202A–U+202E / U+2066–U+2069, zéro-largeur
+// U+200B–U+200F, BOM U+FEFF…) : un `cv\u202Efdp.exe` s'afficherait « cvexe.pdf » (usurpation d'extension).
+const FORMAT_PATTERN = /\p{Cf}/gu
 
 /**
  * Nettoie le nom de fichier original avant de le conserver en métadonnée d'affichage (spec lot 3
  * §3) : nom de base seulement (un chemin, ex. `../../etc/passwd` ou `C:\x\y.pdf`, est réduit à son
  * dernier segment — jamais interprété comme chemin de stockage, `key` UUID reste le seul
- * identifiant physique), caractères de contrôle retirés, forme Unicode NFC, 255 caractères max.
+ * identifiant physique), caractères de contrôle et de format (bidi, zéro-largeur) retirés, forme Unicode NFC, 255 caractères max.
  */
 export function nettoyerNomFichier(filename: string | undefined): string {
   const segment = basename((filename ?? '').replace(/\\/g, '/'))
-  const nettoye = segment.replace(CONTROLE_PATTERN, '').normalize('NFC').trim()
+  const nettoye = segment.replace(CONTROLE_PATTERN, '').replace(FORMAT_PATTERN, '').normalize('NFC').trim()
   return (nettoye || 'fichier').slice(0, 255)
 }
 
@@ -121,15 +125,17 @@ export async function saveUploadedFiles(files: readonly UploadInput[], options: 
 /**
  * Supprime un lot de fichiers (objet stocké + ligne Fichier) — retour arrière après un échec
  * Prisma en aval de l'upload (ex. `Candidature.create`), ou nettoyage de données de test. N'échoue
- * jamais bruyamment : une clé déjà absente (stockage ou base) est simplement ignorée.
+ * jamais bruyamment (le retour arrière ne doit pas masquer l'erreur d'origine) mais un
+ * nettoyage partiel est journalisé, avec la seule clé UUID (aucune PII).
  */
 export async function supprimerFichiers(keys: readonly string[]): Promise<void> {
   await Promise.all(
     keys.map(async (key) => {
+      const avertir = (): void => consola.warn('[storage] nettoyage partiel', { key })
       await uploadsStorage()
         .removeItem(key)
-        .catch(() => undefined)
-      await prisma.fichier.deleteMany({ where: { key } }).catch(() => undefined)
+        .catch(avertir)
+      await prisma.fichier.deleteMany({ where: { key } }).catch(avertir)
     }),
   )
 }

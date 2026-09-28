@@ -9,6 +9,12 @@ const paramsSchema = z.object({
 
 const PUBLIC_CACHE = 'public, max-age=86400, immutable'
 const PRIVATE_CACHE = 'private, no-store'
+// Fichier servi comme ressource inerte : aucun script/ressource chargé, iframe sandboxée.
+const FILE_CSP = "default-src 'none'; sandbox"
+
+// encodeURIComponent laisse passer ' ( ) * que RFC 5987 (attr-char) n'autorise pas.
+const encoderRfc5987 = (valeur: string): string =>
+  encodeURIComponent(valeur).replace(/['()*]/g, (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`)
 
 export default defineEventHandler(async (event) => {
   const { key } = await getValidatedRouterParams(event, paramsSchema.parse)
@@ -37,8 +43,9 @@ export default defineEventHandler(async (event) => {
     'Content-Length': String(fichier.taille),
     'Cache-Control': fichier.visibilite === 'PUBLIC' ? PUBLIC_CACHE : PRIVATE_CACHE,
     'X-Content-Type-Options': 'nosniff',
+    'Content-Security-Policy': FILE_CSP,
     // Nom original encodé RFC 5987 — jamais interprété comme chemin
-    'Content-Disposition': `${disposition}; filename*=UTF-8''${encodeURIComponent(fichier.nomOriginal)}`,
+    'Content-Disposition': `${disposition}; filename*=UTF-8''${encoderRfc5987(fichier.nomOriginal)}`,
   })
 
   return data

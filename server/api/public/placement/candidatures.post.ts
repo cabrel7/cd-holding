@@ -15,14 +15,11 @@ import {
   type FichierEntrant,
   type OffreResolue,
 } from '../../../lib/candidature'
-import { cleAccuseReception } from '../../../lib/contact'
+import { ACCUSE_RECEPTION_LIMIT, cleAccuseReception } from '../../../lib/contact'
 import { accuseReceptionTemplate } from '../../../lib/mail/templates/accuse-reception'
 import { notificationInterneTemplate } from '../../../lib/mail/templates/notification-interne'
 
 const CANDIDATURE_RATE_LIMIT = { scope: 'candidature', max: 3, windowMs: 60 * 60 * 1000 } as const
-// Même fenêtre que le formulaire de contact (server/api/public/contact.post.ts) : un seul
-// mécanisme de limite par destinataire pour tous les accusés de réception publics.
-const ACCUSE_RECEPTION_LIMIT = { max: 3, windowMs: 24 * 60 * 60 * 1000 } as const
 const MAX_CANDIDATURE_BODY_BYTES = CANDIDATURE_LIMITS.totalMaxBytes + MULTIPART_OVERHEAD_BYTES
 
 const CHAMP_CV = 'cv'
@@ -161,7 +158,11 @@ export default defineEventHandler(async (event) => {
     await prisma.candidature.create({ data: data as Prisma.CandidatureUncheckedCreateInput, select: { uuid: true } })
   } catch (error) {
     await supprimerFichiers(saved.map((f) => f.key))
-    throw error
+    // Erreur Prisma jetée (son message contient les champs du candidat) : le détail n'est pas
+    // relayé, ni en `cause` ; le log 5xx (server/lib/log-erreur.ts) n'aurait de toute façon
+    // que le nom/code.
+    consola.error('[candidature] écriture échouée', { erreur: (error as Error)?.name, code: (error as { code?: string })?.code })
+    throw createError({ statusCode: 500, statusMessage: 'Erreur serveur' })
   }
 
   // 11. Courriels, non bloquants.

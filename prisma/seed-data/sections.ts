@@ -679,6 +679,8 @@ function offresPlacement(): Record<string, Donnees> {
       titre: 'Envoyez votre candidature',
       texte: 'Remplissez le formulaire ci-dessous ; un conseiller étudie votre dossier et revient vers vous.',
       messageSucces: 'Merci, votre candidature a bien été transmise. Un accusé de réception vous est envoyé par courriel.',
+      // À FAIRE VALIDER PAR UN JURISTE — brouillon Loi 25 (Québec).
+      consentement: 'J’accepte que mes renseignements soient utilisés pour traiter ma candidature, conformément à la politique de confidentialité.',
     },
     spontanee: {
       surtitre: 'Candidature spontanée',
