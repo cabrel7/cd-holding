@@ -38,11 +38,17 @@ export default defineConfig({
   // au breakpoint (accent + CTA + nav responsive) ; `home.spec.ts`, `admin-site.spec.ts`
   // (phase 3, docs/specs/phase3-holding-home.md §6) et `contact.spec.ts` (phase 3,
   // docs/specs/phase3-holding-contact.md §6, critère 9) ont aussi un critère mobile-only (375px)
-  // et doivent tourner desktop + mobile. Les autres fichiers (mutations CMS, sécurité API,
-  // maintenance) ne gagnent rien à tourner 3 fois sur un état DB partagé — ils ne tournent que
-  // sur le projet "desktop".
+  // et doivent tourner desktop + mobile. Idem pour les pages filiales du lot 1
+  // (`filiale-accueil`, `filiale-services`, `realisations`, `confidentialite`, spec
+  // docs/specs/lot1-pages-filiales.md §5 T3) — parcours publics à revalider aux 2 largeurs.
+  // Les autres fichiers (mutations CMS, sécurité API, maintenance) ne gagnent rien à tourner
+  // 3 fois sur un état DB partagé — ils ne tournent que sur le projet "desktop".
   projects: [
-    { name: 'mobile', use: { viewport: { width: 375, height: 812 } }, testMatch: /(layout-accent|home|admin-site|contact)\.spec\.ts/ },
+    {
+      name: 'mobile',
+      use: { viewport: { width: 375, height: 812 } },
+      testMatch: /(layout-accent|home|admin-site|contact|filiale-accueil|filiale-services|realisations|confidentialite)\.spec\.ts/,
+    },
     { name: 'tablet', use: { viewport: { width: 768, height: 1024 } }, testMatch: /layout-accent\.spec\.ts/ },
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },
   ],
