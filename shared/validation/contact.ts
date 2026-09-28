@@ -13,6 +13,7 @@ import {
   type FormulaireFilialeSlug,
 } from '../config/contact-forms'
 import { ajouterJoursIso, dateDuJourQuebec, isDateCalendaireValide } from '../utils/dates'
+import { ETAPES_ASSISTANT, type ReponsesAssistant } from '../content/ccdpaa/assistant-import-export'
 
 export const CONTACT_LIMITS = {
   nomMin: 2,
@@ -36,7 +37,7 @@ export const CONTACT_LIMITS = {
 const NOM_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M}'’. -]*$/u
 // Caractères de contrôle refusés (un NUL ferait une 500 Postgres), sauf \t \n \r.
 // eslint-disable-next-line no-control-regex
-const CONTROLE_PATTERN = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/
+export const CONTROLE_PATTERN = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/
 
 // `required_error` : message français si le champ est absent (sinon zod renvoie « Required »).
 const CHAMP_REQUIS = 'Ce champ est requis.'
@@ -188,6 +189,36 @@ export const suggestionBodySchema = suggestionFormSchema.extend({
   site: z.enum(SITES_SUGGESTION),
 })
 
+// --- Assistant import-export (ccdpaa) : variante de POST /api/public/contact (T0, spec lot 3 §3) ---
+
+const videEnUndefined = (v: unknown) => (typeof v === 'string' && v.trim() === '' ? undefined : v)
+
+const enumEtape = (options: readonly { readonly value: string }[]) =>
+  z.enum(options.map((x) => x.value) as [string, ...string[]], { errorMap: () => ({ message: 'Choisissez une réponse.' }) })
+
+// Seul cast : forme dérivée de la config au runtime ; le type statique (ReponsesAssistant) est
+// couvert par les tests (tests/unit/assistant-content.test.ts).
+export const reponsesAssistantSchema = z
+  .object(Object.fromEntries(ETAPES_ASSISTANT.map((e) => [e.cle, enumEtape(e.options)])))
+  .strict() as unknown as z.ZodType<ReponsesAssistant, z.ZodTypeDef, Record<string, unknown>>
+
+export const assistantFormSchema = z
+  .object({
+    nom: nomContactSchema,
+    email: emailContactSchema,
+    entreprise: z.preprocess(videEnUndefined, texteCourtSchema(CONTACT_LIMITS.entrepriseMax).optional()),
+    telephone: z.preprocess(videEnUndefined, telephoneContactSchema.optional()),
+    website: honeypotSchema,
+  })
+  .strict()
+
+export const assistantBodySchema = assistantFormSchema.extend({
+  formulaire: z.literal('assistant'),
+  reponses: reponsesAssistantSchema,
+})
+
+export type AssistantFormValues = z.input<typeof assistantFormSchema>
+
 /** Corps de POST /api/public/contact — une variante par formulaire (DEC-12). */
 export const contactBodySchema = z.discriminatedUnion('formulaire', [
   holdingContactBodySchema,
@@ -198,6 +229,7 @@ export const contactBodySchema = z.discriminatedUnion('formulaire', [
   varianteFiliale('ccdpaa'),
   varianteFiliale('boissons'),
   suggestionBodySchema,
+  assistantBodySchema,
 ])
 
 export type HoldingContactFormValues = z.input<typeof holdingContactFormSchema>

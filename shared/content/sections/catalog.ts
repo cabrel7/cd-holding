@@ -108,6 +108,9 @@ export const CATALOG: readonly CatalogEntry[] = [
   // OFFRES — placement
   { page: PAGE_SITE.OFFRES, cle: 'seo', type: 'seo', portee: ['placement'] },
   { page: PAGE_SITE.OFFRES, cle: 'entete', type: 'section', portee: ['placement'] },
+  { page: PAGE_SITE.OFFRES, cle: 'cta', type: 'cta', portee: ['placement'] },
+  { page: PAGE_SITE.OFFRES, cle: 'candidature', type: 'formulaire', portee: ['placement'] },
+  { page: PAGE_SITE.OFFRES, cle: 'spontanee', type: 'formulaire', portee: ['placement'] },
 
   // CONFIDENTIALITE — holding
   { page: PAGE_SITE.CONFIDENTIALITE, cle: 'seo', type: 'seo', portee: 'holding' },

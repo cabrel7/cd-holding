@@ -2,6 +2,8 @@
 // est revalidée côté serveur (`^#[0-9A-F]{6}$`, repli navy) avant d'être injectée en style
 // inline : ce type suppose déjà une valeur sûre.
 import type { SiteSlug } from '../config/sites'
+import type { TypeContratKey } from '../config/candidature'
+import type { ReglagesReservation } from '../utils/restaurant'
 
 export type StatutSitePublic = 'ACTIF' | 'EN_MAINTENANCE' | 'EN_CONSTRUCTION'
 
@@ -83,3 +85,19 @@ export interface PublicPartenaireDto {
 
 /** Clé du catalogue → données résolues (chiffres calculés, `donnees` sinon telle quelle). */
 export type PublicSectionsDto = Record<string, PublicSectionDonnees>
+
+export interface PublicOffreDto {
+  readonly uuid: string
+  readonly titre: string
+  readonly lieu: string
+  readonly typeContrat: TypeContratKey
+  readonly salaire: string | null
+  readonly description: string
+  readonly publieeLe: string /* ISO */
+}
+
+export interface PublicRestaurantDto extends ReglagesReservation {
+  readonly nom: string
+  readonly adresse: string | null
+  readonly quartier: string | null
+}

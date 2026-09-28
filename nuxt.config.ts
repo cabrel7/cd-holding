@@ -8,6 +8,9 @@ import { fileURLToPath } from 'node:url'
 const customErrorHandler = fileURLToPath(new URL('./server/error.ts', import.meta.url))
 
 const ISR_TTL_SECONDS = 3600
+// Une offre retirée disparaît en <= 1 min (le POST candidature revérifie de toute façon que
+// l'offre est publiée et ouverte) : TTL bien plus court que le reste du site public (DEC-25).
+const OFFRES_ISR_TTL_SECONDS = 60
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8 // 8 h
 const MAX_UPLOAD_REQUEST_BYTES = MAX_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES
 const FONT_CACHE_CONTROL = 'public, max-age=31536000, immutable'
@@ -79,6 +82,10 @@ export default defineNuxtConfig({
     // `/${s}/**` ne couvre pas l'accueil `/${s}` lui-même : règle explicite.
     ...Object.fromEntries(FILIALE_SLUGS.map((s) => [`/${s}`, { isr: ISR_TTL_SECONDS }])),
     ...Object.fromEntries(FILIALE_SLUGS.map((s) => [`/${s}/**`, { isr: ISR_TTL_SECONDS }])),
+
+    // Offres de placement : la règle la plus spécifique l'emporte sur `/placement/**` ci-dessus.
+    '/placement/offres': { isr: OFFRES_ISR_TTL_SECONDS },
+    '/placement/offres/**': { isr: OFFRES_ISR_TTL_SECONDS },
 
     // Polices auto-hébergées : jamais invalidées (nom de fichier versionné, voir FONT_*).
     '/fonts/**': { headers: { 'cache-control': FONT_CACHE_CONTROL } },

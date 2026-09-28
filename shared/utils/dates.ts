@@ -66,3 +66,42 @@ export function isDateCalendaireValide(value: string): boolean {
   const date = new Date(`${value}T00:00:00Z`)
   return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value
 }
+
+/** 1 = lundi … 7 = dimanche (ISO 8601) pour "YYYY-MM-DD". */
+export function jourIsoSemaine(dateIso: string): number {
+  const jour = new Date(`${dateIso}T00:00:00Z`).getUTCDay()
+  return jour === 0 ? 7 : jour
+}
+
+const PARTIES_QUEBEC = new Intl.DateTimeFormat('en-CA', {
+  timeZone: FUSEAU_QUEBEC,
+  hourCycle: 'h23',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+  second: '2-digit',
+})
+
+function decalageQuebecMs(instant: Date): number {
+  const p = Object.fromEntries(PARTIES_QUEBEC.formatToParts(instant).map((x) => [x.type, x.value]))
+  const murale = Date.UTC(Number(p.year), Number(p.month) - 1, Number(p.day), Number(p.hour), Number(p.minute), Number(p.second))
+  return murale - (instant.getTime() - instant.getUTCMilliseconds())
+}
+
+/**
+ * Heure murale Québec ("YYYY-MM-DD", "HH:mm") → instant UTC. Deux passes : exact hors du trou
+ * DST 2h-3h (jamais atteint par des créneaux de restaurant). Aucune dépendance (Intl seulement).
+ */
+export function instantQuebec(dateIso: string, heure: string): Date {
+  const naif = Date.UTC(
+    Number(dateIso.slice(0, 4)),
+    Number(dateIso.slice(5, 7)) - 1,
+    Number(dateIso.slice(8, 10)),
+    Number(heure.slice(0, 2)),
+    Number(heure.slice(3, 5)),
+  )
+  const premier = naif - decalageQuebecMs(new Date(naif))
+  return new Date(naif - decalageQuebecMs(new Date(premier)))
+}

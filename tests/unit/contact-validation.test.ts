@@ -80,4 +80,8 @@ describe('contactBodySchema', () => {
   it('should reject an unknown form variant', () => {
     expect(contactBodySchema.safeParse({ ...valide, formulaire: 'inconnu' }).success).toBe(false)
   })
+
+  it('should register the assistant variant in the discriminated union (lot 3)', () => {
+    expect(contactBodySchema.optionsMap.has('assistant')).toBe(true)
+  })
 })

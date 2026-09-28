@@ -79,9 +79,9 @@ describe('CONTACT_FORMS', () => {
     }
   })
 
-  it('should cover exactly holding + the 6 subsidiaries + suggestion in the body union', () => {
+  it('should cover exactly holding + the 6 subsidiaries + suggestion + assistant in the body union', () => {
     expect([...contactBodySchema.optionsMap.keys()].sort()).toEqual(
-      ['holding', ...FORMULAIRES_FILIALES, 'suggestion'].sort(),
+      ['holding', ...FORMULAIRES_FILIALES, 'suggestion', 'assistant'].sort(),
     )
   })
 })
