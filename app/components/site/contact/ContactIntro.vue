@@ -19,12 +19,13 @@ defineProps<{
 
 <template>
   <div>
-    <p
+    <TexteAccentue
       v-if="section?.surtitre"
+      :texte="section.surtitre"
+      :vars="vars"
+      as="p"
       class="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 font-display text-sm font-semibold uppercase tracking-[0.25em] text-site-accent-strong"
-    >
-      {{ section.surtitre }}
-    </p>
+    />
     <TexteAccentue
       :texte="section?.titre ?? titreRepli"
       :vars="vars"

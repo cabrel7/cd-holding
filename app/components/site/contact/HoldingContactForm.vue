@@ -2,26 +2,24 @@
 // Carte formulaire de /contact — spécifique holding (sélecteur de filiale cible), spec §4.1,
 // §4.3. VeeValidate + toTypedSchema(holdingContactFormSchema) : source unique de validation
 // client/serveur (shared/validation/contact.ts). Le composable d'envoi ne gère aucun toast
-// (usePublicFormSubmit) : la machine d'états ci-dessous traduit chaque issue en toast et décide
-// seule de vider ou non le formulaire.
+// (usePublicFormSubmit) : la traduction résultat → toast vit dans usePublicFormFeedback (spec
+// lot 2 §4, partagée avec les formulaires filiales/suggestion) ; ce composant garde la décision
+// de vider ou non le formulaire (`resetForm`, propre à sa propre instance `useForm`).
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { toast } from 'vue-sonner'
 import { ChevronDown, Send } from '@lucide/vue'
 import { holdingContactFormSchema, type HoldingContactFormValues } from '#shared/validation/contact'
-import { interpoler, type TexteVars } from '#shared/utils/texte'
+import type { TexteVars } from '#shared/utils/texte'
 import type { PublicSiteSummary } from '#shared/types/public'
 import { isSiteSlug } from '#shared/config/sites'
 import { usePublicFormSubmit } from '@/composables/usePublicFormSubmit'
+import { usePublicFormFeedback } from '@/composables/usePublicFormFeedback'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import HoneypotField from '@/components/site/form/HoneypotField.vue'
 import MentionConfidentialite from '@/components/site/form/MentionConfidentialite.vue'
-
-const SECONDES_PAR_MINUTE = 60
-const MESSAGE_SUCCES_REPLI = 'Votre message a bien été reçu.'
 
 const props = defineProps<{
   filiales: readonly PublicSiteSummary[] | null
@@ -57,6 +55,7 @@ const [message, messageAttrs] = defineField('message')
 const [website] = defineField('website')
 
 const { envoyer, envoiEnCours } = usePublicFormSubmit<HoldingContactBody>('/api/public/contact')
+const { notifierResultat } = usePublicFormFeedback()
 
 // Soumission native impossible avant hydratation (bug 12, §4.3) : pas de POST déguisé en GET.
 const hydrate = ref(false)
@@ -78,32 +77,13 @@ function focusOn(target: unknown): void {
 const onSubmit = handleSubmit(
   async (values) => {
     const resultat = await envoyer({ formulaire: 'holding', ...values })
-
-    if (resultat.ok) {
-      toast.success('Message envoyé', {
-        description: props.messageSucces ? interpoler(props.messageSucces, props.vars) : MESSAGE_SUCCES_REPLI,
-      })
-      resetForm()
-      return
-    }
-
-    if (resultat.raison === 'validation') {
-      toast.error('Certaines informations sont invalides. Vérifiez le formulaire.')
-      return
-    }
-
-    if (resultat.raison === 'trop-de-requetes') {
-      const minutes =
-        resultat.retryAfterSeconds != null ? Math.ceil(resultat.retryAfterSeconds / SECONDES_PAR_MINUTE) : null
-      toast.error('Trop d’envois depuis votre connexion.', {
-        description: minutes != null ? `Réessayez dans ${minutes} minute${minutes > 1 ? 's' : ''}.` : 'Réessayez dans quelques minutes.',
-      })
-      return
-    }
-
-    toast.error('L’envoi a échoué. Réessayez dans un instant.', {
-      description: props.emailSecours ? `Vous pouvez aussi nous écrire à ${props.emailSecours}` : undefined,
+    const succes = notifierResultat(resultat, {
+      titreSucces: 'Message envoyé',
+      messageSucces: props.messageSucces,
+      vars: props.vars,
+      emailSecours: props.emailSecours,
     })
+    if (succes) resetForm()
   },
   ({ errors: invalidErrors }) => {
     if (invalidErrors.nom) focusOn(nomInputRef.value)
