@@ -28,13 +28,17 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: 'Introuvable' })
   }
 
+  // PRIVE en attachment (jamais inline) : un PDF/JPEG piégé (candidature, document comptable)
+  // ne doit jamais pouvoir s'exécuter/s'afficher dans notre origine — spec lot 3 §0/§6 critère 6.
+  const disposition = fichier.visibilite === 'PRIVE' ? 'attachment' : 'inline'
+
   setResponseHeaders(event, {
     'Content-Type': fichier.mimeType,
     'Content-Length': String(fichier.taille),
     'Cache-Control': fichier.visibilite === 'PUBLIC' ? PUBLIC_CACHE : PRIVATE_CACHE,
     'X-Content-Type-Options': 'nosniff',
     // Nom original encodé RFC 5987 — jamais interprété comme chemin
-    'Content-Disposition': `inline; filename*=UTF-8''${encodeURIComponent(fichier.nomOriginal)}`,
+    'Content-Disposition': `${disposition}; filename*=UTF-8''${encodeURIComponent(fichier.nomOriginal)}`,
   })
 
   return data

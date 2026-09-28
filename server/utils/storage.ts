@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { basename } from 'node:path'
 import type { VisibiliteFichier } from '../generated/prisma/client'
 // Source unique de la borne de taille (voir shared/config/upload.ts) — aussi utilisée par
 // nuxt.config.ts (requestSizeLimiter de nuxt-security). La forme de clé (STORAGE_KEY_PATTERN)
@@ -33,11 +34,35 @@ export interface SaveOptions {
   visibilite: VisibiliteFichier
 }
 
+export interface SavedFile {
+  readonly key: string
+  readonly nomOriginal: string
+  readonly mimeType: AllowedMime
+}
+
+// Caractères de contrôle (un NUL ferait une 500 Postgres), sauf aucun n'est légitime dans un nom
+// de fichier affiché. Même famille que shared/validation/contact.ts (CONTROLE_PATTERN), redéfinie
+// ici pour rester locale à ce fichier (pas d'import shared → server dans ce sens).
+// eslint-disable-next-line no-control-regex
+const CONTROLE_PATTERN = /[\u0000-\u001F\u007F]/g
+
+/**
+ * Nettoie le nom de fichier original avant de le conserver en métadonnée d'affichage (spec lot 3
+ * §3) : nom de base seulement (un chemin, ex. `../../etc/passwd` ou `C:\x\y.pdf`, est réduit à son
+ * dernier segment — jamais interprété comme chemin de stockage, `key` UUID reste le seul
+ * identifiant physique), caractères de contrôle retirés, forme Unicode NFC, 255 caractères max.
+ */
+export function nettoyerNomFichier(filename: string | undefined): string {
+  const segment = basename((filename ?? '').replace(/\\/g, '/'))
+  const nettoye = segment.replace(CONTROLE_PATTERN, '').normalize('NFC').trim()
+  return (nettoye || 'fichier').slice(0, 255)
+}
+
 /**
  * Enregistre un fichier uploadé et le référence dans la table Fichier.
  * Retourne la clé de stockage (UUID). Le nom original n'est conservé qu'en métadonnée d'affichage.
  */
-export async function saveUploadedFile(file: UploadInput, options: SaveOptions) {
+export async function saveUploadedFile(file: UploadInput, options: SaveOptions): Promise<SavedFile> {
   if (file.data.length === 0) {
     throw createError({ statusCode: 400, statusMessage: 'Fichier vide' })
   }
@@ -51,7 +76,7 @@ export async function saveUploadedFile(file: UploadInput, options: SaveOptions) 
   }
 
   const key = `${randomUUID()}.${extensionForMime(mimeType)}`
-  const nomOriginal = (file.filename ?? 'fichier').slice(0, 255)
+  const nomOriginal = nettoyerNomFichier(file.filename)
 
   await uploadsStorage().setItemRaw(key, file.data)
   try {
@@ -72,4 +97,39 @@ export async function saveUploadedFile(file: UploadInput, options: SaveOptions) 
   }
 
   return { key, nomOriginal, mimeType }
+}
+
+/**
+ * Enregistre plusieurs fichiers comme un seul lot applicatif (spec lot 3 §3, étape 9 — CV +
+ * documents d'une candidature) : si l'un des fichiers échoue (stockage ou Prisma), les fichiers
+ * déjà enregistrés du même lot sont nettoyés avant de relancer l'erreur — jamais de fichier
+ * orphelin, même sur un échec partiel.
+ */
+export async function saveUploadedFiles(files: readonly UploadInput[], options: SaveOptions): Promise<SavedFile[]> {
+  const saved: SavedFile[] = []
+  try {
+    for (const file of files) {
+      saved.push(await saveUploadedFile(file, options))
+    }
+    return saved
+  } catch (error) {
+    await supprimerFichiers(saved.map((f) => f.key))
+    throw error
+  }
+}
+
+/**
+ * Supprime un lot de fichiers (objet stocké + ligne Fichier) — retour arrière après un échec
+ * Prisma en aval de l'upload (ex. `Candidature.create`), ou nettoyage de données de test. N'échoue
+ * jamais bruyamment : une clé déjà absente (stockage ou base) est simplement ignorée.
+ */
+export async function supprimerFichiers(keys: readonly string[]): Promise<void> {
+  await Promise.all(
+    keys.map(async (key) => {
+      await uploadsStorage()
+        .removeItem(key)
+        .catch(() => undefined)
+      await prisma.fichier.deleteMany({ where: { key } }).catch(() => undefined)
+    }),
+  )
 }

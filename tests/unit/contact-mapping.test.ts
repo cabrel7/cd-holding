@@ -163,3 +163,58 @@ describe('cleAccuseReception', () => {
     expect(cleAccuseReception('jean@exemple.ca')).not.toBe(cleAccuseReception('marie@exemple.ca'))
   })
 })
+
+const cdCcdpaaAssistant: CibleContact = { id: 6, slug: 'ccdpaa', nom: 'CCDPAA', email: 'contact@ccdpaa.ca' }
+
+const bodyAssistant = {
+  formulaire: 'assistant' as const,
+  nom: 'Marie Roy',
+  email: 'marie@exemple.ca',
+  entreprise: 'Épicerie Roy',
+  reponses: {
+    profil: 'epicerie' as const,
+    categorie: 'epices' as const,
+    volume: '200-1000kg' as const,
+    delai: '1-3-mois' as const,
+  },
+}
+
+describe('FORMULAIRES.assistant', () => {
+  it('always targets ccdpaa, regardless of the body', () => {
+    expect(FORMULAIRES.assistant.cible(bodyAssistant)).toBe('ccdpaa')
+  })
+
+  it('builds an ASSISTANT_IMPORT_EXPORT message with the fixed subject and a null phone/company fallback', () => {
+    const data = FORMULAIRES.assistant.construire(bodyAssistant, cdCcdpaaAssistant, holding)
+    expect(data.type).toBe('ASSISTANT_IMPORT_EXPORT')
+    expect(data.sujet).toBe('Assistant import-export')
+    expect(data.entreprise).toBe('Épicerie Roy')
+    expect(data.telephone).toBeNull()
+  })
+
+  it('defaults telephone/entreprise to null when absent from the body', () => {
+    const { entreprise: _entreprise, ...sansEntreprise } = bodyAssistant
+    const data = FORMULAIRES.assistant.construire(sansEntreprise, cdCcdpaaAssistant, holding)
+    expect(data.entreprise).toBeNull()
+    expect(data.telephone).toBeNull()
+  })
+
+  it('builds a human-readable "Libellé : valeur" message from the answers', () => {
+    const data = FORMULAIRES.assistant.construire(bodyAssistant, cdCcdpaaAssistant, holding)
+    expect(data.message).toContain('Profil : Épicerie spécialisée')
+    expect(data.message).toContain('Volume mensuel : 200 à 1 000 kg')
+  })
+
+  it('stamps details with the raw answers, the computed palier, and formulaire last', () => {
+    const data = FORMULAIRES.assistant.construire(bodyAssistant, cdCcdpaaAssistant, holding)
+    expect(data.details).toEqual({
+      profil: 'epicerie',
+      categorie: 'epices',
+      volume: '200-1000kg',
+      delai: '1-3-mois',
+      palier: 'moyen',
+      formulaire: 'assistant',
+    })
+    expect(data).not.toHaveProperty('website')
+  })
+})

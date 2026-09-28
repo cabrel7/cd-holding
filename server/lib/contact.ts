@@ -6,6 +6,13 @@
 import { createHash } from 'node:crypto'
 import { CONTACT_FORMS, SUGGESTION_FORM, type FormulaireFilialeSlug } from '#shared/config/contact-forms'
 import { HOLDING_SLUG, type SiteSlug } from '#shared/config/sites'
+import {
+  ASSISTANT_FORM,
+  ASSISTANT_SITE,
+  palierRecommandation,
+  recapReponses,
+  type ReponsesAssistant,
+} from '#shared/content/ccdpaa/assistant-import-export'
 import type { ContactBody, ContactFormulaire } from '#shared/validation/contact'
 
 /** Société résolue depuis Prisma (select explicite, jamais l'objet brut) — cible ou holding. */
@@ -120,6 +127,37 @@ const suggestionHandler: FormulaireHandler<SuggestionContactBody> = {
   typeLibelle: 'Suggestion de produit',
 }
 
+type AssistantContactBody = Extract<ContactBody, { formulaire: 'assistant' }>
+
+/** Une ligne « Libellé : valeur » par étape — message lisible pour la notification interne. */
+function messageAssistant(reponses: ReponsesAssistant): string {
+  return recapReponses(reponses)
+    .map((entree) => `${entree.libelle} : ${entree.valeur}`)
+    .join('\n')
+}
+
+/**
+ * Variante de `POST /api/public/contact` pour l'assistant import-export (ccdpaa, spec lot 3 §3) :
+ * questionnaire scripté (aucune IA), cible fixe (jamais une valeur du corps), `palier` calculé
+ * côté serveur à partir du volume déclaré et stocké dans `details` pour l'admin (lot 5).
+ */
+const assistantHandler: FormulaireHandler<AssistantContactBody> = {
+  cible: () => ASSISTANT_SITE,
+  construire: (body, cible) => ({
+    companyId: cible.id,
+    type: 'ASSISTANT_IMPORT_EXPORT',
+    nom: body.nom,
+    email: body.email,
+    telephone: body.telephone ?? null,
+    entreprise: body.entreprise ?? null,
+    sujet: ASSISTANT_FORM.sujet,
+    message: messageAssistant(body.reponses),
+    details: { ...body.reponses, palier: palierRecommandation(body.reponses.volume), formulaire: 'assistant' },
+  }),
+  origine: 'assistant import-export',
+  typeLibelle: 'Assistant import-export',
+}
+
 /**
  * Registre serveur : `satisfies` fait échouer le typecheck si une variante zod (`ContactBody`)
  * n'a pas son handler ici, ou si un handler ne traite pas correctement SA propre variante (DEC-12/13).
@@ -133,6 +171,7 @@ const REGISTRE = {
   ccdpaa: handlerFiliale('ccdpaa'),
   boissons: handlerFiliale('boissons'),
   suggestion: suggestionHandler,
+  assistant: assistantHandler,
 } satisfies {
   [K in ContactFormulaire]: FormulaireHandler<Extract<ContactBody, { formulaire: K }>>
 }

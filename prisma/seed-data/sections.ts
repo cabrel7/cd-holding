@@ -500,16 +500,18 @@ function servicesFiliale(slug: FilialeSlug): Record<string, Donnees> {
     cta: { titre: t.ctaTitre, texte: t.ctaTexte, ctaLibelle: t.heroCta },
   }
   if (slug === 'ccdpaa') {
-    // PROJECT_CONTEXT.md §7 : questionnaire scripté, pas une IA (aucun appel LLM).
+    // PROJECT_CONTEXT.md §7 : questionnaire scripté, pas une IA (aucun appel LLM). Réaligné sur
+    // le prototype validé par le client (lot 3, spec §0) : titre et recommandations par palier de
+    // volume ; « six à huit semaines » (promesse commerciale non validée) neutralisé.
     result.assistant = {
       surtitre: 'Assistant import-export',
-      titre: 'Quel volume souhaitez-vous importer ?',
+      titre: 'Cinq questions pour bâtir votre plan d’approvisionnement.',
       recommandations: {
-        petit: 'Pour un volume ponctuel ou d’essai, nous recommandons une première commande groupée avec un conteneur déjà planifié, pour limiter les frais de transport.',
-        moyen: 'Pour un volume régulier mensuel, un approvisionnement dédié à fréquence fixe permet de stabiliser vos prix et vos délais.',
-        grand: 'Pour un volume important et récurrent, un contrat d’approvisionnement direct avec nos producteurs partenaires est la formule la plus avantageuse.',
+        petit: 'Pour un volume ponctuel ou d’essai, nous recommandons une commande test depuis notre stock de Montréal, livrée sous 72 heures.',
+        moyen: 'Pour un volume régulier mensuel, un groupage palettisé mensuel permet de stabiliser vos prix et vos délais de livraison.',
+        grand: 'Pour un volume important et récurrent, un conteneur de 20 pieds direct depuis Douala ou Dakar est la formule la plus avantageuse.',
       },
-      mentionDelai: 'Recommandation automatisée à partir de règles fixes ; notre équipe confirme chaque commande par courriel.',
+      mentionDelai: 'Recommandation automatisée à partir de règles fixes ; nous revenons vers vous sous 48 heures ouvrables.',
     }
   }
   return result
@@ -629,7 +631,9 @@ function restaurantCcdpaa(): Record<string, Donnees> {
         'Une salle chaleureuse au cœur du Plateau, une carte qui traverse treize cuisines africaines, un bar complet avec permis d’alcool. Nous vous accueillons midi et soir, en famille, en tête-à-tête ou pour un événement.',
       imageKey: null,
       imageAlt: 'Salle du restaurant Les Ambassades d’Afrique',
-      legende: { surtitre: 'Ouverture', titre: 'Mardi — dimanche · 11h30-22h00' },
+      // Pas de `legende` ici (lot 3, spec §0) : les horaires ont une seule source,
+      // `ReglagesRestaurant` — les recopier ici créerait une deuxième source qui diverge dès
+      // la première édition des réglages. Le bloc « Ouverture » de la page les lit directement.
     },
     // routes/ccdpaa.restaurant.tsx:37-42,84-89
     menu: {
@@ -657,9 +661,30 @@ function offresPlacement(): Record<string, Donnees> {
       title: 'Offres d’emploi — Placement CD Pro',
       description: 'Postes disponibles en manutention, transport et entretien, à pourvoir rapidement au Québec.',
     },
+    // routes/placement.offres.tsx:43-52 (lot 3) : surtitre + titre repris du prototype, sans le
+    // compteur « 0 mandats » codé en dur (spec §0) — le compteur est calculé côté page.
     entete: {
-      titre: 'Offres d’emploi',
-      texte: 'Consultez les postes actuellement à pourvoir et déposez votre candidature en quelques minutes.',
+      surtitre: 'Postes ouverts',
+      titre: 'Des mandats à pourvoir\n*en ce moment.*',
+      texte:
+        'Nos offres sont mises à jour au fil des mandats confiés par nos entreprises clientes. Postulez directement : un conseiller vous rappelle sous 48 heures.',
+    },
+    cta: {
+      titre: 'Vous ne trouvez pas votre poste ?',
+      texte: 'Envoyez-nous une candidature spontanée : nous la gardons en vue des prochains mandats à pourvoir.',
+      ctaLibelle: 'Candidature spontanée',
+    },
+    candidature: {
+      surtitre: 'Postuler',
+      titre: 'Envoyez votre candidature',
+      texte: 'Remplissez le formulaire ci-dessous ; un conseiller étudie votre dossier et revient vers vous.',
+      messageSucces: 'Merci, votre candidature a bien été transmise. Un accusé de réception vous est envoyé par courriel.',
+    },
+    spontanee: {
+      surtitre: 'Candidature spontanée',
+      titre: 'Aucun poste ne correspond à votre profil ?',
+      texte: 'Envoyez-nous votre candidature : nous la conservons en vue des prochains mandats à pourvoir.',
+      messageSucces: 'Merci, votre candidature a bien été transmise. Un accusé de réception vous est envoyé par courriel.',
     },
   }
 }
