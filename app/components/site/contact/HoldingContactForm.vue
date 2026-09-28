@@ -161,7 +161,7 @@ const onSubmit = handleSubmit(
                 ref="cibleSelectRef"
                 v-model="cibleChoisie"
                 v-bind="cibleAttrs"
-                class="h-12 w-full appearance-none rounded-xl border border-input bg-white px-4 pr-10 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
+                class="h-12 w-full appearance-none rounded-xl border border-input bg-white px-4 pr-10 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm aria-invalid:border-destructive aria-invalid:ring-destructive/20"
               >
                 <option value="" disabled>Sélectionnez une filiale</option>
                 <option value="holding">Le {{ groupe }} (général)</option>

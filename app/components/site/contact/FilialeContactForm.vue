@@ -96,7 +96,7 @@ const cleChamp = (champ: ChampContactConfig) => (estChampDetail(champ) ? champ.c
     @submit="onSubmit"
   >
     <fieldset :disabled="envoiEnCours" class="space-y-6">
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <ChampContact v-for="champ in cfg.champs" :key="cleChamp(champ)" :champ="champ" />
       </div>
 
@@ -108,7 +108,7 @@ const cleChamp = (champ: ChampContactConfig) => (estChampDetail(champ) ? champ.c
         <Button
           type="submit"
           :disabled="!hydrate || envoiEnCours"
-          class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent px-7 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+          class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent-strong px-7 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
         >
           {{ envoiEnCours ? 'Envoi en cours…' : cfg.bouton }}
           <Send :size="16" aria-hidden="true" class="transition-transform group-hover:translate-x-0.5" />

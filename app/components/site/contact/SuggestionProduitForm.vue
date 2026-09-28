@@ -4,6 +4,7 @@
 // éditable `CONTACT:suggestion` existe pour ce site. Écarts assumés vs le prototype (§0 CHALLENGE
 // de la spec) : sans icône Lightbulb décorative, toast sans reprendre la saisie de l'utilisateur.
 import { useForm } from 'vee-validate'
+import { Send } from '@lucide/vue'
 import { toTypedSchema } from '@vee-validate/zod'
 import { suggestionFormSchema, type SuggestionFormValues } from '#shared/validation/contact'
 import { SUGGESTION_FORM, type SiteSuggestion } from '#shared/config/contact-forms'
@@ -68,7 +69,7 @@ const onSubmit = handleSubmit(
 <template>
   <section class="pb-24 md:pb-32">
     <div class="mx-auto max-w-5xl px-6">
-      <div class="rounded-[1.75rem] bg-white p-8 shadow-lg ring-1 ring-border md:p-12">
+      <div class="rounded-[1.5rem] bg-white p-8 shadow-lg ring-1 ring-border md:p-12">
         <TexteAccentue
           :texte="section?.titre ?? TITRE_REPLI"
           :vars="vars"
@@ -88,11 +89,11 @@ const onSubmit = handleSubmit(
           method="post"
           novalidate
           :aria-busy="envoiEnCours"
-          class="mt-8 space-y-5"
+          class="mt-8 space-y-6"
           @submit="onSubmit"
         >
-          <fieldset :disabled="envoiEnCours" class="space-y-5">
-            <div class="grid gap-5 sm:grid-cols-2">
+          <fieldset :disabled="envoiEnCours" class="space-y-6">
+            <div class="grid gap-6 lg:grid-cols-2">
               <FormField v-slot="{ componentField }" name="nom">
                 <FormItem>
                   <FormLabel class="font-display text-xs font-semibold uppercase tracking-widest text-navy">
@@ -132,7 +133,7 @@ const onSubmit = handleSubmit(
               </FormField>
             </div>
 
-            <div class="grid gap-5 sm:grid-cols-2">
+            <div class="grid gap-6 lg:grid-cols-2">
               <FormField v-slot="{ componentField }" name="produitSouhaite">
                 <FormItem>
                   <FormLabel class="font-display text-xs font-semibold uppercase tracking-widest text-navy">
@@ -194,9 +195,10 @@ const onSubmit = handleSubmit(
               <Button
                 type="submit"
                 :disabled="!hydrate || envoiEnCours"
-                class="inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent px-7 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+                class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent-strong px-7 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
               >
                 {{ envoiEnCours ? 'Envoi en cours…' : SUGGESTION_FORM.bouton }}
+                <Send :size="16" aria-hidden="true" class="transition-transform group-hover:translate-x-0.5" />
               </Button>
               <MentionConfidentialite :texte="mention" :vars="vars" />
             </div>
