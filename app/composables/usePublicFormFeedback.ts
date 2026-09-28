@@ -45,6 +45,16 @@ export function usePublicFormFeedback(): UsePublicFormFeedbackReturn {
       return false
     }
 
+    if (resultat.raison === 'introuvable') {
+      toast.error('Cette offre n’est plus disponible.')
+      return false
+    }
+
+    if (resultat.raison === 'fichier') {
+      toast.error('Fichier refusé : PDF (CV), PDF/JPEG/PNG, 10 Mo au total.')
+      return false
+    }
+
     toast.error('L’envoi a échoué. Réessayez dans un instant.', {
       description: options.emailSecours ? `Vous pouvez aussi nous écrire à ${options.emailSecours}` : undefined,
     })

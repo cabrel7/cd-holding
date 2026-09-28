@@ -81,11 +81,26 @@ describe('usePublicFormSubmit', () => {
     expect(resultat).toEqual({ ok: false, raison: 'erreur', retryAfterSeconds: null })
   })
 
-  it('endpoint injoignable (réseau) : renvoie raison erreur sans jamais rejeter', async () => {
+  it('404 (offre retirée, endpoint absent) : renvoie raison introuvable sans jamais rejeter', async () => {
     const wrapper = await mountSubmit('/api/public/contact-test-introuvable')
     await expect(wrapper.vm.envoyer({ formulaire: 'holding', nom: 'Jean' })).resolves.toMatchObject({
       ok: false,
-      raison: 'erreur',
+      raison: 'introuvable',
+    })
+  })
+
+  it.each([413, 415])('%i : renvoie raison fichier', async (statusCode) => {
+    registerEndpoint(`/api/public/contact-test-${statusCode}`, {
+      method: 'POST',
+      handler: () => {
+        throw createError({ statusCode, statusMessage: 'Fichier refusé' })
+      },
+    })
+
+    const wrapper = await mountSubmit(`/api/public/contact-test-${statusCode}`)
+    await expect(wrapper.vm.envoyer({ formulaire: 'holding', nom: 'Jean' })).resolves.toMatchObject({
+      ok: false,
+      raison: 'fichier',
     })
   })
 

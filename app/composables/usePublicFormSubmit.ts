@@ -1,18 +1,28 @@
 // Envoi générique des formulaires de contact publics (spec docs/specs/phase3-holding-contact.md
-// §4.2). Ne lance jamais de toast (composable testable, comme useAdminResource) : c'est au
-// composant appelant de traduire `PublicSubmitResult` en toast et de conserver les valeurs
-// saisies en cas d'échec (machine d'états §4.3). Ne rejette jamais : toute erreur, y compris
-// réseau, devient un `PublicSubmitResult` `ok: false`.
+// §4.2, extension multipart docs/specs/lot3-pages-specifiques.md §4). Ne lance jamais de toast
+// (composable testable, comme useAdminResource) : c'est au composant appelant de traduire
+// `PublicSubmitResult` en toast et de conserver les valeurs saisies en cas d'échec (machine
+// d'états §4.3). Ne rejette jamais : toute erreur, y compris réseau, devient un
+// `PublicSubmitResult` `ok: false`.
+// `TBody` accepte aussi `FormData` (candidature : fichiers) — $fetch/ofetch détecte une instance
+// FormData et laisse le navigateur poser le Content-Type multipart (boundary compris), sans
+// JSON.stringify. Rétrocompatible : les appelants JSON existants (Record<string, unknown>) sont
+// inchangés.
 import { ref, type Ref } from 'vue'
 
 const HTTP_BAD_REQUEST = 400
+const HTTP_NOT_FOUND = 404
 const HTTP_PAYLOAD_TOO_LARGE = 413
 const HTTP_UNSUPPORTED_MEDIA_TYPE = 415
 const HTTP_TOO_MANY_REQUESTS = 429
 
 export type PublicSubmitResult =
   | { readonly ok: true }
-  | { readonly ok: false; readonly raison: 'validation' | 'trop-de-requetes' | 'erreur'; readonly retryAfterSeconds: number | null }
+  | {
+      readonly ok: false
+      readonly raison: 'validation' | 'trop-de-requetes' | 'erreur' | 'introuvable' | 'fichier'
+      readonly retryAfterSeconds: number | null
+    }
 
 interface PublicFetchError {
   readonly status?: number
@@ -35,13 +45,14 @@ function extractRetryAfterSeconds(error: PublicFetchError): number | null {
   return Number.isFinite(seconds) && seconds >= 0 ? seconds : null
 }
 
-export interface UsePublicFormSubmitReturn<TBody extends Record<string, unknown>> {
+export interface UsePublicFormSubmitReturn<TBody extends Record<string, unknown> | FormData> {
   envoyer(body: TBody): Promise<PublicSubmitResult>
   readonly envoiEnCours: Readonly<Ref<boolean>>
 }
 
-/** POST JSON générique vers un endpoint `/api/public/*` — pipeline serveur commun §3.2. */
-export function usePublicFormSubmit<TBody extends Record<string, unknown>>(
+/** POST JSON (ou FormData) générique vers un endpoint `/api/public/*` — pipeline serveur commun
+ * §3.2. Un corps `FormData` sert au formulaire de candidature (CV + documents, lot 3). */
+export function usePublicFormSubmit<TBody extends Record<string, unknown> | FormData>(
   endpoint: `/api/public/${string}`,
 ): UsePublicFormSubmitReturn<TBody> {
   const envoiEnCours = ref(false)
@@ -60,7 +71,13 @@ export function usePublicFormSubmit<TBody extends Record<string, unknown>>(
       if (status === HTTP_TOO_MANY_REQUESTS) {
         return { ok: false, raison: 'trop-de-requetes', retryAfterSeconds: extractRetryAfterSeconds(error) }
       }
-      if (status === HTTP_BAD_REQUEST || status === HTTP_PAYLOAD_TOO_LARGE || status === HTTP_UNSUPPORTED_MEDIA_TYPE) {
+      if (status === HTTP_NOT_FOUND) {
+        return { ok: false, raison: 'introuvable', retryAfterSeconds: null }
+      }
+      if (status === HTTP_PAYLOAD_TOO_LARGE || status === HTTP_UNSUPPORTED_MEDIA_TYPE) {
+        return { ok: false, raison: 'fichier', retryAfterSeconds: null }
+      }
+      if (status === HTTP_BAD_REQUEST) {
         return { ok: false, raison: 'validation', retryAfterSeconds: null }
       }
       return { ok: false, raison: 'erreur', retryAfterSeconds: null }
