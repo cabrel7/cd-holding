@@ -6,7 +6,7 @@
 import { useForm } from 'vee-validate'
 import { Send } from '@lucide/vue'
 import { toTypedSchema } from '@vee-validate/zod'
-import { suggestionFormSchema, type SuggestionFormValues } from '#shared/validation/contact'
+import { CONTACT_LIMITS, suggestionFormSchema, type SuggestionFormValues } from '#shared/validation/contact'
 import { SUGGESTION_FORM, type SiteSuggestion } from '#shared/config/contact-forms'
 import type { TexteVars } from '#shared/utils/texte'
 import type { FormulaireData } from '@/composables/useSiteSections'
@@ -103,7 +103,7 @@ const onSubmit = handleSubmit(
                     <Input
                       v-bind="componentField"
                       autocomplete="name"
-                      maxlength="120"
+                      :maxlength="CONTACT_LIMITS.nomMax"
                       placeholder="Jean Tremblay"
                       class="h-12 rounded-xl bg-white px-4"
                     />
@@ -123,7 +123,7 @@ const onSubmit = handleSubmit(
                       type="email"
                       autocomplete="email"
                       :spellcheck="false"
-                      maxlength="254"
+                      :maxlength="CONTACT_LIMITS.emailMax"
                       placeholder="vous@exemple.ca"
                       class="h-12 rounded-xl bg-white px-4"
                     />
@@ -142,7 +142,7 @@ const onSubmit = handleSubmit(
                   <FormControl>
                     <Input
                       v-bind="componentField"
-                      maxlength="120"
+                      :maxlength="CONTACT_LIMITS.texteCourtMax"
                       :placeholder="SUGGESTION_FORM.placeholdersProduit[site]"
                       class="h-12 rounded-xl bg-white px-4"
                     />
@@ -159,7 +159,7 @@ const onSubmit = handleSubmit(
                   <FormControl>
                     <Input
                       v-bind="componentField"
-                      maxlength="80"
+                      :maxlength="CONTACT_LIMITS.paysMax"
                       placeholder="Ex. Sénégal"
                       class="h-12 rounded-xl bg-white px-4"
                     />
@@ -178,7 +178,7 @@ const onSubmit = handleSubmit(
                   <Textarea
                     v-bind="componentField"
                     rows="3"
-                    maxlength="5000"
+                    :maxlength="CONTACT_LIMITS.messageMax"
                     placeholder="Demande de votre clientèle, volume estimé, saisonnalité…"
                     class="resize-none rounded-xl bg-white px-4 py-3"
                   />
