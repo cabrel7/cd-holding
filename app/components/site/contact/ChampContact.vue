@@ -86,7 +86,7 @@ onMounted(() => {
 
 <template>
   <FormField v-slot="{ componentField }" :name="nomChamp">
-    <FormItem :class="champ.pleineLargeur ? 'sm:col-span-2' : undefined">
+    <FormItem :class="champ.pleineLargeur ? 'lg:col-span-2' : undefined">
       <FormLabel class="font-display text-xs font-semibold uppercase tracking-widest text-navy">
         {{ champ.label }}
       </FormLabel>
