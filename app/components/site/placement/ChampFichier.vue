@@ -25,7 +25,9 @@ const props = withDefaults(
 
 const { value, setValue, errorMessage } = useField<File | File[] | undefined>(() => props.name)
 
-const messageErreur = computed(() => props.erreur ?? errorMessage.value ?? null)
+// Dépassement de `maxFichiers` : message explicite plutôt qu'une troncature silencieuse.
+const erreurLocale = ref<string | null>(null)
+const messageErreur = computed(() => props.erreur ?? errorMessage.value ?? erreurLocale.value)
 
 function commeFichiers(v: File | File[] | undefined): File[] {
   if (Array.isArray(v)) return v
@@ -39,10 +41,20 @@ function onChange(event: Event): void {
   // (un <input type=file multiple> ne fusionne pas les sélections successives par lui-même).
   input.value = ''
   if (!choisis.length) return
-  setValue(props.multiple ? [...commeFichiers(value.value), ...choisis].slice(0, props.maxFichiers) : choisis[0])
+  erreurLocale.value = null
+  if (!props.multiple) {
+    setValue(choisis[0])
+    return
+  }
+  const fusion = [...commeFichiers(value.value), ...choisis]
+  if (fusion.length > props.maxFichiers) {
+    erreurLocale.value = `Vous pouvez joindre ${props.maxFichiers} documents au maximum : les fichiers en trop n’ont pas été ajoutés.`
+  }
+  setValue(fusion.slice(0, props.maxFichiers))
 }
 
 function retirer(index: number): void {
+  erreurLocale.value = null
   if (props.multiple) {
     setValue(commeFichiers(value.value).filter((_, i) => i !== index))
   } else {
@@ -52,6 +64,8 @@ function retirer(index: number): void {
 
 const id = useId()
 const erreurId = `${id}-erreur`
+const aideId = `${id}-aide`
+const decritPar = computed(() => (messageErreur.value ? `${aideId} ${erreurId}` : aideId))
 </script>
 
 <template>
@@ -65,11 +79,11 @@ const erreurId = `${id}-erreur`
       :accept="accept"
       :multiple="multiple"
       :aria-invalid="!!messageErreur"
-      :aria-describedby="messageErreur ? erreurId : undefined"
-      class="block w-full cursor-pointer text-sm text-ink/80 file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-site-accent-strong file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-white"
+      :aria-describedby="decritPar"
+      class="block w-full cursor-pointer text-sm text-ink/80 file:mr-4 file:cursor-pointer file:rounded-full file:border-0 file:bg-site-accent-strong file:h-11 file:px-5 file:text-sm file:font-semibold file:text-white"
       @change="onChange"
     >
-    <p class="text-xs text-ink/60">{{ hint }}</p>
+    <p :id="aideId" class="text-xs text-ink/70">{{ hint }}</p>
 
     <ul v-if="commeFichiers(value).length" class="space-y-2">
       <li

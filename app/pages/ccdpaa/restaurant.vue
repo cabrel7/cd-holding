@@ -48,6 +48,8 @@ const heureOuverture = computed(() =>
   reglages.value ? `${libelleHeure(reglages.value.heureOuverture)} · ${libelleHeure(reglages.value.heureFermeture)}` : '',
 )
 const joursOuverture = computed(() => (reglages.value ? libelleJoursOuverture(reglages.value.joursOuverture) : ''))
+// `tel:` sans espaces ni séparateurs (le numéro affiché garde le format saisi dans les réglages).
+const telephoneHref = computed(() => (site.value?.telephone ?? '').replace(/[^\d+]/g, ''))
 const adresse = computed(() => reglages.value?.adresse ?? reglages.value?.quartier ?? null)
 
 useSeoMeta({
@@ -91,11 +93,11 @@ useSeoMeta({
 
             <div class="mt-8 grid max-w-md grid-cols-2 gap-8">
               <div v-if="reglages">
-                <p class="font-display text-xs uppercase tracking-widest text-ink/55">Ouverture</p>
+                <p class="font-display text-xs uppercase tracking-widest text-ink/70">Ouverture</p>
                 <p class="mt-1 font-semibold text-navy">{{ joursOuverture }}<br>{{ heureOuverture }}</p>
               </div>
               <div v-if="reglages && adresse">
-                <p class="font-display text-xs uppercase tracking-widest text-ink/55">Adresse</p>
+                <p class="font-display text-xs uppercase tracking-widest text-ink/70">Adresse</p>
                 <p class="mt-1 font-semibold text-navy">{{ adresse }}</p>
               </div>
             </div>
@@ -163,9 +165,14 @@ useSeoMeta({
       :email-secours="site?.email ?? null"
     />
     <section v-else class="pb-24 md:pb-32">
-      <div class="mx-auto max-w-4xl px-6 text-center">
+      <div class="mx-auto max-w-4xl px-6">
         <p class="text-ink/70">
-          Réservez par téléphone ou via la
+          Réservez par téléphone
+          <template v-if="site?.telephone">
+            au
+            <a :href="`tel:${telephoneHref}`" class="font-semibold underline underline-offset-2 hover:text-site-accent-strong">{{ site.telephone }}</a>
+          </template>
+          ou via la
           <NuxtLink to="/ccdpaa/contact" class="underline underline-offset-2 hover:text-site-accent-strong">page contact</NuxtLink>.
         </p>
       </div>

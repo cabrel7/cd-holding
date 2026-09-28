@@ -9,6 +9,7 @@
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { ChevronDown, Send } from '@lucide/vue'
+import { MAX_UPLOAD_BYTES } from '#shared/config/upload'
 import type { ChampContact as ChampContactConfig } from '#shared/config/contact-forms'
 import {
   CANDIDATURE_FORM,
@@ -16,6 +17,7 @@ import {
   CV_ACCEPT,
   DOCUMENT_ACCEPT,
   NIVEAUX_EXPERIENCE,
+  OFFRES_PATH,
   POSTES_CANDIDAT,
   POSTE_AUTRE,
 } from '#shared/config/candidature'
@@ -28,6 +30,7 @@ import { usePublicFormFeedback } from '@/composables/usePublicFormFeedback'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { CHECKBOX_CLASS, LABEL_CLAIR, SELECT_CLASS } from '@/utils/formClasses'
 import ChampContact from '@/components/site/contact/ChampContact.vue'
 import ChampFichier from '@/components/site/placement/ChampFichier.vue'
 import HoneypotField from '@/components/site/form/HoneypotField.vue'
@@ -35,14 +38,34 @@ import MentionConfidentialite from '@/components/site/form/MentionConfidentialit
 import TexteAccentue from '@/components/site/TexteAccentue.vue'
 
 const TITRE_REPLI = 'Postuler'
+const OCTETS_PAR_MO = 1024 * 1024
+const CONSENTEMENT_REPLI = 'J’accepte que mes données soient traitées pour ma candidature.'
+const LIBELLE_POLITIQUE = 'Politique de confidentialité'
+const LIBELLE_AUTRES_OFFRES = 'Voir les autres offres'
+const MESSAGE_INTROUVABLE = 'Cette offre n’est plus disponible.'
 
-const props = defineProps<{
-  offre: PublicOffreDto | null
-  section: FormulaireData | undefined
-  vars: TexteVars
-  mention: string | null
-  emailSecours: string | null
-}>()
+const enMo = (octets: number): number => Math.round(octets / OCTETS_PAR_MO)
+const CV_MO = enMo(CANDIDATURE_LIMITS.cvMaxBytes)
+const DOCUMENT_MO = enMo(CANDIDATURE_LIMITS.documentMaxBytes)
+const TOTAL_MO = enMo(MAX_UPLOAD_BYTES)
+const AIDE_CV = `PDF uniquement, ${CV_MO} Mo au maximum.`
+const AIDE_DOCUMENTS = `PDF, JPEG ou PNG — ${CANDIDATURE_LIMITS.documentsMax} documents et ${DOCUMENT_MO} Mo par fichier au maximum.`
+// Cohérent avec les aides ci-dessus : mêmes types, mêmes limites (par fichier, puis total).
+const MESSAGE_FICHIER = `Fichier refusé : CV en PDF (${CV_MO} Mo max.), autres documents en PDF, JPEG ou PNG (${DOCUMENT_MO} Mo max. par fichier), ${TOTAL_MO} Mo au total.`
+
+const props = withDefaults(
+  defineProps<{
+    offre: PublicOffreDto | null
+    /** Section `OFFRES:candidature` / `OFFRES:spontanee` ; `consentement` : texte éditable de la case. */
+    section: FormulaireData | undefined
+    vars: TexteVars
+    mention: string | null
+    emailSecours: string | null
+    /** `h1` quand le formulaire est le titre principal de la page (candidature spontanée). */
+    titreTag?: 'h1' | 'h2'
+  }>(),
+  { titreTag: 'h2' },
+)
 
 const avecOffre = computed(() => props.offre !== null)
 
@@ -82,7 +105,7 @@ function valeursInitiales(): CandidatureFormValues {
 }
 
 const schema = computed(() => toTypedSchema(candidatureFormSchema({ avecOffre: avecOffre.value })))
-const { handleSubmit, resetForm, errors, values } = useForm({
+const { handleSubmit, resetForm, errors, values, setFieldError } = useForm({
   validationSchema: schema,
   initialValues: valeursInitiales(),
 })
@@ -137,16 +160,32 @@ onMounted(() => {
 
 const formRef = ref<HTMLFormElement | null>(null)
 
+const offreIntrouvable = ref(false)
+
+// Le <fieldset disabled> pendant l'envoi retire le focus au bouton : on le lui rend après un échec.
+async function rendreFocusBouton(): Promise<void> {
+  await nextTick()
+  formRef.value?.querySelector<HTMLElement>('button[type="submit"]')?.focus()
+}
+
 const onSubmit = handleSubmit(
   async (formValues) => {
+    offreIntrouvable.value = false
     const resultat = await envoyer(construireFormData(formValues))
     const succes = notifierResultat(resultat, {
       titreSucces: CANDIDATURE_FORM.toastTitre,
       messageSucces: props.section?.messageSucces ?? null,
       vars: props.vars,
       emailSecours: props.emailSecours,
+      messages: { introuvable: MESSAGE_INTROUVABLE, fichier: MESSAGE_FICHIER },
     })
-    if (succes) resetForm()
+    if (succes) {
+      resetForm()
+      return
+    }
+    if (!resultat.ok && resultat.raison === 'fichier') setFieldError('cv', MESSAGE_FICHIER)
+    if (!resultat.ok && resultat.raison === 'introuvable') offreIntrouvable.value = true
+    await rendreFocusBouton()
   },
   async () => {
     await nextTick()
@@ -167,8 +206,9 @@ const onSubmit = handleSubmit(
     <TexteAccentue
       :texte="section?.titre ?? TITRE_REPLI"
       :vars="vars"
-      as="h2"
-      class="mt-2 font-display text-3xl font-bold leading-tight text-navy"
+      :as="titreTag"
+      class="mt-2 font-display font-bold leading-tight text-navy"
+      :class="titreTag === 'h1' ? 'text-4xl md:text-5xl' : 'text-3xl'"
     />
     <TexteAccentue
       v-if="section?.texte"
@@ -194,7 +234,7 @@ const onSubmit = handleSubmit(
 
           <FormField v-slot="{ componentField }" name="pays">
             <FormItem>
-              <FormLabel class="font-display text-xs font-semibold uppercase tracking-widest text-navy">
+              <FormLabel :class="LABEL_CLAIR">
                 Pays
               </FormLabel>
               <FormControl>
@@ -212,7 +252,7 @@ const onSubmit = handleSubmit(
 
           <FormField v-slot="{ componentField }" name="adresseComplete">
             <FormItem class="lg:col-span-2">
-              <FormLabel class="font-display text-xs font-semibold uppercase tracking-widest text-navy">
+              <FormLabel :class="LABEL_CLAIR">
                 Adresse complète
               </FormLabel>
               <FormControl>
@@ -231,7 +271,7 @@ const onSubmit = handleSubmit(
           <template v-if="!avecOffre">
             <FormField v-slot="{ componentField }" name="posteRecherche">
               <FormItem>
-                <FormLabel class="font-display text-xs font-semibold uppercase tracking-widest text-navy">
+                <FormLabel :class="LABEL_CLAIR">
                   Poste recherché
                 </FormLabel>
                 <div class="relative">
@@ -239,7 +279,7 @@ const onSubmit = handleSubmit(
                     <select
                       :value="componentField.modelValue ?? ''"
                       :name="componentField.name"
-                      class="h-12 w-full appearance-none rounded-xl border border-input bg-white px-4 pr-10 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm aria-invalid:border-destructive aria-invalid:ring-destructive/20"
+                      :class="SELECT_CLASS"
                       @change="componentField['onUpdate:modelValue']?.(($event.target as HTMLSelectElement).value)"
                       @blur="componentField.onBlur"
                     >
@@ -261,7 +301,7 @@ const onSubmit = handleSubmit(
 
             <FormField v-if="posteRecherche === POSTE_AUTRE" v-slot="{ componentField }" name="posteAutrePrecision">
               <FormItem>
-                <FormLabel class="font-display text-xs font-semibold uppercase tracking-widest text-navy">
+                <FormLabel :class="LABEL_CLAIR">
                   Précisez le poste
                 </FormLabel>
                 <FormControl>
@@ -279,7 +319,7 @@ const onSubmit = handleSubmit(
 
           <FormField v-slot="{ componentField }" name="experience">
             <FormItem :class="avecOffre ? undefined : 'lg:col-span-2'">
-              <FormLabel class="font-display text-xs font-semibold uppercase tracking-widest text-navy">
+              <FormLabel :class="LABEL_CLAIR">
                 Expérience
               </FormLabel>
               <div class="relative">
@@ -287,7 +327,7 @@ const onSubmit = handleSubmit(
                   <select
                     :value="componentField.modelValue ?? ''"
                     :name="componentField.name"
-                    class="h-12 w-full appearance-none rounded-xl border border-input bg-white px-4 pr-10 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm aria-invalid:border-destructive aria-invalid:ring-destructive/20"
+                    :class="SELECT_CLASS"
                     @change="componentField['onUpdate:modelValue']?.(($event.target as HTMLSelectElement).value)"
                     @blur="componentField.onBlur"
                   >
@@ -314,7 +354,7 @@ const onSubmit = handleSubmit(
               name="cv"
               label="Curriculum vitæ (CV)"
               :accept="CV_ACCEPT"
-              hint="PDF uniquement, 5 Mo au maximum."
+              :hint="AIDE_CV"
               :erreur="erreurCv"
             />
           </div>
@@ -326,7 +366,7 @@ const onSubmit = handleSubmit(
               :accept="DOCUMENT_ACCEPT"
               multiple
               :max-fichiers="CANDIDATURE_LIMITS.documentsMax"
-              hint="PDF, JPEG ou PNG — 5 documents et 5 Mo par fichier au maximum."
+              :hint="AIDE_DOCUMENTS"
               :erreur="erreurDocuments"
             />
           </div>
@@ -339,15 +379,15 @@ const onSubmit = handleSubmit(
                 <input
                   type="checkbox"
                   :checked="consentement === true"
-                  class="mt-0.5 h-5 w-5 shrink-0 rounded border-input text-site-accent-strong focus-visible:ring-3 focus-visible:ring-ring/50"
+                  :class="CHECKBOX_CLASS"
                   @change="handleChange(($event.target as HTMLInputElement).checked)"
                 >
               </FormControl>
               <FormLabel class="text-sm font-normal normal-case tracking-normal text-ink/80">
-                J’accepte que mes renseignements soient utilisés pour traiter ma candidature, conformément à la
-                <NuxtLink to="/confidentialite" class="underline underline-offset-2 hover:text-site-accent-strong">
-                  politique de confidentialité
-                </NuxtLink>.
+                <TexteAccentue :texte="section?.consentement ?? CONSENTEMENT_REPLI" :vars="vars" as="span" />
+                <NuxtLink to="/confidentialite" class="ml-1 underline underline-offset-2 hover:text-site-accent-strong">
+                  {{ LIBELLE_POLITIQUE }}
+                </NuxtLink>
               </FormLabel>
             </div>
             <FormMessage />
@@ -359,10 +399,14 @@ const onSubmit = handleSubmit(
         </FormField>
 
         <div class="space-y-4">
+          <p v-if="offreIntrouvable" role="alert" class="text-sm font-semibold text-destructive">
+            {{ MESSAGE_INTROUVABLE }}
+            <NuxtLink :to="OFFRES_PATH" class="ml-1 underline underline-offset-2">{{ LIBELLE_AUTRES_OFFRES }}</NuxtLink>
+          </p>
           <Button
             type="submit"
             :disabled="!hydrate || envoiEnCours"
-            class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent-strong px-7 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
+            class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent-strong px-7 text-sm font-semibold text-white transition-colors hover:bg-navy disabled:opacity-60"
           >
             {{ envoiEnCours ? 'Envoi en cours…' : CANDIDATURE_FORM.bouton }}
             <Send :size="16" aria-hidden="true" class="transition-transform group-hover:translate-x-0.5" />

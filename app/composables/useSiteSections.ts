@@ -59,6 +59,8 @@ export interface FormulaireData {
   readonly titre: string
   readonly texte?: string
   readonly messageSucces: string
+  /** Texte de la case de consentement Loi 25 (utilisé par `OFFRES:candidature`). */
+  readonly consentement?: string
 }
 
 /** Un item de `chiffres`, résolu côté serveur (`resolveChiffres`, T1) : toujours `{valeur, libelle}`. */

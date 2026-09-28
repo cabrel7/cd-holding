@@ -3,8 +3,8 @@
 // écart assumé #1 : une page, pas un modal — le formulaire complet dépasse largement 85vh à
 // 375px, le lien est partageable, et la page porte le JSON-LD JobPosting). 404 (fatal) si l'uuid
 // est malformé (garde `validate`) ou si l'offre est absente/retirée/incomplète côté serveur.
-import { Banknote, Clock, MapPin } from '@lucide/vue'
-import { TYPE_CONTRAT_SCHEMA_ORG, TYPES_CONTRAT } from '#shared/config/candidature'
+import { ArrowLeft, Banknote, Briefcase, MapPin } from '@lucide/vue'
+import { OFFRES_PATH, TYPE_CONTRAT_SCHEMA_ORG, TYPES_CONTRAT } from '#shared/config/candidature'
 import type { PublicOffreDto } from '#shared/types/public'
 import type { FormulaireData } from '@/composables/useSiteSections'
 import CandidatureForm from '@/components/site/placement/CandidatureForm.vue'
@@ -69,8 +69,12 @@ useHead(() => ({
 <template>
   <section class="pb-24 pt-32 md:pb-32 md:pt-40">
     <div class="mx-auto max-w-5xl px-6">
-      <NuxtLink to="/placement/offres" class="text-sm font-semibold text-site-accent-strong hover:underline">
-        ← Retour aux offres
+      <NuxtLink
+        :to="OFFRES_PATH"
+        class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-site-accent-strong hover:underline"
+      >
+        <ArrowLeft :size="16" aria-hidden="true" />
+        Retour aux offres
       </NuxtLink>
 
       <h1 class="mt-4 max-w-2xl font-display text-4xl font-bold leading-[1.05] text-navy md:text-5xl">
@@ -82,7 +86,7 @@ useHead(() => ({
           {{ offre?.lieu }}
         </span>
         <span class="inline-flex items-center gap-2">
-          <Clock :size="15" aria-hidden="true" class="text-site-accent-strong" />
+          <Briefcase :size="15" aria-hidden="true" class="text-site-accent-strong" />
           {{ offre ? TYPES_CONTRAT[offre.typeContrat] : '' }}
         </span>
         <span v-if="offre?.salaire" class="inline-flex items-center gap-2">
@@ -90,7 +94,7 @@ useHead(() => ({
           {{ offre.salaire }}
         </span>
       </div>
-      <p class="mt-6 max-w-2xl leading-relaxed text-ink/80">{{ offre?.description }}</p>
+      <p class="mt-6 max-w-2xl whitespace-pre-line leading-relaxed text-ink/80">{{ offre?.description }}</p>
 
       <div class="mt-14">
         <CandidatureForm

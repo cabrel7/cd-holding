@@ -1,15 +1,13 @@
 <script setup lang="ts">
 // Assistant import-export (ccdpaa) — spec lot3 §3/§4, questionnaire SCRIPTÉ (DEC-14) : aucune
 // IA, aucun appel LLM, jamais présenté comme tel. Affiché par la page appelante seulement si la
-// section éditable `SERVICES:assistant` existe (aucun `if (slug)` ici). Champs de l'étape
-// « coordonnées » volontairement PAS rendus via <ChampContact>/<MentionConfidentialite>
-// (contrairement à la suggestion littérale de la spec) : leurs couleurs fixes (`text-navy`,
-// `text-ink/70`) sont illisibles sur cette carte `bg-navy` (mesuré : ~1:1 et ~2,2:1, sous l'AA).
-// Le contenu est repris à l'identique, seule la teinte change (blanc/crème, cohérent avec le
-// reste du site sur fond navy — voir [filiale]/a-propos.vue, section Équipe).
+// section éditable `SERVICES:assistant` existe (aucun `if (slug)` ici). Carte sombre (fidélité
+// prototype) rendue accessible : champs/mention via <ChampContact>/<MentionConfidentialite>
+// `tone="sombre"`, jamais de texte blanc sur `bg-site-accent` (contraste), anneau de focus blanc
+// avec espacement navy (`--carte-fond`) sur tous les contrôles.
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { ArrowLeft, ArrowRight, RotateCcw, Send } from '@lucide/vue'
+import { ArrowLeft, ArrowRight, Check, RotateCcw, Send } from '@lucide/vue'
 import {
   ASSISTANT_FORM,
   ETAPES_ASSISTANT,
@@ -20,13 +18,16 @@ import {
   type PalierRecommandation,
   type ReponsesAssistant,
 } from '#shared/content/ccdpaa/assistant-import-export'
-import { assistantFormSchema, CONTACT_LIMITS, type AssistantFormValues } from '#shared/validation/contact'
+import { assistantFormSchema, type AssistantFormValues } from '#shared/validation/contact'
 import type { TexteVars } from '#shared/utils/texte'
 import { usePublicFormSubmit } from '@/composables/usePublicFormSubmit'
 import { usePublicFormFeedback } from '@/composables/usePublicFormFeedback'
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
+import type { ChampContact as ChampContactConfig } from '#shared/config/contact-forms'
+import { FOCUS_CARTE_SOMBRE } from '@/utils/formClasses'
+import { FormField } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
+import ChampContact from '@/components/site/contact/ChampContact.vue'
+import MentionConfidentialite from '@/components/site/form/MentionConfidentialite.vue'
 import HoneypotField from '@/components/site/form/HoneypotField.vue'
 import TexteAccentue from '@/components/site/TexteAccentue.vue'
 
@@ -39,11 +40,13 @@ export interface AssistantSectionData {
   readonly mentionDelai: string
 }
 
-const LABEL_CLASS = 'font-display text-xs font-semibold uppercase tracking-widest text-white/80'
-const CONTROL_CLASS = 'h-12 rounded-xl bg-white px-4 text-ink'
-const MESSAGE_CLASS = 'text-white'
-const CONTROLE_BASE =
-  'inline-flex min-h-12 items-center gap-2 rounded-full border border-white/25 px-5 text-sm font-medium hover:bg-white/10'
+const CHAMP_NOM: ChampContactConfig = { type: 'nom', label: 'Nom', placeholder: 'Jean Tremblay' }
+const CHAMP_ENTREPRISE: ChampContactConfig = { type: 'entreprise', label: 'Entreprise (facultatif)' }
+const CHAMP_EMAIL: ChampContactConfig = { type: 'email', label: 'Courriel', placeholder: 'vous@exemple.ca' }
+const CHAMP_TELEPHONE: ChampContactConfig = { type: 'telephone', label: 'Téléphone (facultatif)', placeholder: '514-000-0000' }
+
+const CONTROLE_BASE = `inline-flex min-h-12 items-center gap-2 rounded-full border border-white/25 px-5 text-sm font-medium hover:bg-white/10 ${FOCUS_CARTE_SOMBRE}`
+const BOUTON_PRIMAIRE = `group inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-navy transition-colors hover:bg-cream disabled:pointer-events-none disabled:opacity-50 ${FOCUS_CARTE_SOMBRE}`
 
 const props = defineProps<{
   section: AssistantSectionData
@@ -81,11 +84,17 @@ function retour() {
 const recommandationTexte = computed(() => (palier.value ? props.section.recommandations[palier.value] : ''))
 
 // Focus la question (ou le résultat) à chaque changement d'étape — accessibilité clavier (spec §4).
+// Étapes : `@after-enter` de la <Transition> (l'élément entrant est monté) ; récapitulatif et
+// « Recommencer » : hors transition, donc focus direct après le rendu.
 const panelHeadingRef = ref<HTMLElement | null>(null)
-watch([etapeIndex, termine], async () => {
+const sectionRef = ref<HTMLElement | null>(null)
+function focuserEtape(el: Element): void {
+  el.querySelector<HTMLElement>('legend')?.focus()
+}
+async function focuserApresRendu(cible: () => HTMLElement | null | undefined): Promise<void> {
   await nextTick()
-  panelHeadingRef.value?.focus()
-})
+  cible()?.focus()
+}
 
 const schemaContact = toTypedSchema(assistantFormSchema)
 const { handleSubmit, resetForm } = useForm<AssistantFormValues>({
@@ -114,6 +123,7 @@ const onSubmitContact = handleSubmit(
       palier.value = palierRecommandation(reponsesCompletes.volume)
       recapFinal.value = recapReponses(reponsesCompletes)
       termine.value = true
+      await focuserApresRendu(() => panelHeadingRef.value)
     }
   },
   async () => {
@@ -129,18 +139,19 @@ function recommencer() {
   palier.value = null
   recapFinal.value = null
   resetForm()
+  void focuserApresRendu(() => sectionRef.value?.querySelector<HTMLElement>('legend'))
 }
 </script>
 
 <template>
-  <section class="pb-24 md:pb-32">
-    <div class="mx-auto max-w-5xl px-6">
-      <div class="overflow-hidden rounded-[1.75rem] bg-navy p-8 text-white md:p-12">
+  <section ref="sectionRef" class="pb-24 md:pb-32">
+    <div class="mx-auto max-w-7xl px-6">
+      <div class="overflow-hidden rounded-[1.75rem] bg-navy p-8 text-white [--carte-fond:var(--navy)] md:p-12">
         <TexteAccentue
           :texte="section.surtitre"
           :vars="vars"
           as="p"
-          class="font-display text-xs font-semibold uppercase tracking-[0.3em] text-site-accent"
+          class="font-display text-xs font-semibold uppercase tracking-[0.3em] text-gold"
         />
         <TexteAccentue
           :texte="section.titre"
@@ -155,16 +166,16 @@ function recommencer() {
               v-for="n in NOMBRE_ETAPES"
               :key="n"
               class="h-1 flex-1 rounded-full transition-colors"
-              :class="n - 1 <= etapeIndex ? 'bg-site-accent' : 'bg-white/20'"
+              :class="n - 1 <= etapeIndex ? 'bg-white' : 'bg-white/20'"
             />
           </div>
           <p class="sr-only" role="status" aria-live="polite">Étape {{ etapeIndex + 1 }} sur {{ NOMBRE_ETAPES }}</p>
 
-          <Transition name="assistant-fade" mode="out-in">
+          <Transition name="assistant-fade" mode="out-in" @after-enter="focuserEtape">
             <div :key="etapeIndex" class="mt-8">
               <!-- Étapes 1-4 : question à choix -->
               <fieldset v-if="etapeCourante">
-                <legend ref="panelHeadingRef" tabindex="-1" class="font-display text-xl font-semibold outline-none">
+                <legend tabindex="-1" class="font-display text-xl font-semibold outline-none">
                   {{ etapeCourante.question }}
                 </legend>
                 <p class="mt-2 max-w-lg text-sm text-white/70">{{ etapeCourante.aide }}</p>
@@ -180,8 +191,9 @@ function recommencer() {
                       @change="setValeur(option.value)"
                     >
                     <span
-                      class="block min-h-11 cursor-pointer rounded-full border border-white/25 px-5 py-3 text-sm font-medium transition-colors peer-checked:border-site-accent peer-checked:bg-site-accent peer-focus-visible:ring-2 peer-focus-visible:ring-white peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-navy"
+                      class="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full border border-white/25 px-5 py-3 text-sm font-medium transition-colors peer-checked:border-white peer-checked:bg-white peer-checked:text-navy peer-focus-visible:ring-2 peer-focus-visible:ring-white peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-navy"
                     >
+                      <Check v-if="valeurCourante === option.value" :size="16" aria-hidden="true" />
                       {{ option.label }}
                     </span>
                   </label>
@@ -191,96 +203,31 @@ function recommencer() {
                   <button v-if="etapeIndex > 0" type="button" :class="CONTROLE_BASE" @click="retour">
                     <ArrowLeft :size="16" aria-hidden="true" /> Retour
                   </button>
-                  <button
-                    type="button"
-                    :disabled="!valeurCourante"
-                    class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent px-6 text-sm font-semibold transition-transform hover:-translate-y-0.5 disabled:pointer-events-none disabled:opacity-50"
-                    @click="continuer"
+                  <button type="button" :disabled="!valeurCourante" :class="BOUTON_PRIMAIRE" @click="continuer"
                   >
                     Continuer
                     <ArrowRight :size="16" aria-hidden="true" class="transition-transform group-hover:translate-x-0.5" />
                   </button>
-                  <span class="text-xs text-white/50">Étape {{ etapeIndex + 1 }} sur {{ NOMBRE_ETAPES }}</span>
+                  <span class="text-xs text-white/70" aria-hidden="true">Étape {{ etapeIndex + 1 }} sur {{ NOMBRE_ETAPES }}</span>
                 </div>
               </fieldset>
 
               <!-- Étape 5 : coordonnées -->
               <form v-else ref="contactFormRef" method="post" novalidate :aria-busy="envoiEnCours" @submit="onSubmitContact">
                 <fieldset :disabled="envoiEnCours">
-                  <legend ref="panelHeadingRef" tabindex="-1" class="font-display text-xl font-semibold outline-none">
+                  <legend tabindex="-1" class="font-display text-xl font-semibold outline-none">
                     {{ ETAPE_CONTACT.question }}
                   </legend>
                   <p class="mt-2 max-w-lg text-sm text-white/70">{{ ETAPE_CONTACT.aide }}</p>
 
                   <div class="mt-6 grid gap-5 sm:grid-cols-2">
-                    <FormField v-slot="{ componentField }" name="nom">
-                      <FormItem>
-                        <FormLabel :class="LABEL_CLASS">Nom</FormLabel>
-                        <FormControl>
-                          <Input
-                            v-bind="componentField"
-                            autocomplete="name"
-                            :maxlength="CONTACT_LIMITS.nomMax"
-                            placeholder="Jean Tremblay"
-                            :class="CONTROL_CLASS"
-                          />
-                        </FormControl>
-                        <FormMessage :class="MESSAGE_CLASS" />
-                      </FormItem>
-                    </FormField>
-
-                    <FormField v-slot="{ componentField }" name="entreprise">
-                      <FormItem>
-                        <FormLabel :class="LABEL_CLASS">Entreprise (facultatif)</FormLabel>
-                        <FormControl>
-                          <Input
-                            v-bind="componentField"
-                            autocomplete="organization"
-                            :maxlength="CONTACT_LIMITS.entrepriseMax"
-                            :class="CONTROL_CLASS"
-                          />
-                        </FormControl>
-                        <FormMessage :class="MESSAGE_CLASS" />
-                      </FormItem>
-                    </FormField>
+                    <ChampContact :champ="CHAMP_NOM" tone="sombre" />
+                    <ChampContact :champ="CHAMP_ENTREPRISE" tone="sombre" />
                   </div>
 
                   <div class="mt-5 grid gap-5 sm:grid-cols-2">
-                    <FormField v-slot="{ componentField }" name="email">
-                      <FormItem>
-                        <FormLabel :class="LABEL_CLASS">Courriel</FormLabel>
-                        <FormControl>
-                          <Input
-                            v-bind="componentField"
-                            type="email"
-                            autocomplete="email"
-                            :spellcheck="false"
-                            :maxlength="CONTACT_LIMITS.emailMax"
-                            placeholder="vous@exemple.ca"
-                            :class="CONTROL_CLASS"
-                          />
-                        </FormControl>
-                        <FormMessage :class="MESSAGE_CLASS" />
-                      </FormItem>
-                    </FormField>
-
-                    <FormField v-slot="{ componentField }" name="telephone">
-                      <FormItem>
-                        <FormLabel :class="LABEL_CLASS">Téléphone (facultatif)</FormLabel>
-                        <FormControl>
-                          <Input
-                            v-bind="componentField"
-                            type="tel"
-                            inputmode="tel"
-                            autocomplete="tel"
-                            :maxlength="CONTACT_LIMITS.telephoneMax"
-                            placeholder="514-000-0000"
-                            :class="CONTROL_CLASS"
-                          />
-                        </FormControl>
-                        <FormMessage :class="MESSAGE_CLASS" />
-                      </FormItem>
-                    </FormField>
+                    <ChampContact :champ="CHAMP_EMAIL" tone="sombre" />
+                    <ChampContact :champ="CHAMP_TELEPHONE" tone="sombre" />
                   </div>
 
                   <FormField v-slot="{ componentField }" name="website">
@@ -291,23 +238,14 @@ function recommencer() {
                     <button type="button" :class="CONTROLE_BASE" @click="retour">
                       <ArrowLeft :size="16" aria-hidden="true" /> Retour
                     </button>
-                    <Button
-                      type="submit"
-                      :disabled="envoiEnCours"
-                      class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent px-6 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
-                    >
+                    <Button type="submit" :disabled="envoiEnCours" :class="BOUTON_PRIMAIRE">
                       {{ envoiEnCours ? 'Envoi en cours…' : ASSISTANT_FORM.bouton }}
                       <Send :size="16" aria-hidden="true" class="transition-transform group-hover:translate-x-0.5" />
                     </Button>
-                    <span class="text-xs text-white/50">Étape {{ NOMBRE_ETAPES }} sur {{ NOMBRE_ETAPES }}</span>
+                    <span class="text-xs text-white/70" aria-hidden="true">Étape {{ NOMBRE_ETAPES }} sur {{ NOMBRE_ETAPES }}</span>
                   </div>
 
-                  <p class="mt-6 text-xs text-white/70">
-                    <TexteAccentue v-if="mention" :texte="mention" :vars="vars" as="span" />
-                    <NuxtLink to="/confidentialite" class="ml-1 underline underline-offset-2 hover:text-white">
-                      Politique de confidentialité
-                    </NuxtLink>
-                  </p>
+                  <MentionConfidentialite :texte="mention" :vars="vars" tone="sombre" class="mt-6" />
                 </fieldset>
               </form>
             </div>
@@ -322,12 +260,12 @@ function recommencer() {
 
           <dl v-if="recapFinal" class="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
             <div v-for="reponse in recapFinal" :key="reponse.libelle">
-              <dt class="text-xs uppercase tracking-widest text-white/50">{{ reponse.libelle }}</dt>
+              <dt class="text-xs uppercase tracking-widest text-white/70">{{ reponse.libelle }}</dt>
               <dd class="mt-1 text-sm font-medium">{{ reponse.valeur }}</dd>
             </div>
           </dl>
 
-          <TexteAccentue :texte="section.mentionDelai" :vars="vars" as="p" class="mt-8 text-sm text-white/60" />
+          <TexteAccentue :texte="section.mentionDelai" :vars="vars" as="p" class="mt-8 text-sm text-white/70" />
 
           <button type="button" :class="`mt-6 ${CONTROLE_BASE}`" @click="recommencer">
             <RotateCcw :size="16" aria-hidden="true" /> Recommencer

@@ -34,6 +34,7 @@ useSeoMeta({
     <div class="mx-auto max-w-5xl px-6">
       <CandidatureForm
         :offre="null"
+        titre-tag="h1"
         :section="spontanee"
         :vars="vars"
         :mention="site?.groupe.mentionFormulaires ?? null"

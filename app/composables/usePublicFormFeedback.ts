@@ -15,6 +15,8 @@ export interface NotifierResultatOptions {
   readonly messageSucces?: string | null
   readonly vars?: TexteVars
   readonly emailSecours?: string | null
+  /** Messages propres à certains formulaires (candidature) ; absents → toast générique d'erreur. */
+  readonly messages?: { readonly introuvable?: string; readonly fichier?: string }
 }
 
 export interface UsePublicFormFeedbackReturn {
@@ -45,13 +47,14 @@ export function usePublicFormFeedback(): UsePublicFormFeedbackReturn {
       return false
     }
 
-    if (resultat.raison === 'introuvable') {
-      toast.error('Cette offre n’est plus disponible.')
-      return false
-    }
-
-    if (resultat.raison === 'fichier') {
-      toast.error('Fichier refusé : PDF (CV), PDF/JPEG/PNG, 10 Mo au total.')
+    const messagePropre =
+      resultat.raison === 'introuvable'
+        ? options.messages?.introuvable
+        : resultat.raison === 'fichier'
+          ? options.messages?.fichier
+          : undefined
+    if (messagePropre) {
+      toast.error(messagePropre)
       return false
     }
 

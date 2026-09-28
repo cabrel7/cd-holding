@@ -85,4 +85,32 @@ describe('usePublicFormFeedback', () => {
     expect(erreurSpy).toHaveBeenCalledWith('L’envoi a échoué. Réessayez dans un instant.', { description: undefined })
     erreurSpy.mockRestore()
   })
+
+  it('introuvable / fichier sans messages fournis : toast générique d’erreur (formulaires JSON inchangés)', () => {
+    const erreurSpy = vi.spyOn(toast, 'error').mockImplementation(() => '')
+    const { notifierResultat } = usePublicFormFeedback()
+
+    for (const raison of ['introuvable', 'fichier'] as const) {
+      const resultat = notifierResultat({ ok: false, raison, retryAfterSeconds: null }, { titreSucces: 'x' })
+      expect(resultat).toBe(false)
+    }
+
+    expect(erreurSpy).toHaveBeenCalledTimes(2)
+    expect(erreurSpy).toHaveBeenNthCalledWith(1, 'L’envoi a échoué. Réessayez dans un instant.', { description: undefined })
+    expect(erreurSpy).toHaveBeenNthCalledWith(2, 'L’envoi a échoué. Réessayez dans un instant.', { description: undefined })
+    erreurSpy.mockRestore()
+  })
+
+  it('introuvable / fichier avec messages fournis : toast avec le message propre', () => {
+    const erreurSpy = vi.spyOn(toast, 'error').mockImplementation(() => '')
+    const { notifierResultat } = usePublicFormFeedback()
+    const messages = { introuvable: 'Offre retirée.', fichier: 'Fichier refusé.' }
+
+    notifierResultat({ ok: false, raison: 'introuvable', retryAfterSeconds: null }, { titreSucces: 'x', messages })
+    notifierResultat({ ok: false, raison: 'fichier', retryAfterSeconds: null }, { titreSucces: 'x', messages })
+
+    expect(erreurSpy).toHaveBeenNthCalledWith(1, 'Offre retirée.')
+    expect(erreurSpy).toHaveBeenNthCalledWith(2, 'Fichier refusé.')
+    erreurSpy.mockRestore()
+  })
 })

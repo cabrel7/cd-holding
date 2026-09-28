@@ -11,11 +11,35 @@ import { ChevronDown } from '@lucide/vue'
 import { estChampDetail, type ChampContact } from '#shared/config/contact-forms'
 import { CONTACT_LIMITS } from '#shared/validation/contact'
 import { ajouterJoursIso, dateDuJourQuebec } from '#shared/utils/dates'
+import {
+  CONTROLE_CLAIR,
+  CONTROLE_SOMBRE,
+  LABEL_CLAIR,
+  LABEL_SOMBRE,
+  SELECT_CLASS,
+  SELECT_CLASS_SOMBRE,
+  TEXTAREA_CLAIR,
+  TEXTAREA_SOMBRE,
+  type ToneFormulaire,
+} from '@/utils/formClasses'
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import MessageChamp from '@/components/site/form/MessageChamp.vue'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 
-const props = defineProps<{ champ: ChampContact }>()
+// `tone="sombre"` : rendu lisible sur une carte navy/accent (label blanc, message d'erreur blanc
+// avec icône, contrôles blancs avec anneau de focus blanc). La carte pose `--carte-fond`.
+// `disabled` : désactive un `select` dont les options (champ.options) sont calculées.
+const props = withDefaults(
+  defineProps<{
+    champ: ChampContact
+    tone?: ToneFormulaire
+    disabled?: boolean
+  }>(),
+  { tone: 'clair', disabled: false },
+)
+
+const sombre = computed(() => props.tone === 'sombre')
 
 const nomChamp = computed(() => (estChampDetail(props.champ) ? `details.${props.champ.cle}` : props.champ.type))
 
@@ -87,7 +111,7 @@ onMounted(() => {
 <template>
   <FormField v-slot="{ componentField }" :name="nomChamp">
     <FormItem :class="champ.pleineLargeur ? 'lg:col-span-2' : undefined">
-      <FormLabel class="font-display text-xs font-semibold uppercase tracking-widest text-navy">
+      <FormLabel :class="sombre ? LABEL_SOMBRE : LABEL_CLAIR">
         {{ champ.label }}
       </FormLabel>
 
@@ -99,7 +123,8 @@ onMounted(() => {
           <select
             :value="componentField.modelValue ?? ''"
             :name="componentField.name"
-            class="h-12 w-full appearance-none rounded-xl border border-input bg-white px-4 pr-10 text-base outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm aria-invalid:border-destructive aria-invalid:ring-destructive/20"
+            :disabled="disabled"
+            :class="sombre ? SELECT_CLASS_SOMBRE : SELECT_CLASS"
             @change="componentField['onUpdate:modelValue']?.(($event.target as HTMLSelectElement).value)"
             @blur="componentField.onBlur"
           >
@@ -123,7 +148,7 @@ onMounted(() => {
           :rows="champ.lignes"
           :placeholder="champ.placeholder"
           :maxlength="CONTACT_LIMITS.messageMax"
-          class="resize-none rounded-xl bg-white px-4 py-3"
+          :class="sombre ? TEXTAREA_SOMBRE : TEXTAREA_CLAIR"
         />
         <Input
           v-else
@@ -136,11 +161,12 @@ onMounted(() => {
           :maxlength="maxLengthInput"
           :placeholder="champ.placeholder"
           :spellcheck="champ.type === 'email' ? false : undefined"
-          class="h-12 rounded-xl bg-white px-4"
+          :class="sombre ? CONTROLE_SOMBRE : CONTROLE_CLAIR"
         />
       </FormControl>
 
-      <FormMessage />
+      <MessageChamp v-if="sombre" />
+      <FormMessage v-else />
     </FormItem>
   </FormField>
 </template>

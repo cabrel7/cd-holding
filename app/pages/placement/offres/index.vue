@@ -13,6 +13,10 @@ import TexteAccentue from '@/components/site/TexteAccentue.vue'
 import OffreLigne from '@/components/site/placement/OffreLigne.vue'
 import { Button } from '@/components/ui/button'
 
+const VIDE_TITRE = 'Aucune offre ouverte pour le moment'
+const VIDE_TEXTE = 'Nos postes changent souvent : envoyez-nous votre candidature et nous vous recontacterons dès qu’un poste correspond à votre profil.'
+const VIDE_ACTION = 'Envoyer une candidature spontanée'
+
 const slug = useCurrentSiteSlug()
 const { data: site } = await useSite(slug)
 const { data: sections, error: sectionsError, refresh: refreshSections } = await useSiteSections(slug, 'OFFRES')
@@ -74,19 +78,32 @@ useSeoMeta({
             as="p"
             class="mt-6 max-w-xl leading-relaxed text-ink/75"
           />
-          <p v-if="offresStatus === 'success'" class="mt-4 text-sm font-medium text-ink/60">{{ compteur }}</p>
+          <p v-if="offresStatus === 'success' && offres?.length" class="mt-4 text-sm font-medium text-ink/70">{{ compteur }}</p>
         </template>
 
         <EtatCollection
           class="mt-10"
+          variant="lignes"
           :pending="offresStatus === 'pending'"
           :error="!!offresError"
-          :empty="offresStatus === 'success' && !offres?.length"
-          empty-message="Aucune offre publiée pour le moment. Envoyez-nous une candidature spontanée ci-dessous."
+          :empty="false"
           @retry="refreshOffres()"
         >
-          <div class="divide-y divide-border border-y border-border">
-            <OffreLigne v-for="offre in offres" :key="offre.uuid" :offre="offre" />
+          <ul v-if="offres?.length" role="list" class="divide-y divide-border border-y border-border">
+            <li v-for="offre in offres" :key="offre.uuid">
+              <OffreLigne :offre="offre" />
+            </li>
+          </ul>
+          <!-- État vide : titre + explication + action (libellés d'interface, jamais éditables). -->
+          <div v-else class="max-w-xl border-y border-border py-12">
+            <h2 class="font-display text-2xl font-semibold text-navy">{{ VIDE_TITRE }}</h2>
+            <p class="mt-3 leading-relaxed text-ink/75">{{ VIDE_TEXTE }}</p>
+            <NuxtLink
+              :to="CANDIDATURE_SPONTANEE_PATH"
+              class="mt-6 inline-flex min-h-12 items-center rounded-full bg-site-accent-strong px-7 text-sm font-semibold text-white transition-colors hover:bg-navy"
+            >
+              {{ VIDE_ACTION }}
+            </NuxtLink>
           </div>
         </EtatCollection>
       </div>
