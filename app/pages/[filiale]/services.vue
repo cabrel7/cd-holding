@@ -1,12 +1,17 @@
 <script setup lang="ts">
 // Services — filiales (spec §1 « /{filiale}/services », prototype SubServicesPage.tsx).
 // Écarts assumés (spec §4/§0) : pas de dégradé, visuel de repli numéroté plutôt que l'id brut,
-// un seul CTA (encadré navy) — l'assistant import-export (ccdpaa) est hors lot.
+// un seul CTA (encadré navy). Assistant import-export (lot3 §4) : affiché seulement si la
+// section éditable `SERVICES:assistant` existe pour ce site (ccdpaa aujourd'hui) — aucun
+// `if (slug === 'ccdpaa')` ici, la condition est portée entièrement par le catalogue. Placé
+// avant le CTA générique (spec lot3 §4, écart assumé au prototype) : le CTA « un besoin qui ne
+// rentre pas dans une case » sert de repli après l'assistant plutôt que deux cartes navy collées.
 import { isFilialeSlug, contactPath } from '#shared/config/sites'
 import type { PublicServiceDto } from '#shared/types/public'
 import type { CtaData, SectionData, SeoData } from '@/composables/useSiteSections'
 import TexteAccentue from '@/components/site/TexteAccentue.vue'
 import ServiceRangee from '@/components/site/services/ServiceRangee.vue'
+import AssistantImportExport, { type AssistantSectionData } from '@/components/site/services/AssistantImportExport.vue'
 import EtatCollection from '@/components/site/EtatCollection.vue'
 import SectionCta from '@/components/site/SectionCta.vue'
 import { Button } from '@/components/ui/button'
@@ -17,6 +22,7 @@ definePageMeta({
 
 const slug = useCurrentSiteSlug()
 
+const { data: site } = await useSite(slug)
 const {
   data: sections,
   error: sectionsError,
@@ -32,6 +38,10 @@ const {
 const entete = computed(() => sections.value?.entete as SectionData | undefined)
 const cta = computed(() => sections.value?.cta as CtaData | undefined)
 const seo = computed(() => sections.value?.seo as SeoData | undefined)
+const assistant = computed(() => sections.value?.assistant as AssistantSectionData | undefined)
+
+const nomCourt = computed(() => site.value?.nomCourt ?? site.value?.nom ?? '')
+const vars = computed(() => ({ nomCourt: nomCourt.value, nom: site.value?.nom }))
 
 useSeoMeta({
   title: () => seo.value?.title ?? entete.value?.titre ?? 'Services',
@@ -87,6 +97,14 @@ useSeoMeta({
         </EtatCollection>
       </div>
     </section>
+
+    <AssistantImportExport
+      v-if="assistant"
+      :section="assistant"
+      :vars="vars"
+      :mention="site?.groupe.mentionFormulaires ?? null"
+      :email-secours="site?.email ?? null"
+    />
 
     <SectionCta v-if="cta" :cta="cta" :to="contactPath(slug)" variant="encadre" />
   </template>
