@@ -85,3 +85,32 @@ export function recapitulatifReservation(body: ReservationBody, dateReservation:
   const personnes = body.nombrePersonnes === 1 ? '1 personne' : `${body.nombrePersonnes} personnes`
   return `${personnes}, ${JOUR_DATE_FORMATTER.format(dateReservation)} à ${libelleHeure(body.heure)}`
 }
+
+// --- Idempotence sous concurrence ------------------------------------------------------------
+
+export type IssueReservation = 'creee' | 'existante'
+
+/** P2034 = conflit d'écriture / échec de sérialisation (Prisma) ; 40001 = serialization_failure Postgres. */
+export function estConflitSerialisation(err: unknown): boolean {
+  if (typeof err !== 'object' || err === null) return false
+  const { code, meta } = err as { code?: unknown; meta?: { code?: unknown } }
+  return code === 'P2034' || meta?.code === '40001'
+}
+
+/**
+ * Décision pure : `tenter` = findFirst+create en transaction Serializable. Sur conflit de
+ * sérialisation, on relit ; ligne identique présente → 'existante' (envoi idempotent, pas de
+ * second accusé) ; sinon un unique nouvel essai. Toute autre erreur (ou second conflit) remonte.
+ */
+export async function ecrireIdempotent(
+  tenter: () => Promise<IssueReservation>,
+  relireExiste: () => Promise<boolean>,
+): Promise<IssueReservation> {
+  try {
+    return await tenter()
+  } catch (err) {
+    if (!estConflitSerialisation(err)) throw err
+    if (await relireExiste()) return 'existante'
+    return tenter()
+  }
+}

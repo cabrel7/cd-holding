@@ -77,3 +77,52 @@ describe('candidatureFormSchema — client files', () => {
     expect(result.success).toBe(false)
   })
 })
+
+describe('règles poste/taille indépendantes des autres champs', () => {
+  const chemins = (issues: readonly { path: (string | number)[] }[]) => issues.map((i) => i.path[0])
+
+  it('should report posteRecherche together with other field errors on an empty server submission', () => {
+    const result = candidatureChampsSchema.safeParse({})
+    expect(result.success).toBe(false)
+    if (result.success) return
+    const messages = result.error.issues.filter((i) => i.path[0] === 'posteRecherche').map((i) => i.message)
+    expect(chemins(result.error.issues)).toEqual(expect.arrayContaining(['nom', 'email', 'consentement']))
+    expect(messages).toContain('Sélectionnez un poste.')
+  })
+
+  it('should report posteRecherche together with other errors on an empty form submission', () => {
+    const result = candidatureFormSchema({ avecOffre: false }).safeParse({})
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(chemins(result.error.issues)).toEqual(expect.arrayContaining(['nom', 'email', 'posteRecherche']))
+  })
+
+  it('should not require a poste on the form when tied to an offer', () => {
+    const result = candidatureFormSchema({ avecOffre: true }).safeParse({})
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(chemins(result.error.issues)).not.toContain('posteRecherche')
+  })
+
+  it('should report the total size error even when another field is invalid', () => {
+    const quatreMo = new Uint8Array(4 * 1024 * 1024)
+    const f = () => new File([quatreMo], 'a.pdf', { type: 'application/pdf' })
+    const result = candidatureFormSchema({ avecOffre: true }).safeParse({ ...CHAMPS_BASE, nom: '', consentement: true, cv: f(), documents: [f(), f()] })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.error.issues.map((i) => i.message)).toContain('Taille totale limitée à 10 Mo.')
+    expect(chemins(result.error.issues)).toContain('nom')
+  })
+
+  it('should still require the precision for "autre" alongside other errors', () => {
+    const result = candidatureChampsSchema.safeParse({ ...CHAMPS_BASE, nom: '', posteRecherche: 'autre' })
+    expect(result.success).toBe(false)
+    if (result.success) return
+    expect(result.error.issues.map((i) => i.message)).toContain('Précisez le poste recherché.')
+  })
+
+  it('should keep rejecting unknown keys (strict)', () => {
+    const result = candidatureChampsSchema.safeParse({ ...CHAMPS_BASE, posteRecherche: 'manutention', intrus: 'x' })
+    expect(result.success).toBe(false)
+  })
+})

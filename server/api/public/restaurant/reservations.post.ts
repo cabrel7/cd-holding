@@ -10,7 +10,13 @@ import { RESTAURANT_SLUG, reglagesValides, type ReglagesReservation } from '#sha
 import { instantQuebec } from '#shared/utils/dates'
 import { reservationBaseSchema, reservationSchema } from '#shared/validation/reservation'
 import { ACCUSE_RECEPTION_LIMIT, cleAccuseReception } from '../../../lib/contact'
-import { RESTAURANT_SELECT, construireReservation, recapitulatifReservation } from '../../../lib/reservation'
+import {
+  RESTAURANT_SELECT,
+  construireReservation,
+  ecrireIdempotent,
+  recapitulatifReservation,
+  type IssueReservation,
+} from '../../../lib/reservation'
 import { accuseReceptionTemplate } from '../../../lib/mail/templates/accuse-reception'
 import { notificationInterneTemplate } from '../../../lib/mail/templates/notification-interne'
 
@@ -88,19 +94,27 @@ export default defineEventHandler(async (event) => {
   // Courriel normalisé (casse/espaces) : clé d'idempotence et stockage cohérents.
   const courriel = validated.data.email.trim().toLowerCase()
 
-  // 9. Idempotence : même filiale/courriel/instant, statut non annulé → 201 sans écriture ni courriel.
-  const existante = await prisma.reservationRestaurant.findFirst({
-    where: { companyId, email: courriel, dateReservation, statut: { not: 'ANNULEE' } },
-    select: { uuid: true },
-  })
-  if (existante) {
+  // 9-10. Idempotence + persistance : findFirst puis create en transaction Serializable (pas de
+  // contrainte unique sans migration — à ajouter au lot 5) ; deux POST simultanés identiques ne
+  // créent qu'une ligne, le perdant relit et répond comme un renvoi. Aucun courriel dans la transaction.
+  const where = { companyId, email: courriel, dateReservation, statut: { not: 'ANNULEE' } } as const
+  const data = construireReservation({ ...validated.data, email: courriel }, companyId, dateReservation)
+  const issue = await ecrireIdempotent(
+    () =>
+      prisma.$transaction(
+        async (tx): Promise<IssueReservation> => {
+          if (await tx.reservationRestaurant.findFirst({ where, select: { uuid: true } })) return 'existante'
+          await tx.reservationRestaurant.create({ data, select: { uuid: true } })
+          return 'creee'
+        },
+        { isolationLevel: 'Serializable' },
+      ),
+    async () => (await prisma.reservationRestaurant.findFirst({ where, select: { uuid: true } })) !== null,
+  )
+  if (issue === 'existante') {
     setResponseStatus(event, 201)
     return { ok: true }
   }
-
-  // 10. Persistance — select explicite, uuid non renvoyé au client.
-  const data = construireReservation({ ...validated.data, email: courriel }, companyId, dateReservation)
-  await prisma.reservationRestaurant.create({ data, select: { uuid: true } })
 
   // 11. Courriels, non bloquants.
   if (email) {

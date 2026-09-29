@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { construireReservation, recapitulatifReservation, toRestaurantDto, type ReglagesRow } from '../../server/lib/reservation'
+import { describe, expect, it, vi } from 'vitest'
+import { construireReservation, ecrireIdempotent, recapitulatifReservation, toRestaurantDto, type ReglagesRow } from '../../server/lib/reservation'
 import type { ReservationBody } from '#shared/validation/reservation'
 
 const body: ReservationBody = {
@@ -69,5 +69,31 @@ describe('toRestaurantDto', () => {
     expect(dto).toEqual(row)
     expect(dto).not.toHaveProperty('id')
     expect(dto).not.toHaveProperty('companyId')
+  })
+})
+
+describe('ecrireIdempotent', () => {
+  const conflit = Object.assign(new Error('conflict'), { code: 'P2034' })
+
+  it('should return the outcome directly when no conflict occurs', async () => {
+    expect(await ecrireIdempotent(async () => 'creee', async () => false)).toBe('creee')
+  })
+
+  it('should answer "existante" when a conflict is followed by an identical row', async () => {
+    const tenter = vi.fn().mockRejectedValue(conflit)
+    expect(await ecrireIdempotent(tenter, async () => true)).toBe('existante')
+    expect(tenter).toHaveBeenCalledTimes(1)
+  })
+
+  it('should retry once when a conflict leaves no identical row', async () => {
+    const tenter = vi.fn().mockRejectedValueOnce(conflit).mockResolvedValueOnce('creee')
+    expect(await ecrireIdempotent(tenter, async () => false)).toBe('creee')
+    expect(tenter).toHaveBeenCalledTimes(2)
+  })
+
+  it('should propagate a second conflict and non-conflict errors', async () => {
+    await expect(ecrireIdempotent(vi.fn().mockRejectedValue(conflit), async () => false)).rejects.toBe(conflit)
+    const autre = new Error('boom')
+    await expect(ecrireIdempotent(vi.fn().mockRejectedValue(autre), async () => true)).rejects.toBe(autre)
   })
 })
