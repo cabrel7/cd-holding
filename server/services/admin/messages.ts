@@ -6,7 +6,7 @@ import type { MessagesQuery } from '#shared/validation/admin'
 import type { Prisma } from '../../generated/prisma/client'
 import type { AuthContext } from '../../utils/auth'
 import { resolveReadScope, toSiteSlug } from '../../utils/site-scope'
-import { champsDetails } from '../../lib/admin/message-details'
+import { champsDetails, champsSuggestion } from '../../lib/admin/message-details'
 import { buildPage, isUniqueViolation, pageArgs } from '../../lib/admin/pagination'
 import { CLIENT_SELECT, toClientDto } from './clients'
 
@@ -21,6 +21,8 @@ const MESSAGE_SELECT = {
   type: true,
   statut: true,
   details: true,
+  produitSouhaite: true,
+  paysOrigine: true,
   createdAt: true,
   company: { select: { uuid: true, slug: true, nom: true } },
 } as const
@@ -43,7 +45,7 @@ export function toMessageDto(row: MessageRow): AdminMessageDto {
     statut: row.statut,
     site: { uuid: row.company.uuid, slug: toSiteSlug(row.company.slug), nom: row.company.nom },
     formulaire,
-    champs,
+    champs: [...champsSuggestion(row.type, row.produitSouhaite, row.paysOrigine), ...champs],
     createdAt: row.createdAt.toISOString(),
   }
 }

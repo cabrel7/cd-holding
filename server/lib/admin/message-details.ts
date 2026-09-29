@@ -100,3 +100,21 @@ export function champsDetails(details: unknown, type: TypeMessageDto): DetailsTr
   }
   return { formulaire, champs: [] }
 }
+
+const LIBELLE_PRODUIT_SOUHAITE = 'Produit souhaité'
+const LIBELLE_PAYS_ORIGINE = "Pays d'origine"
+
+/** Colonnes dédiées d'une suggestion de produit (hors `details`) → champs affichables, si non vides. */
+export function champsSuggestion(
+  type: TypeMessageDto,
+  produitSouhaite: string | null,
+  paysOrigine: string | null,
+): ChampAffiche[] {
+  if (type !== 'SUGGESTION_PRODUIT') return []
+  const champs: ChampAffiche[] = []
+  const produit = produitSouhaite?.trim()
+  const pays = paysOrigine?.trim()
+  if (produit) champs.push({ libelle: LIBELLE_PRODUIT_SOUHAITE, valeur: produit })
+  if (pays) champs.push({ libelle: LIBELLE_PAYS_ORIGINE, valeur: pays })
+  return champs
+}

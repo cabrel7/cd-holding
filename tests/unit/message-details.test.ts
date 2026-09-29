@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { champsDetails } from '../../server/lib/admin/message-details'
+import { champsDetails, champsSuggestion } from '../../server/lib/admin/message-details'
 import { buildPage, isUniqueViolation, pageArgs } from '../../server/lib/admin/pagination'
 import { CONTACT_FORMS } from '../../shared/config/contact-forms'
 
@@ -97,5 +97,21 @@ describe('pagination', () => {
     expect(isUniqueViolation({ code: 'P2002' })).toBe(true)
     expect(isUniqueViolation(new Error('x'))).toBe(false)
     expect(isUniqueViolation(null)).toBe(false)
+  })
+})
+
+describe('champsSuggestion', () => {
+  it('expose produit et pays pour une suggestion', () => {
+    expect(champsSuggestion('SUGGESTION_PRODUIT', 'Karité brut', 'Ghana')).toEqual([
+      { libelle: 'Produit souhaité', valeur: 'Karité brut' },
+      { libelle: "Pays d'origine", valeur: 'Ghana' },
+    ])
+  })
+  it('ignore les valeurs vides ou nulles', () => {
+    expect(champsSuggestion('SUGGESTION_PRODUIT', '  ', null)).toEqual([])
+    expect(champsSuggestion('SUGGESTION_PRODUIT', 'Karité', null)).toHaveLength(1)
+  })
+  it('ne renvoie rien pour un autre type', () => {
+    expect(champsSuggestion('CONTACT_GENERAL' as never, 'x', 'y')).toEqual([])
   })
 })
