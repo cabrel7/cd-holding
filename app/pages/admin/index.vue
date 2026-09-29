@@ -66,7 +66,7 @@ const isLoading = computed(() => status.value === 'pending' || (data.value === n
         <h2 id="dash-sites" class="font-display text-navy text-xl font-semibold">Activité par site</h2>
         <p v-if="data.sites.length === 0" class="text-sm text-foreground">Aucun site.</p>
         <template v-else>
-          <div class="hidden md:block">
+          <div class="hidden lg:block">
             <Table>
               <caption class="sr-only">Activité par site</caption>
               <TableHeader>
@@ -104,7 +104,7 @@ const isLoading = computed(() => status.value === 'pending' || (data.value === n
             </Table>
           </div>
 
-          <ul class="divide-y divide-border border-y border-border md:hidden">
+          <ul class="divide-y divide-border border-y border-border lg:hidden">
             <li v-for="row in data.sites" :key="row.site.uuid" class="flex items-center justify-between gap-3 py-3">
               <div class="min-w-0">
                 <p class="flex items-center gap-2 text-sm font-medium text-foreground">
