@@ -39,11 +39,11 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/contact` | ✅ | Vérifié 2026-09-28 (spec `docs/specs/phase3-holding-contact.md`). Contrats curl ✅ (201, honeypot 201 sans écriture, NUL 400, 411/413/415, 429 + Retry-After), e2e `contact.spec.ts` ✅, captures 3 breakpoints ✅, parcours vidéo (envoi vide → erreurs, envoi valide → 201 + toast) ✅. Base de dev : surtitre/SEO CONTACT holding encore aux anciennes valeurs (seed en amorçage) → éditer dans `/admin/contenu` |
 | `/realisations` | ✅ | Lot 1 (2026-09-28) : absente du prototype, page dédiée (DEC-39), réalisations propres à la holding, composant partagé `RealisationsListe` |
 | `/confidentialite` | ✅ | Lot 1 (2026-09-28) : section `legal`, accessible pendant une maintenance (`bypassMaintenance`), e2e + captures ✅. Texte à faire valider par un juriste (Q-01) |
-| `/admin/login` | ❌ | |
-| `/admin` (shell dashboard) | ❌ | |
-| `/admin/contenu/*` (CMS services/réalisations/équipe/partenaires + onglet Site) | 👀 | Onglet « Site » (fiche société : secteur, description, image, coordonnées, réseaux ; nom/ordre SUPER_ADMIN) ajouté 2026-09-26, e2e `admin-site.spec.ts` ✅. CRUD + réordonnancement + sections + réglages site, e2e ✅. Écart assumé : sections éditées un site à la fois (prototype : 7 sites sur une page) — contrainte API `GET …/sections` |
-| `/admin/messages` | ❌ | |
-| `/admin/clients` | ❌ | CRM |
+| `/admin/login` | ✅ | Lot 4 (2026-09-29, spec `docs/specs/lot4-admin-socle.md`) : écran scindé, erreur inline `role=alert` (401/429), `safeAdminRedirect` (refuse `//`, hors `/admin`), e2e + captures 3 breakpoints ✅ |
+| `/admin` (shell dashboard) | ✅ | Lot 4 : shell clair (sidebar shadcn portée, Sheet < 1024 px, badge messages NOUVEAU), tableau de bord (activité par site, derniers messages ; EMPLOYE : « Aucun module disponible », aucun appel). 401 → session + cache `admin-*` vidés. e2e 375/768/1440 + captures ✅ |
+| `/admin/contenu/*` (CMS services/réalisations/équipe/partenaires + onglet Site) | 👀 | Dans le shell admin depuis le lot 4 (captures ✅). Reste : 401 non géré par `watchAdminUnauthorized` sur les useFetch contenu (lot 5). Onglet « Site » (fiche société : secteur, description, image, coordonnées, réseaux ; nom/ordre SUPER_ADMIN) ajouté 2026-09-26, e2e `admin-site.spec.ts` ✅. CRUD + réordonnancement + sections + réglages site, e2e ✅. Écart assumé : sections éditées un site à la fois (prototype : 7 sites sur une page) — contrainte API `GET …/sections` |
+| `/admin/messages` | ✅ | Lot 4 : liste paginée, filtres URL (site/type/statut/q), `details` traduits en libellés (CONTACT_FORMS, assistant, suggestion produit/pays), statut, conversion en client (409), suppression. e2e + captures ✅ |
+| `/admin/clients` | ✅ | Lot 4 : CRM paginé, CRUD (Dialog, doublon courriel → erreur sous le champ), filiale immuable, avertissement cascade `DossierComptable`, scoping AF 403/404. e2e + captures ✅ |
 
 ### Chaudetcha Entretiens et Sanitations (`entretien`)
 
@@ -174,11 +174,11 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 - [ ] Initiales partenaires : algorithme différent du prototype (« CD » vs « CC ») — cosmétique
 - [ ] CMS admin : boutons Monter/Descendre/Modifier/Supprimer 32px + `gap-1` (< 44px) — OK desktop, à revoir si usage tablette
 - [ ] `resolveAccentColor` (`server/utils/site-scope.ts`) : regex hex sensible à la casse
-- [ ] `/admin/contenu` sans shell dashboard (lien retour seul) — dépend décision ouverte n°1
+- [x] `/admin/contenu` dans le shell admin (lot 4)
 - [ ] Dette schéma : `Candidat.posteRecherche` / `DemandeClient.posteRecherche` redondants avec `categorie` (nettoyage phase 3 placement)
 - [ ] `server/api/public/contact.post.ts` : aligner sur DEC-12/13/15 (zod par filiale, `entreprise`/`details`/`paysOrigine`, sujet calculé serveur, `queueMail`) — non attribué en phase 2
 - [ ] `DEFAULT_REALISATIONS_LIMIT = 12` (API publique réalisations) : défaut choisi par T1, à valider
-- [ ] pagination `/api/admin/messages` (lors conversion `/admin/messages`)
+- [x] pagination `/api/admin/messages` (lors conversion `/admin/messages`)
 - [x] `PASSWORD_MIN_LENGTH` dupliqué → `shared/validation/auth.ts` (correctif post-setup)
 
 ## Décisions encore ouvertes (à trancher avec l'utilisateur)
@@ -195,7 +195,7 @@ Conversion par lots (CLAUDE.md « Workflow de conversion ») — Lot 1 ✅ (2026
 
 1. ~~Lot 2~~ ✅ (2026-09-28, spec `docs/specs/lot2-contact-filiales.md`) — contact des 6 filiales + suggestion produit. Base de dev : textes contact placement / suggestion réalignés dans le seed seulement → saisir dans `/admin/contenu`.
 2. ~~Lot 3~~ ✅ (2026-09-29) — offres placement + candidature, restaurant + réservation, assistant import-export.
-3. Lot 4 (en cours, spec `docs/specs/lot4-admin-socle.md`) — admin socle : login, shell, tableau de bord, messages, clients. Code + revues faits ; correctifs de revue, e2e, captures en cours.
+3. ~~Lot 4~~ ✅ (2026-09-29, spec `docs/specs/lot4-admin-socle.md`) — login, shell, tableau de bord, messages, clients. e2e admin + contact/assistant 127 ✅, captures 3 breakpoints ✅. **Bloquant prod** : pas de changement de mot de passe ni de gestion des comptes (lot 5).
 4. Lot 5 — modules admin, en sous-lots : placement ×3 (+ migration Loi 25 anonymisation 6 mois), réservations (+ contrainte unique), planning ×3 + mon planning, dossiers comptables, paramètres/mot de passe (bloquant prod).
 5. À la volée : recapture des 6 `/{filiale}/a-propos` → ✅.
 
