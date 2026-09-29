@@ -19,6 +19,7 @@ import {
   type ReponsesAssistant,
 } from '#shared/content/ccdpaa/assistant-import-export'
 import { loginAs, SUPER_ADMIN } from './helpers/auth'
+import type { AdminMessageDto, AdminPage } from '#shared/types/admin'
 import { nextTestIp } from './helpers/ip'
 import { nettoyer } from './helpers/db'
 
@@ -32,14 +33,6 @@ const HTTP_SERVER_ERROR = 500
 interface AssistantSectionDto {
   readonly recommandations: { readonly petit: string; readonly moyen: string; readonly grand: string }
   readonly mentionDelai: string
-}
-interface AdminMessageDto {
-  readonly type: string
-  readonly email: string
-  readonly nom: string
-  readonly message: string
-  readonly details: Record<string, unknown>
-  readonly company: { readonly slug: string }
 }
 
 const suffixe = Date.now()
@@ -210,12 +203,16 @@ test.describe('ccdpaa — assistant import-export (services)', () => {
     const adminContext = await page.context().browser()!.newContext({ baseURL: test.info().project.use.baseURL })
     try {
       await loginAs(adminContext, SUPER_ADMIN)
-      const messages = (await (await adminContext.request.get('/api/admin/messages')).json()) as AdminMessageDto[]
-      const cree = messages.find((m) => m.email === email)
+      const page = (await (await adminContext.request.get(`/api/admin/messages?q=${encodeURIComponent(email)}`)).json()) as AdminPage<AdminMessageDto>
+      const cree = page.items.find((m) => m.email === email)
       expect(cree, 'le message doit être visible via GET /api/admin/messages').toBeTruthy()
       expect(cree!.type).toBe('ASSISTANT_IMPORT_EXPORT')
-      expect(cree!.company.slug).toBe('ccdpaa')
-      expect(cree!.details).toMatchObject({ ...reponses, palier, formulaire: 'assistant' })
+      expect(cree!.site.slug).toBe('ccdpaa')
+      expect(cree!.formulaire).toBe('assistant')
+      expect(cree, 'details ne doit jamais être renvoyé brut').not.toHaveProperty('details')
+      // Le palier est recalculé côté serveur et traduit en libellé (jamais la clé brute).
+      expect(cree!.champs.map((c) => c.libelle)).toContain('Palier recommandé')
+      for (const ligne of recapReponses(reponses)) expect(cree!.champs).toContainEqual({ libelle: ligne.libelle, valeur: ligne.valeur })
       for (const ligne of recapReponses(reponses)) expect(cree!.message).toContain(`${ligne.libelle} : ${ligne.valeur}`)
     } finally {
       await adminContext.close()

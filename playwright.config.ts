@@ -47,7 +47,7 @@ export default defineConfig({
     {
       name: 'mobile',
       use: { viewport: { width: 375, height: 812 } },
-      testMatch: /(layout-accent|home|admin-site|contact|contact-filiales|filiale-accueil|filiale-services|realisations|confidentialite)\.spec\.ts/,
+      testMatch: /(layout-accent|home|admin-site|admin-shell|admin-messages|admin-clients|contact|contact-filiales|filiale-accueil|filiale-services|realisations|confidentialite)\.spec\.ts/,
     },
     { name: 'tablet', use: { viewport: { width: 768, height: 1024 } }, testMatch: /layout-accent\.spec\.ts/ },
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },

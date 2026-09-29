@@ -19,6 +19,13 @@
 //   --inspect-candidature-email <e>  imprime en JSON les champs vérifiables de la candidature
 //   --inspect-reservation-email <e>  imprime en JSON les réservations (dateReservation ISO)
 //   --count-fichiers-placement       imprime le nombre de Fichier de placement (détection d'orphelins)
+//
+// Lot 4 (e2e admin messages / clients) — marqueur = suffixe unique en minuscules ; toutes les
+// lignes créées ont un e-mail se terminant par `-<marqueur>@example.test` :
+//   --seed-admin-messages <m>   crée 25 messages entretien (pagination) + transport (details
+//                               réalistes) + holding + suggestion ccdpaa + contact ccdpaa
+//   --seed-dossier <email>      crée un DossierComptable pour le client de cet e-mail
+//   --purge-admin-data <m>      supprime messages ET clients (dossiers en cascade) du marqueur
 import 'dotenv/config'
 import { existsSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
@@ -65,6 +72,95 @@ async function supprimerCandidatures(where: { email?: { in: string[] }; demandeI
   await supprimerFichiersParCle(rows.flatMap((r) => [r.cvKey, ...r.autresDocumentsKeys]))
 }
 
+const NOMBRE_MESSAGES_PAGINATION = 25
+const MINUTE_MS = 60_000
+
+async function companyId(slug: string): Promise<number> {
+  const company = await prisma.company.findUnique({ where: { slug }, select: { id: true } })
+  if (!company) throw new Error(`Filiale ${slug} introuvable`)
+  return company.id
+}
+
+async function seedAdminMessages(marker: string): Promise<void> {
+  const [entretien, transport, holding, ccdpaa] = await Promise.all(
+    ['entretien', 'transport', 'holding', 'ccdpaa'].map((slug) => companyId(slug)),
+  )
+  const now = Date.now()
+  const pagination = Array.from({ length: NOMBRE_MESSAGES_PAGINATION }, (_, i) => {
+    const n = String(i + 1).padStart(2, '0')
+    return {
+      companyId: entretien,
+      nom: `Pagination ${n}`,
+      email: `pag-${n}-${marker}@example.test`,
+      sujet: `Pagination ${marker}`,
+      message: `Message de pagination numéro ${n}.`,
+      createdAt: new Date(now - (i + 10) * MINUTE_MS),
+    }
+  })
+  await prisma.messageContact.createMany({ data: pagination })
+  await prisma.messageContact.createMany({
+    data: [
+      {
+        companyId: transport,
+        nom: 'Jean Transport',
+        email: `transport-${marker}@example.test`,
+        telephone: '514-555-0123',
+        entreprise: 'Entreprise Test E2E',
+        sujet: 'Demande de devis — transport',
+        message: 'Besoin de déménager nos bureaux.',
+        details: {
+          typeTransport: 'demenagement-commercial',
+          dateSouhaitee: '2026-11-12',
+          origine: 'Montréal',
+          destination: 'Laval',
+          formulaire: 'transport',
+        },
+        createdAt: new Date(now - 2 * MINUTE_MS),
+      },
+      {
+        companyId: holding,
+        nom: 'Holding Contact',
+        email: `holding-${marker}@example.test`,
+        sujet: 'Demande — Groupe (via le site du groupe)',
+        message: 'Question générale pour le groupe.',
+        details: { formulaire: 'holding' },
+        createdAt: new Date(now - 3 * MINUTE_MS),
+      },
+      {
+        companyId: ccdpaa,
+        nom: 'Suggestion Produit',
+        email: `suggestion-${marker}@example.test`,
+        sujet: 'Suggestion de produit',
+        message: 'Demande de suggestion e2e.',
+        type: 'SUGGESTION_PRODUIT' as const,
+        produitSouhaite: 'Karité brut E2E',
+        paysOrigine: 'Mali',
+        details: { formulaire: 'suggestion' },
+        createdAt: new Date(now - 4 * MINUTE_MS),
+      },
+      {
+        companyId: entretien,
+        nom: 'Casse Client',
+        email: `Client.Casse-${marker}@Example.TEST`,
+        sujet: 'Conversion e2e (courriel en casse mixte)',
+        message: 'Message dont le courriel a des majuscules.',
+        details: { formulaire: 'entretien' },
+        createdAt: new Date(now - 6 * MINUTE_MS),
+      },
+      {
+        companyId: ccdpaa,
+        nom: 'Contact Ccdpaa',
+        email: `ccdpaa-${marker}@example.test`,
+        sujet: 'Contact ccdpaa e2e',
+        message: 'Message ccdpaa hors périmètre entretien.',
+        details: { formulaire: 'ccdpaa' },
+        createdAt: new Date(now - 5 * MINUTE_MS),
+      },
+    ],
+  })
+  console.log(`Messages admin créés pour ${marker} : ${pagination.length + 5}`)
+}
+
 async function main() {
   const candidatureEmails = argValues('--candidature-email')
   const reservationEmails = argValues('--reservation-email')
@@ -74,6 +170,23 @@ async function main() {
   const inspectCandidature = argValues('--inspect-candidature-email')
   const inspectReservation = argValues('--inspect-reservation-email')
   const countFichiers = process.argv.includes('--count-fichiers-placement')
+  const seedAdminMessagesArgs = argValues('--seed-admin-messages')
+  const seedDossier = argValues('--seed-dossier')
+  const purgeAdmin = argValues('--purge-admin-data')
+
+  for (const marker of seedAdminMessagesArgs) await seedAdminMessages(marker)
+  for (const email of seedDossier) {
+    const client = await prisma.client.findFirst({ where: { email }, select: { id: true } })
+    if (!client) throw new Error('Client introuvable pour le dossier de test')
+    await prisma.dossierComptable.create({ data: { clientId: client.id } })
+    console.log('DossierComptable créé : 1')
+  }
+  for (const marker of purgeAdmin) {
+    const suffixe = { endsWith: `-${marker}@example.test`, mode: 'insensitive' as const }
+    const clients = await prisma.client.deleteMany({ where: { email: suffixe } })
+    const messages = await prisma.messageContact.deleteMany({ where: { email: suffixe } })
+    console.log(`Purge ${marker} : clients=${clients.count}, messages=${messages.count}`)
+  }
 
   if (creerOffre.length) {
     const placement = await prisma.company.findUnique({ where: { slug: 'placement' }, select: { id: true } })
@@ -172,7 +285,8 @@ async function main() {
 
   const aFaitQuelqueChose =
     messageUuids.length || contactEmails.length || fileKeys.length || candidatureEmails.length || reservationEmails.length ||
-    offreTitres.length || creerOffre.length || retirerOffre.length || inspectCandidature.length || inspectReservation.length || countFichiers
+    offreTitres.length || creerOffre.length || retirerOffre.length || inspectCandidature.length || inspectReservation.length || countFichiers ||
+    seedAdminMessagesArgs.length || seedDossier.length || purgeAdmin.length
   if (!aFaitQuelqueChose) {
     console.log('Rien à nettoyer (aucun argument reconnu fourni).')
   }

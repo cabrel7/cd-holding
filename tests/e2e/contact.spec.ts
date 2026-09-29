@@ -23,6 +23,7 @@
 import { execFileSync } from 'node:child_process'
 import { test, expect, type Locator, type Page } from '@playwright/test'
 import { loginAs, SUPER_ADMIN } from './helpers/auth'
+import type { AdminMessageDto, AdminPage } from '#shared/types/admin'
 
 // --- Types DTO (contrats API, spec §2.3/§3.2/§4.1) -----------------------------------------
 interface PublicSiteSummaryDto {
@@ -61,14 +62,6 @@ interface AdminSectionRow {
   readonly donnees: Record<string, unknown>
 }
 
-interface AdminMessageDto {
-  readonly uuid: string
-  readonly nom: string
-  readonly email: string
-  readonly sujet: string
-  readonly message: string
-  readonly company: { readonly slug: string; readonly nom: string }
-}
 
 // --- Interpolation locale (miroir minimal de shared/utils/texte.ts:15-19 — seule la variable
 // {groupe} est utilisée par ce contenu ; dupliqué plutôt qu'importé, comme parseAccentTitre
@@ -375,10 +368,12 @@ test.describe('/contact — holding, formulaire de contact public', () => {
     const adminContext = await browser.newContext()
     try {
       await loginAs(adminContext, SUPER_ADMIN)
-      const messages = (await adminContext.request.get('/api/admin/messages').then((r) => r.json())) as AdminMessageDto[]
-      const created = messages.find((m) => m.email === email)
+      const page = (await adminContext.request
+        .get(`/api/admin/messages?q=${encodeURIComponent(email)}`)
+        .then((r) => r.json())) as AdminPage<AdminMessageDto>
+      const created = page.items.find((m) => m.email === email)
       expect(created, 'le message créé doit être visible via GET /api/admin/messages').toBeTruthy()
-      expect(created!.company.slug).toBe('entretien')
+      expect(created!.site.slug).toBe('entretien')
       expect(created!.sujet).toBe(`Demande — ${entretien!.nom} (via le site du groupe)`)
       expect(created!.message).toBe(messageEnvoye)
       expect(created!.nom).toBe('Jean Tremblay')
@@ -461,8 +456,10 @@ test.describe('/contact — holding, formulaire de contact public', () => {
     const adminContext = await browser.newContext()
     try {
       await loginAs(adminContext, SUPER_ADMIN)
-      const messages = (await adminContext.request.get('/api/admin/messages').then((r) => r.json())) as AdminMessageDto[]
-      expect(messages.some((m) => m.email === email), 'le honeypot ne doit jamais créer de MessageContact').toBe(false)
+      const page = (await adminContext.request
+        .get(`/api/admin/messages?q=${encodeURIComponent(email)}`)
+        .then((r) => r.json())) as AdminPage<AdminMessageDto>
+      expect(page.total, 'le honeypot ne doit jamais créer de MessageContact').toBe(0)
     } finally {
       await adminContext.close()
     }

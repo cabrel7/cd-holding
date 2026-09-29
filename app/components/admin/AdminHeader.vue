@@ -67,7 +67,7 @@ async function deconnecter(): Promise<void> {
 
       <AlertDialog>
         <AlertDialogTrigger as-child>
-          <Button variant="outline" class="min-h-11 gap-2 md:min-h-9" :disabled="deconnexionEnCours">
+          <Button variant="outline" class="min-h-11 min-w-11 gap-2 md:min-h-9 md:min-w-0" :disabled="deconnexionEnCours">
             <LogOut aria-hidden="true" />
             <span class="hidden sm:inline">Déconnexion</span>
             <span class="sr-only sm:hidden">Se déconnecter</span>

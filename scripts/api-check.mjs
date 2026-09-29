@@ -139,28 +139,41 @@ async function main() {
     )
   }
 
-  // --- A.3 : /api/admin/messages — scoping + pas de id/companyId ---
+  // --- A.3 : /api/admin/messages — format paginé, scoping, pas de id/companyId/details brut ---
+  // Réponse : { items, total, page, pageSize, pageCount } (lot 4) ; `details` n'est jamais renvoyé
+  // brut (traduit en `champs`), la filiale est `site` (uuid/slug/nom).
+  const isPage = (body) =>
+    body && Array.isArray(body.items) && ['total', 'page', 'pageSize', 'pageCount'].every((k) => Number.isInteger(body[k]))
+  const hasRawDetails = (body) => Array.isArray(body?.items) && body.items.some((m) => 'details' in m)
   {
     const res = await fetch(`${BASE}/api/admin/messages`, { headers: { cookie: sessions.ADMIN_FILIALE } })
     const body = await res.json().catch(() => null)
-    const slugs = Array.isArray(body) ? [...new Set(body.map((m) => m.company?.slug))] : null
+    const slugs = isPage(body) ? [...new Set(body.items.map((m) => m.site?.slug))] : null
     const forbidden = findForbiddenKeys(body)
     check(
-      'A.3 messages ADMIN_FILIALE (entretien) -> 200, uniquement entretien, aucun id/companyId',
-      res.status === 200 && Array.isArray(body) && body.length > 0 && slugs?.length === 1 && slugs[0] === 'entretien' && forbidden.length === 0,
-      `status=${res.status} slugs=${JSON.stringify(slugs)} count=${body?.length} forbidden=${JSON.stringify(forbidden)}`,
+      'A.3 messages ADMIN_FILIALE (entretien) -> 200 paginé, uniquement entretien, aucun id/companyId/details brut',
+      res.status === 200 && isPage(body) && body.items.length > 0 && slugs?.length === 1 && slugs[0] === 'entretien' && forbidden.length === 0 && !hasRawDetails(body),
+      `status=${res.status} slugs=${JSON.stringify(slugs)} count=${body?.items?.length} forbidden=${JSON.stringify(forbidden)}`,
     )
+  }
+  {
+    const res = await fetch(`${BASE}/api/admin/messages?site=ccdpaa`, { headers: { cookie: sessions.ADMIN_FILIALE } })
+    check('A.3 messages ADMIN_FILIALE (entretien) ?site=ccdpaa -> 403', res.status === 403, res.status)
   }
   {
     const res = await fetch(`${BASE}/api/admin/messages`, { headers: { cookie: sessions.SUPER_ADMIN } })
     const body = await res.json().catch(() => null)
-    const slugs = Array.isArray(body) ? [...new Set(body.map((m) => m.company?.slug))].sort() : null
+    const slugs = isPage(body) ? [...new Set(body.items.map((m) => m.site?.slug))].sort() : null
     const forbidden = findForbiddenKeys(body)
     check(
-      'A.3 messages SUPER_ADMIN -> 200, entretien+transport, aucun id/companyId',
-      res.status === 200 && Array.isArray(body) && slugs?.includes('entretien') && slugs?.includes('transport') && forbidden.length === 0,
-      `status=${res.status} slugs=${JSON.stringify(slugs)} forbidden=${JSON.stringify(forbidden)}`,
+      'A.3 messages SUPER_ADMIN -> 200 paginé, plusieurs sites, aucun id/companyId/details brut',
+      res.status === 200 && isPage(body) && body.total >= body.items.length && slugs?.length > 0 && forbidden.length === 0 && !hasRawDetails(body),
+      `status=${res.status} slugs=${JSON.stringify(slugs)} total=${body?.total} forbidden=${JSON.stringify(forbidden)}`,
     )
+  }
+  {
+    const res = await fetch(`${BASE}/api/admin/messages?statut=INVALIDE`, { headers: { cookie: sessions.SUPER_ADMIN } })
+    check('A.3 messages ?statut=INVALIDE -> 400', res.status === 400, res.status)
   }
   {
     const res = await fetch(`${BASE}/api/admin/messages`, { headers: { cookie: sessions.EMPLOYE } })

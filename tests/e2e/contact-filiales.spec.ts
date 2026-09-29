@@ -16,6 +16,7 @@
 import { execFileSync } from 'node:child_process'
 import { test, expect, type Locator, type Page } from '@playwright/test'
 import { loginAs, SUPER_ADMIN } from './helpers/auth'
+import type { AdminMessageDto, AdminPage, ChampAffiche } from '#shared/types/admin'
 import {
   CONTACT_FORMS,
   FORMULAIRES_FILIALES,
@@ -26,7 +27,7 @@ import {
   type ChampContact,
   type FormulaireFilialeSlug,
 } from '#shared/config/contact-forms'
-import { ajouterJoursIso, dateDuJourQuebec } from '#shared/utils/dates'
+import { ajouterJoursIso, dateDuJourQuebec, formatDateLongue } from '#shared/utils/dates'
 
 // --- Types DTO (contrats API, spec §1/§2/§6) ------------------------------------------------
 interface PublicSiteDto {
@@ -47,20 +48,6 @@ interface ContactSectionsDto {
   readonly suggestion?: FormulaireSectionDto
 }
 
-interface AdminMessageDto {
-  readonly uuid: string
-  readonly type: string
-  readonly nom: string
-  readonly email: string
-  readonly telephone: string | null
-  readonly entreprise: string | null
-  readonly sujet: string
-  readonly message: string
-  readonly produitSouhaite: string | null
-  readonly paysOrigine: string | null
-  readonly details: Record<string, unknown>
-  readonly company: { readonly slug: string }
-}
 
 // --- Interpolation locale (miroir minimal de shared/utils/texte.ts, comme contact.spec.ts et
 // filiale-accueil.spec.ts — dupliqué plutôt qu'importé pour ne pas coupler ce test au module
@@ -134,16 +121,20 @@ function corpsValideFiliale(slug: FormulaireFilialeSlug, email: string, override
   return { ...corps, details, ...overrides }
 }
 
-/** `MessageContact.details` attendu côté admin : mêmes clés que le corps envoyé, `entier` en
- * nombre (coercion serveur), `formulaire` écrit en dernier par `handlerFiliale` (spec §2). */
-function detailsAttendus(slug: FormulaireFilialeSlug): Record<string, string | number> {
-  const details: Record<string, string | number> = {}
+/** Champs `details` attendus côté admin (`AdminMessageDto.champs`, jamais `details` brut) : libellé
+ * de la config, valeur lisible (option -> libellé, date -> date longue, entier -> texte), dans
+ * l'ordre de la config. */
+function champsAttendus(slug: FormulaireFilialeSlug): ChampAffiche[] {
+  const champs: ChampAffiche[] = []
   for (const champ of CONTACT_FORMS[slug].champs) {
     if (!estChampDetail(champ)) continue
     const valeur = valeurChamp(champ)
-    details[champ.cle] = champ.type === 'entier' ? Number(valeur) : String(valeur)
+    let affichee = String(valeur)
+    if (champ.type === 'select') affichee = champ.options.find((o) => o.value === valeur)?.label ?? affichee
+    if (champ.type === 'date-future') affichee = formatDateLongue(affichee)
+    champs.push({ libelle: champ.label, valeur: affichee })
   }
-  return { ...details, formulaire: slug }
+  return champs
 }
 
 /**
@@ -378,15 +369,19 @@ test.describe('/{filiale}/contact — 6 formulaires pilotés par CONTACT_FORMS +
         // eslint-disable-next-line no-await-in-loop
         await loginAs(adminContext, SUPER_ADMIN)
         // eslint-disable-next-line no-await-in-loop
-        const messages = (await adminContext.request.get('/api/admin/messages').then((r) => r.json())) as AdminMessageDto[]
-        const created = messages.find((m) => m.email === email)
+        const page = (await adminContext.request
+          .get(`/api/admin/messages?q=${encodeURIComponent(email)}`)
+          .then((r) => r.json())) as AdminPage<AdminMessageDto>
+        const created = page.items.find((m) => m.email === email)
         expect(created, `le message ${slug} doit être visible via GET /api/admin/messages`).toBeTruthy()
-        expect(created!.company.slug).toBe(slug)
+        expect(created!.site.slug).toBe(slug)
         expect(created!.type).toBe('CONTACT')
+        expect(created!.formulaire).toBe(slug)
         expect(created!.sujet).toBe(cfg.sujet)
         expect(created!.telephone).toBe(cfg.champs.some((c) => c.type === 'telephone') ? '514-555-0123' : null)
         expect(created!.entreprise).toBe(cfg.champs.some((c) => c.type === 'entreprise') ? 'Entreprise Test E2E' : null)
-        expect(created!.details).toEqual(detailsAttendus(slug))
+        expect(created!.champs).toEqual(champsAttendus(slug))
+        expect(created, 'details ne doit jamais être renvoyé brut').not.toHaveProperty('details')
       } finally {
         // eslint-disable-next-line no-await-in-loop
         await adminContext.close()
@@ -445,15 +440,18 @@ test.describe('/{filiale}/contact — 6 formulaires pilotés par CONTACT_FORMS +
         // eslint-disable-next-line no-await-in-loop
         await loginAs(adminContext, SUPER_ADMIN)
         // eslint-disable-next-line no-await-in-loop
-        const messages = (await adminContext.request.get('/api/admin/messages').then((r) => r.json())) as AdminMessageDto[]
-        const created = messages.find((m) => m.email === email)
+        const page = (await adminContext.request
+          .get(`/api/admin/messages?q=${encodeURIComponent(email)}`)
+          .then((r) => r.json())) as AdminPage<AdminMessageDto>
+        const created = page.items.find((m) => m.email === email)
         expect(created, `la suggestion ${site} doit être visible via GET /api/admin/messages`).toBeTruthy()
-        expect(created!.company.slug).toBe(site)
+        expect(created!.site.slug).toBe(site)
         expect(created!.type).toBe('SUGGESTION_PRODUIT')
         expect(created!.sujet).toBe(SUGGESTION_FORM.sujet)
-        expect(created!.produitSouhaite).toBe(produitAttendu)
-        expect(created!.paysOrigine).toBe(paysAttendu)
-        expect(created!.details).toEqual({ formulaire: 'suggestion' })
+        expect(created!.formulaire).toBe('suggestion')
+        // produitSouhaite / paysOrigine ne sont plus exposés par le DTO admin (voir
+        // admin-messages.spec.ts, test « suggestion : produit et pays visibles »).
+        expect(created, 'details ne doit jamais être renvoyé brut').not.toHaveProperty('details')
       } finally {
         // eslint-disable-next-line no-await-in-loop
         await adminContext.close()
