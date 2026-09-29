@@ -87,8 +87,8 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/placement/realisations` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/placement/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/placement/contact` | ✅ | Lot 2 : formulaire employeur seul (candidats → `/placement/offres`, lot 3), e2e + captures ✅ |
-| `/placement/offres` | 👀 | Lot 3 (2026-09-29, spec `docs/specs/lot3-pages-specifiques.md`) : liste `DemandeClient.publiee` (ISR 60 s), état vide + lien candidature spontanée. e2e `placement-offres.spec.ts` ✅ (build prod), revues ✅ corrigées. Captures en attente. Base de dev sans offre (création admin au lot 5) |
-| `/placement/offres/[uuid]` + `/placement/offres/candidature-spontanee` | 👀 | Lot 3 : détail + JSON-LD `JobPosting`, formulaire multipart (CV PDF requis, documents PDF/JPEG/PNG, consentement Loi 25 éditable `OFFRES:candidature.consentement`), fichiers `PRIVE`. e2e 415/413/429/honeypot/offre retirée 404/double clic ✅. Captures en attente |
+| `/placement/offres` | ✅ | Lot 3 (2026-09-29, spec `docs/specs/lot3-pages-specifiques.md`) : liste `DemandeClient.publiee` (ISR 60 s), état vide + lien candidature spontanée. e2e `placement-offres.spec.ts` ✅ (build prod), revues ✅ corrigées. Captures 3 breakpoints ✅. Base de dev : 3 offres seed ; création/publication admin au lot 5 |
+| `/placement/offres/[uuid]` + `/placement/offres/candidature-spontanee` | ✅ | Lot 3 : détail + JSON-LD `JobPosting`, formulaire multipart (CV PDF requis, documents PDF/JPEG/PNG, consentement Loi 25 éditable `OFFRES:candidature.consentement`), fichiers `PRIVE`. e2e 415/413/429/honeypot/offre retirée 404/double clic ✅. Captures 3 breakpoints ✅ |
 | `/admin/placement/candidats` | ❌ | Vivier interne |
 | `/admin/placement/demandes` | ❌ | Demandes clients + toggle "Publier comme offre" |
 | `/admin/placement/candidatures` | ❌ | Candidatures reçues, statut nouvelle/en_revision/retenue/rejetee |
@@ -102,8 +102,8 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 | `/ccdpaa/realisations` | ✅ | Lot 1 : page générique, e2e ✅ |
 | `/ccdpaa/a-propos` | 👀 | Page générique `[filiale]/a-propos.vue`, e2e accent ✅. Contraste initiales équipe sur navy corrigé 2026-09-26 (`SiteImage` tone). Entretien vérifié (captures 3 breakpoints) ; autres filiales : même page générique, recapture rapide avant ✅ |
 | `/ccdpaa/contact` | ✅ | Lot 2 : contact B2B + formulaire suggestion de produit (`SUGGESTION_PRODUIT`), e2e + captures ✅ |
-| `/ccdpaa/restaurant` | 👀 | Lot 3 (2026-09-29) : horaires/créneaux depuis `ReglagesRestaurant`, réservation (fuseau Québec, idempotence en transaction Serializable, accusé 3/24 h par destinataire). e2e `ccdpaa-restaurant.spec.ts` ✅. Captures en attente. Contrainte unique en base → lot 5 (migration) |
-| Widget "Assistant Import-Export" | 👀 | Lot 3 : dans `/ccdpaa/services` (section `SERVICES:assistant`), 5 étapes clavier, message `ASSISTANT_IMPORT_EXPORT` + palier, aucun libellé IA. e2e `ccdpaa-assistant.spec.ts` ✅. Captures + vidéo en attente |
+| `/ccdpaa/restaurant` | ✅ | Lot 3 (2026-09-29) : horaires/créneaux depuis `ReglagesRestaurant`, réservation (fuseau Québec, idempotence en transaction Serializable, accusé 3/24 h par destinataire). e2e `ccdpaa-restaurant.spec.ts` ✅. Captures 3 breakpoints ✅ (titre hero corrigé à 768). Contrainte unique en base → lot 5 (migration) |
+| Widget "Assistant Import-Export" | ✅ | Lot 3 : dans `/ccdpaa/services` (section `SERVICES:assistant`), 5 étapes clavier, message `ASSISTANT_IMPORT_EXPORT` + palier, aucun libellé IA. e2e `ccdpaa-assistant.spec.ts` ✅. Captures + vidéo clavier ✅ |
 | `/admin/ccdpaa/planning` | ❌ | Planning restaurant |
 | `/admin/ccdpaa/reservations` | ❌ | |
 
