@@ -5,6 +5,13 @@ import type { AuthContext } from '../../utils/auth'
 import { resolveAccentColor, resolveReadScope, toSiteSlug } from '../../utils/site-scope'
 import { MESSAGE_LIST_SELECT, toMessageDto } from './messages'
 
+/** Dans un `$transaction([...])`, Prisma type `_count` d'un `groupBy` comme optionnel/union : on le lit défensivement. */
+function compterTout(compte: unknown): number {
+  return typeof compte === 'object' && compte !== null && '_all' in compte && typeof compte._all === 'number'
+    ? compte._all
+    : 0
+}
+
 export async function getDashboard(ctx: AuthContext): Promise<AdminDashboardDto> {
   const scope = await resolveReadScope(ctx, undefined)
   const parCompany = scope.companyId !== null ? { companyId: scope.companyId } : {}
@@ -35,8 +42,8 @@ export async function getDashboard(ctx: AuthContext): Promise<AdminDashboardDto>
     }),
   ])
 
-  const nouveauxParSite = new Map(nouveaux.map((g) => [g.companyId, g._count._all]))
-  const clientsParSite = new Map(clients.map((g) => [g.companyId, g._count._all]))
+  const nouveauxParSite = new Map(nouveaux.map((g) => [g.companyId, compterTout(g._count)]))
+  const clientsParSite = new Map(clients.map((g) => [g.companyId, compterTout(g._count)]))
 
   return {
     sites: companies.map((c) => ({
