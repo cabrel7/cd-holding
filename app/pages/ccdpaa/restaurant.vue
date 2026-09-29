@@ -70,7 +70,7 @@ useSeoMeta({
       <div class="mx-auto max-w-7xl px-6">
         <div v-if="!hero" class="h-96 animate-pulse rounded-3xl bg-secondary" aria-hidden="true" />
         <div v-else class="grid grid-cols-1 gap-12 md:grid-cols-12">
-          <div class="md:col-span-7">
+          <div class="min-w-0 break-words md:col-span-7">
             <TexteAccentue
               v-if="hero.surtitre"
               :texte="hero.surtitre"
@@ -82,7 +82,7 @@ useSeoMeta({
               :texte="hero.titre"
               :vars="vars"
               as="h1"
-              class="mt-4 font-display text-5xl font-bold leading-[1.02] text-navy md:text-7xl"
+              class="mt-4 font-display text-5xl font-bold leading-[1.02] text-navy md:text-6xl lg:text-7xl"
             />
             <TexteAccentue
               :texte="hero.texte"

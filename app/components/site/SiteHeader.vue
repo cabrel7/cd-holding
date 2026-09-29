@@ -56,7 +56,7 @@ function isActive(item: NavItem): boolean {
     class="fixed inset-x-0 top-0 z-50 transition-colors duration-300"
     :class="scrolled ? 'border-b border-border bg-cream/90 backdrop-blur' : 'bg-transparent'"
   >
-    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:py-5">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:py-5">
       <div class="flex items-center gap-4">
         <template v-if="variant === 'holding'">
           <NuxtLink to="/" class="inline-flex items-baseline gap-1">
@@ -67,30 +67,30 @@ function isActive(item: NavItem): boolean {
         <template v-else>
           <NuxtLink
             to="/"
-            class="hidden items-center gap-1 text-xs font-medium uppercase tracking-widest text-ink/75 transition-colors hover:text-navy md:inline-flex"
+            class="hidden min-h-11 items-center gap-1 text-xs font-medium uppercase tracking-widest text-ink/75 transition-colors hover:text-navy lg:inline-flex"
           >
             <ArrowLeft :size="14" aria-hidden="true" /> {{ groupe }}
           </NuxtLink>
-          <span class="hidden h-4 w-px bg-border md:block" aria-hidden="true" />
-          <span class="font-display text-lg font-bold leading-tight text-navy md:text-xl">
+          <span class="hidden h-4 w-px bg-border lg:block" aria-hidden="true" />
+          <span class="font-display text-lg font-bold leading-tight text-navy lg:text-xl">
             {{ displayName }}
           </span>
         </template>
       </div>
 
-      <nav v-if="showNav" aria-label="Navigation principale" class="hidden items-center gap-8 md:flex">
+      <nav v-if="showNav" aria-label="Navigation principale" class="hidden items-center gap-6 lg:flex xl:gap-8">
         <NuxtLink
           v-for="item in nav"
           :key="item.label"
           :to="item.hash ? { path: item.to, hash: item.hash } : item.to"
-          class="text-sm font-medium transition-colors hover:text-navy"
+          class="inline-flex min-h-11 items-center whitespace-nowrap text-sm font-medium transition-colors hover:text-navy"
           :class="isActive(item) ? 'text-navy' : 'text-ink/75'"
         >
           {{ item.label }}
         </NuxtLink>
         <NuxtLink
           :to="contactTo"
-          class="inline-flex items-center rounded-full bg-site-accent-strong px-5 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
+          class="inline-flex items-center rounded-full bg-site-accent-strong whitespace-nowrap px-5 py-3 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5"
         >
           Nous joindre
         </NuxtLink>
@@ -99,7 +99,7 @@ function isActive(item: NavItem): boolean {
       <button
         v-if="showNav"
         type="button"
-        class="-m-2.5 rounded-sm p-2.5 text-navy outline-none md:hidden focus-visible:ring-2 focus-visible:ring-navy focus-visible:ring-offset-2"
+        class="-m-2.5 rounded-sm p-2.5 text-navy outline-none lg:hidden focus-visible:ring-2 focus-visible:ring-navy focus-visible:ring-offset-2"
         aria-label="Menu"
         :aria-expanded="open"
         :aria-controls="MOBILE_NAV_ID"
@@ -114,13 +114,13 @@ function isActive(item: NavItem): boolean {
       <div
         v-if="showNav && open"
         :id="MOBILE_NAV_ID"
-        class="overflow-hidden border-t border-border bg-cream md:hidden"
+        class="overflow-hidden border-t border-border bg-cream lg:hidden"
       >
         <div class="flex flex-col gap-1 px-6 py-4">
           <NuxtLink
             v-if="variant === 'filiale'"
             to="/"
-            class="inline-flex items-center gap-2 py-2 text-sm font-medium text-ink/70"
+            class="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-ink/70"
           >
             <ArrowLeft :size="14" aria-hidden="true" /> Retour au {{ groupe }}
           </NuxtLink>
@@ -128,7 +128,7 @@ function isActive(item: NavItem): boolean {
             v-for="item in nav"
             :key="item.label"
             :to="item.hash ? { path: item.to, hash: item.hash } : item.to"
-            class="py-2 text-base font-medium text-navy"
+            class="inline-flex min-h-11 items-center text-base font-medium text-navy"
           >
             {{ item.label }}
           </NuxtLink>

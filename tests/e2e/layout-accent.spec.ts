@@ -15,8 +15,8 @@ const PAGES: ReadonlyArray<{ slug: string; path: string }> = [
 ]
 
 /**
- * Le CTA "Nous joindre" du header n'est visible que dans la nav desktop (`hidden md:flex`,
- * SiteHeader.vue) sauf si le menu mobile est ouvert. En dessous de 768px, on ouvre le menu pour
+ * Le CTA "Nous joindre" du header n'est visible que dans la nav desktop (`hidden lg:flex`,
+ * SiteHeader.vue) sauf si le menu mobile est ouvert. En dessous de 1024px, on ouvre le menu pour
  * révéler une copie visible du même lien plutôt que de dupliquer la logique par breakpoint.
  */
 async function revealNavCta(page: Page): Promise<Locator> {
@@ -98,7 +98,7 @@ test.describe('Accent de navigation par filiale — /a-propos (7 sites)', () => 
 
   test('should reveal the navigation through the mobile menu toggle (aria-expanded)', async ({ page }) => {
     const viewport = page.viewportSize()
-    test.skip(!viewport || viewport.width >= 768, 'Le bouton menu est masqué (md:hidden) à partir de 768px')
+    test.skip(!viewport || viewport.width >= 1024, 'Le bouton menu est masqué (lg:hidden) à partir de 1024px')
 
     await page.goto('/entretien/a-propos')
     const toggle = page.getByRole('button', { name: 'Menu' })

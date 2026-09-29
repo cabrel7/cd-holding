@@ -177,7 +177,7 @@ const onSubmit = soumettre(handleSubmit(
                       @change="componentField['onUpdate:modelValue']?.(($event.target as HTMLSelectElement).value)"
                       @blur="componentField.onBlur"
                     >
-                      <option value="" disabled>{{ !values.date ? 'Choisissez une date' : 'Sélectionnez' }}</option>
+                      <option value="" disabled :selected="!componentField.modelValue">{{ !values.date ? 'Choisissez une date' : 'Sélectionnez' }}</option>
                       <option v-for="h in creneaux" :key="h" :value="h">{{ libelleHeure(h) }}</option>
                     </select>
                   </FormControl>
@@ -212,7 +212,7 @@ const onSubmit = soumettre(handleSubmit(
           </div>
           <p class="-mt-2 text-xs text-white/85">
             Plus de {{ reglages.capaciteMaxReservation }} personnes ?
-            <NuxtLink to="/ccdpaa/contact" class="rounded-sm underline underline-offset-2 hover:text-white" :class="FOCUS_CARTE_SOMBRE">Écrivez-nous</NuxtLink>
+            <NuxtLink to="/ccdpaa/contact" class="rounded-sm py-3 underline underline-offset-2 hover:text-white" :class="FOCUS_CARTE_SOMBRE">Écrivez-nous</NuxtLink>
           </p>
 
           <FormField v-slot="{ componentField }" name="notes">

@@ -67,7 +67,7 @@ const reseaux = computed(() =>
           <NuxtLink
             v-else
             to="/"
-            class="group mt-6 inline-flex items-center gap-2 text-sm font-semibold text-cream"
+            class="group mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-cream"
           >
             <span class="border-b border-cream/40 pb-0.5">Retour au {{ groupe }}</span>
             <ArrowUpRight
@@ -80,9 +80,9 @@ const reseaux = computed(() =>
 
         <div v-if="isHolding" class="md:col-span-4">
           <h5 class="font-display text-xs font-semibold uppercase tracking-widest text-gold">Nos filiales</h5>
-          <ul class="mt-4 space-y-2 text-sm">
+          <ul class="mt-2 text-sm">
             <li v-for="filiale in filiales" :key="filiale.uuid">
-              <NuxtLink :to="`/${filiale.slug}`" class="text-cream/80 transition-colors hover:text-gold">
+              <NuxtLink :to="`/${filiale.slug}`" class="inline-flex min-h-11 items-center text-cream/80 transition-colors hover:text-gold">
                 {{ filiale.nom }}
               </NuxtLink>
             </li>
@@ -104,13 +104,13 @@ const reseaux = computed(() =>
           >
             {{ isHolding ? 'Suivez-nous' : 'Suivre' }}
           </h5>
-          <ul v-if="reseaux.length" class="mt-4 space-y-2 text-sm">
+          <ul v-if="reseaux.length" class="mt-2 text-sm">
             <li v-for="r in reseaux" :key="r.label">
               <a
                 :href="r.url ?? undefined"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="inline-flex items-center gap-1.5 text-cream/80 transition-colors hover:text-gold"
+                class="inline-flex min-h-11 items-center gap-1.5 text-cream/80 transition-colors hover:text-gold"
               >
                 {{ r.label }}
                 <ExternalLink :size="14" aria-hidden="true" />
@@ -127,7 +127,7 @@ const reseaux = computed(() =>
         <p v-if="isHolding">© {{ annee }} {{ groupe }}. Tous droits réservés.</p>
         <p v-else>© {{ annee }} {{ site.nom }} — Une filiale du {{ groupe }}.</p>
         <div class="flex gap-6">
-          <NuxtLink to="/confidentialite" class="hover:text-gold">Politique de confidentialité</NuxtLink>
+          <NuxtLink to="/confidentialite" class="inline-flex min-h-11 items-center hover:text-gold">Politique de confidentialité</NuxtLink>
         </div>
       </div>
     </div>

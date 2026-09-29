@@ -87,7 +87,7 @@ function trackExternalRequests(page: Page): string[] {
   return externalRequests
 }
 
-/** Le lien "Nos filiales" du header est masqué (`hidden md:flex`) sous 768px sauf menu ouvert. */
+/** Le lien "Nos filiales" du header est masqué (`hidden lg:flex`) sous 1024px sauf menu ouvert. */
 async function revealHeaderLink(page: Page, name: string): Promise<Locator> {
   const links = page.getByRole('link', { name })
   const desktopLink = links.first()

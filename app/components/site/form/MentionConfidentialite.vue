@@ -22,7 +22,7 @@ withDefaults(
     <TexteAccentue v-if="texte" :texte="texte" :vars="vars" as="span" />
     <NuxtLink
       to="/confidentialite"
-      class="ml-1 rounded-sm underline underline-offset-2"
+      class="ml-1 rounded-sm py-3 underline underline-offset-2"
       :class="
         tone === 'sombre'
           ? 'hover:text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white'
