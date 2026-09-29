@@ -73,27 +73,42 @@ watch(
   () => props.open,
   (isOpen) => {
     if (isOpen) {
+      formError.value = null
       resetForm({ values: transformValues(props.fields, props.initialValues, 'toDisplay') })
     }
   },
 )
 
+const formEl = ref<HTMLFormElement | null>(null)
+
+const GENERIC_FORM_ERROR = 'Le formulaire est invalide. Vérifiez les champs et réessayez.'
+
+/** Erreur non rattachée à un champ affiché (schéma global, clé inconnue) : jamais silencieuse. */
+const formError = ref<string | null>(null)
+
 const onSubmit = handleSubmit((formValues) => {
-  const payload = transformValues(props.fields, formValues, 'toSubmit')
+  formError.value = null
+  // Seules les clés déclarées partent au schéma : vee-validate conserve les valeurs de champs
+  // non rendus (ex. `site` d'une création précédente), que les schémas `.strict()` rejetteraient.
+  const declared = Object.fromEntries(props.fields.map((f) => [f.key, formValues[f.key]]))
+  const payload = transformValues(props.fields, declared, 'toSubmit')
   const parsed = props.schema.safeParse(payload)
   if (!parsed.success) {
+    const fieldKeys = new Set(props.fields.map((f) => f.key))
     const fieldErrors: Record<string, string> = {}
     for (const issue of parsed.error.issues) {
       const path = issue.path.join('.')
-      if (path && !(path in fieldErrors)) fieldErrors[path] = issue.message
+      if (path && fieldKeys.has(String(issue.path[0]))) {
+        if (!(path in fieldErrors)) fieldErrors[path] = issue.message
+      } else {
+        formError.value = GENERIC_FORM_ERROR
+      }
     }
     setErrors(fieldErrors)
     return
   }
   emit('submit', parsed.data as Record<string, unknown>)
 })
-
-const formEl = ref<HTMLFormElement | null>(null)
 
 watch(
   () => props.serverErrors,
@@ -122,6 +137,8 @@ function onOpenChange(value: boolean): void {
 
       <form ref="formEl" class="space-y-4" @submit="onSubmit">
         <CmsFieldInput v-for="field in fields" :key="field.key" :field="field" :name="field.key" :site-uuid="siteUuid" />
+
+        <p v-if="formError" class="text-sm text-destructive" role="alert">{{ formError }}</p>
 
         <DialogFooter>
           <Button type="button" variant="outline" :disabled="submitting" @click="onOpenChange(false)">Annuler</Button>

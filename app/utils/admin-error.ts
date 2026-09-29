@@ -22,7 +22,9 @@ function extractStatus(error: FetchLikeError): number {
 }
 
 function extractMessage(error: FetchLikeError): string | undefined {
-  return error.statusMessage ?? error.data?.statusMessage ?? error.data?.message
+  // Corps JSON d'abord : la ligne de statut HTTP (`statusMessage` d'ofetch) perd les caractères
+  // non ASCII (« déjà » -> « dj »), le corps est fidèle.
+  return error.data?.statusMessage ?? error.data?.message ?? error.statusMessage
 }
 
 /** Erreur 4xx → message générique du serveur (déjà affichable, voir CLAUDE.md). Sinon repli générique. */
