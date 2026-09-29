@@ -54,20 +54,20 @@ async function deconnecter(): Promise<void> {
 
 <template>
   <header class="border-border bg-card flex h-16 shrink-0 items-center justify-between gap-3 border-b px-3 md:px-8">
-    <div class="flex min-w-0 items-center gap-2">
+    <div class="flex min-w-0 flex-1 items-center gap-2">
       <SidebarTrigger />
       <span class="font-display text-navy truncate text-sm font-semibold">{{ contexteNom }}</span>
     </div>
 
-    <div class="flex items-center gap-3 md:gap-4">
+    <div class="flex shrink-0 items-center gap-3 md:gap-4">
       <div v-if="user" class="hidden flex-col items-end gap-1 md:flex">
-        <span class="text-navy text-sm font-medium">{{ user.nom }}</span>
+        <span class="text-navy max-w-48 truncate text-sm font-medium">{{ user.nom }}</span>
         <Badge variant="secondary">{{ roleLabel }}</Badge>
       </div>
 
       <AlertDialog>
         <AlertDialogTrigger as-child>
-          <Button variant="outline" class="min-h-11 min-w-11 gap-2 md:min-h-9 md:min-w-0" :disabled="deconnexionEnCours">
+          <Button variant="outline" class="min-h-11 min-w-11 gap-2 lg:min-h-9 lg:min-w-0" :disabled="deconnexionEnCours">
             <LogOut aria-hidden="true" />
             <span class="hidden sm:inline">Déconnexion</span>
             <span class="sr-only sm:hidden">Se déconnecter</span>

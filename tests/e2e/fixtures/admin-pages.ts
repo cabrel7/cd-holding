@@ -4,7 +4,7 @@ import { expect, request as pwRequest, type APIRequestContext, type Locator, typ
 import type { AdminAccount } from '../helpers/auth'
 
 const BASE_URL_DEFAUT = 'http://localhost:3200'
-const LARGEUR_TABLETTE = 768
+const LARGEUR_DESKTOP = 1024
 
 /** Contexte d'API authentifié (cookie de session propre) — sans navigateur. */
 export async function apiAs(testInfo: TestInfo, account: AdminAccount): Promise<APIRequestContext> {
@@ -34,7 +34,7 @@ export function clesInterdites(value: unknown, chemin = '$'): string[] {
 
 export function estMobile(page: Page): boolean {
   const viewport = page.viewportSize()
-  return viewport !== null && viewport.width < LARGEUR_TABLETTE
+  return viewport !== null && viewport.width < LARGEUR_DESKTOP
 }
 
 // --- Shell ----------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ export class ClientsPage {
     return this.page.getByRole('search', { name: 'Filtrer les clients' })
   }
 
-  /** Ligne de tableau (>= md) ou élément de liste (< md) contenant ce texte. */
+  /** Ligne de tableau (>= lg) ou élément de liste (< lg) contenant ce texte. */
   ligne(texte: string | RegExp): Locator {
     return this.page.getByRole('row').or(this.page.getByRole('listitem')).filter({ hasText: texte })
   }

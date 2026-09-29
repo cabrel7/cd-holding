@@ -64,12 +64,12 @@ onScopeDispose(clearTimer)
 
   <div v-else-if="state === 'error'" role="alert" class="space-y-3 border-l-2 border-destructive py-2 pl-4">
     <p class="text-sm text-foreground">{{ messageErreur ?? 'Le chargement a échoué.' }}</p>
-    <Button variant="outline" class="min-h-11 md:min-h-9" @click="emit('retry')">Réessayer</Button>
+    <Button variant="outline" class="min-h-11 lg:min-h-9" @click="emit('retry')">Réessayer</Button>
   </div>
 
   <div v-else-if="state === 'filtered-empty'" class="space-y-3 py-8">
     <p class="text-sm text-foreground">{{ messageVideFiltre }}</p>
-    <Button variant="outline" class="min-h-11 md:min-h-9" @click="emit('reset')">Réinitialiser</Button>
+    <Button variant="outline" class="min-h-11 lg:min-h-9" @click="emit('reset')">Réinitialiser</Button>
   </div>
 
   <div v-else-if="state === 'empty'" class="space-y-3 py-8">

@@ -23,12 +23,12 @@ const fin = computed(() => Math.min(props.page * props.pageSize, props.total))
       <template v-if="total > 0">{{ debut }}–{{ fin }} sur {{ total }}</template>
     </p>
     <div v-if="pageCount > 1" class="flex items-center gap-2">
-      <Button variant="outline" class="min-h-11 md:min-h-9" :disabled="page <= 1" @click="emit('update:page', page - 1)">
+      <Button variant="outline" class="min-h-11 lg:min-h-9" :disabled="page <= 1" @click="emit('update:page', page - 1)">
         <ChevronLeft aria-hidden="true" />
         Précédent
       </Button>
       <span class="text-sm text-muted-foreground">Page {{ page }} / {{ pageCount }}</span>
-      <Button variant="outline" class="min-h-11 md:min-h-9" :disabled="page >= pageCount" @click="emit('update:page', page + 1)">
+      <Button variant="outline" class="min-h-11 lg:min-h-9" :disabled="page >= pageCount" @click="emit('update:page', page + 1)">
         Suivant
         <ChevronRight aria-hidden="true" />
       </Button>

@@ -1,8 +1,8 @@
 import type { ComputedRef, Ref } from "vue"
 import { createContext } from "reka-ui"
 
-/** Largeur en dessous de laquelle la barre latérale devient un Sheet (768 px = breakpoint md). */
-export const SIDEBAR_MOBILE_QUERY = "(max-width: 767px)"
+/** Largeur en dessous de laquelle la barre latérale devient un Sheet (1024 px = breakpoint lg). */
+export const SIDEBAR_MOBILE_QUERY = "(max-width: 1023px)"
 
 export const [useSidebar, provideSidebarContext] = createContext<{
   state: ComputedRef<"expanded" | "collapsed">

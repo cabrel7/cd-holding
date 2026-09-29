@@ -48,7 +48,7 @@ const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
     :data-state="state"
     :data-collapsible="state === 'collapsed' ? collapsible : ''"
     :class="cn(
-      'group/sidebar bg-card text-foreground border-border sticky top-0 hidden h-svh shrink-0 flex-col border-r transition-[width] duration-200 ease-out motion-reduce:transition-none md:flex',
+      'group/sidebar bg-card text-foreground border-border sticky top-0 hidden h-svh shrink-0 flex-col border-r transition-[width] duration-200 ease-out motion-reduce:transition-none lg:flex',
       state === 'collapsed' && collapsible === 'icon' ? 'w-16' : 'w-64',
       props.class,
     )"

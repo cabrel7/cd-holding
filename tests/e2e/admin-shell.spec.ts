@@ -96,7 +96,7 @@ test.describe('Shell admin', () => {
     expect(apres.status(), 'la session doit être détruite côté serveur').toBe(HTTP.UNAUTHORIZED)
   })
 
-  test('should render the sidebar in a Sheet under 768 px and inline on desktop', async ({ page, context }) => {
+  test('should render the sidebar in a Sheet under 1024 px and inline on desktop', async ({ page, context }) => {
     await loginAs(context, SUPER_ADMIN)
     const shell = new AdminShell(page)
     await page.goto('/admin')
@@ -118,7 +118,7 @@ test.describe('Shell admin', () => {
   })
 
   test('should give the mobile menu button and logout a touch target of at least 44 px (mobile only)', async ({ page, context }) => {
-    test.skip(!estMobile(page), 'critère mobile (375 px)')
+    test.skip(!estMobile(page), 'critère mobile (< 1024 px)')
     await loginAs(context, SUPER_ADMIN)
     const shell = new AdminShell(page)
     await page.goto('/admin')

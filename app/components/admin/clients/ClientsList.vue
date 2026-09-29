@@ -20,7 +20,7 @@ const emit = defineEmits<{
   remove: [client: AdminClientDto]
 }>()
 
-const isTable = useMediaQuery('(min-width: 768px)')
+const isTable = useMediaQuery('(min-width: 1024px)')
 
 const BADGE_VARIANTS = { PROSPECT: 'outline', CLIENT_ACTIF: 'default', INACTIF: 'secondary' } as const satisfies Record<
   StatutClientDto,
