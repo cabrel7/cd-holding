@@ -1,7 +1,8 @@
 // Filtres et pagination d'une liste admin, portés par l'URL (`route.query`) : survivent au
-// rechargement et au retour arrière. Valeurs validées par le schéma zod partagé ; toute valeur
-// invalide retombe sur les défauts du schéma. Un changement de filtre remet `page` à 1 ; la
-// recherche est temporisée (300 ms) pour ne pas requêter à chaque frappe.
+// rechargement et au retour arrière. Valeurs validées par le schéma zod partagé ; une valeur
+// invalide est ignorée seule (défaut du schéma), les autres filtres sont conservés. Un changement
+// de filtre remet `page` à 1 ; la recherche est temporisée (300 ms) pour ne pas requêter à
+// chaque frappe.
 import { computed, onScopeDispose, ref, watch, type ComputedRef, type Ref } from 'vue'
 import type { z } from 'zod'
 
@@ -40,8 +41,16 @@ export function useAdminListQuery<TQuery extends AdminListQueryBase>(
   }
 
   const query = computed<TQuery>(() => {
-    const parsed = schema.safeParse(readUrl())
-    return parsed.success ? parsed.data : schema.parse({})
+    // Un paramètre invalide n'annule que lui-même : on retire les clés en erreur et on réessaie.
+    const raw = readUrl()
+    for (let attempt = 0; attempt <= keys.length; attempt++) {
+      const parsed = schema.safeParse(raw)
+      if (parsed.success) return parsed.data
+      const invalides = parsed.error.issues.map((issue) => String(issue.path[0] ?? '')).filter((key) => key in raw)
+      if (invalides.length === 0) break
+      for (const key of invalides) delete raw[key]
+    }
+    return schema.parse({})
   })
 
   const hasFilters = computed(() => {

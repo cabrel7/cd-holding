@@ -1,9 +1,10 @@
 // Liste paginée admin (GET /api/admin/<ressource> → AdminPage<T>). Ne lance jamais de toast :
 // l'erreur est exposée normalisée et affichée par AdminListState (avec « Réessayer »).
-// Une session expirée (401) renvoie vers la connexion avec `redirect`.
+// Une session expirée (401) vide la session et renvoie vers la connexion (handleAdminUnauthorized).
 import { computed, toValue, watch, type ComputedRef, type MaybeRefOrGetter } from 'vue'
 import type { AdminError, AdminPage } from '#shared/types/admin'
 import { toAdminError } from '@/utils/admin-error'
+import { watchAdminUnauthorized } from '@/utils/admin-unauthorized'
 
 export type AdminListState = 'loading' | 'error' | 'empty' | 'filtered-empty' | 'ready'
 
@@ -32,7 +33,6 @@ export interface UseAdminPagedListReturn<TItem extends { uuid: string }> {
 export function useAdminPagedList<TItem extends { uuid: string }, TQuery extends Record<string, string | number | undefined>>(
   options: UseAdminPagedListOptions<TQuery>,
 ): UseAdminPagedListReturn<TItem> {
-  const route = useRoute()
   const query = computed(() => toValue(options.query))
 
   const {
@@ -68,11 +68,7 @@ export function useAdminPagedList<TItem extends { uuid: string }, TQuery extends
     if (isOut) options.onPageOutOfRange?.(Math.max(1, pageCount.value))
   })
 
-  watch(error, (value) => {
-    if (value?.status === 401) {
-      void navigateTo({ path: ADMIN_LOGIN_PATH, query: { redirect: route.fullPath } })
-    }
-  })
+  watchAdminUnauthorized(fetchError)
 
   async function refresh(): Promise<void> {
     await refreshFetch()

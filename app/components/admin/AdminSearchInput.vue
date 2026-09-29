@@ -11,8 +11,8 @@ const id = useId()
 </script>
 
 <template>
-  <div class="space-y-1.5">
+  <div class="w-full space-y-1.5 md:w-auto">
     <Label :for="id" class="text-xs text-muted-foreground">{{ label }}</Label>
-    <Input :id="id" v-model="model" type="search" :maxlength="ADMIN_SEARCH_MAX" autocomplete="off" class="h-11 md:h-9 md:w-64" />
+    <Input :id="id" v-model="model" type="search" :maxlength="ADMIN_SEARCH_MAX" autocomplete="off" class="h-11 w-full md:h-9 md:w-64" />
   </div>
 </template>

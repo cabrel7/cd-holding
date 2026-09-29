@@ -5,7 +5,6 @@
 // la nouvelle page dans l'ancien nœud (le slot lit la route courante).
 import AdminHeader from '@/components/admin/AdminHeader.vue'
 import AdminSidebar from '@/components/admin/AdminSidebar.vue'
-import { ADMIN_GROUP_NAME } from '@/config/admin-nav'
 import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 
 const route = useRoute()
@@ -31,14 +30,6 @@ const pageKey = computed(() => route.matched[0]?.path ?? route.path)
           </div>
         </Transition>
       </main>
-      <footer class="border-border bg-card text-muted-foreground border-t px-4 py-4 text-xs md:px-10">
-        <div class="flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
-          <span>{{ ADMIN_GROUP_NAME }} — Console d'administration</span>
-          <NuxtLink to="/" class="hover:text-navy inline-flex min-h-11 items-center underline-offset-4 hover:underline">
-            Voir le site public
-          </NuxtLink>
-        </div>
-      </footer>
     </SidebarInset>
   </SidebarProvider>
 </template>

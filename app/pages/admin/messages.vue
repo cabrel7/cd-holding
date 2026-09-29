@@ -12,6 +12,7 @@ import MessageFilters from '@/components/admin/messages/MessageFilters.vue'
 import MessageItem from '@/components/admin/messages/MessageItem.vue'
 import { useMessageActions } from '@/components/admin/messages/useMessageActions'
 import CmsDeleteDialog from '@/components/cms/CmsDeleteDialog.vue'
+import { ADMIN_PAGE_WIDTH_CLASS } from '@/config/admin-nav'
 
 definePageMeta({
   middleware: 'admin',
@@ -61,7 +62,7 @@ async function confirmDelete(): Promise<void> {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-5xl space-y-6">
+  <div :class="[ADMIN_PAGE_WIDTH_CLASS, 'space-y-6']">
     <AdminPageHeader titre="Messages" description="Demandes reçues depuis les formulaires des sites." />
 
     <MessageFilters
@@ -85,7 +86,7 @@ async function confirmDelete(): Promise<void> {
       @retry="list.refresh"
       @reset="reset"
     >
-      <div :class="{ 'opacity-60 transition-opacity': list.refreshing.value }">
+      <div :class="{ 'opacity-80 transition-opacity': list.refreshing.value }" :aria-busy="list.refreshing.value">
         <MessageItem
           v-for="message in list.items.value"
           :key="message.uuid"

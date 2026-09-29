@@ -23,7 +23,7 @@ const props = withDefaults(defineProps<PrimitiveProps & {
     :class="cn(
       'flex h-11 w-full items-center gap-3 overflow-hidden rounded-md px-3 text-left text-sm font-medium outline-hidden transition-colors',
       'hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring focus-visible:ring-2',
-      'data-[active=true]:bg-primary data-[active=true]:text-primary-foreground',
+      'data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[active=true]:hover:bg-primary data-[active=true]:hover:text-primary-foreground',
       'disabled:pointer-events-none disabled:opacity-50 [&>svg]:size-4 [&>svg]:shrink-0 [&>span:last-child]:truncate',
       'group-data-[collapsible=icon]/sidebar:justify-center group-data-[collapsible=icon]/sidebar:px-0 group-data-[collapsible=icon]/sidebar:[&>span:last-child]:sr-only',
       props.class,

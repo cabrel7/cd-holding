@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
+import { Globe } from '@lucide/vue'
 import { isNavItemActive, navLabel, visibleNavItems, ADMIN_GROUP_NAME } from '@/config/admin-nav'
 import type { ModuleKey } from '#shared/config/modules'
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
@@ -84,6 +86,7 @@ watch(
                   as-child
                   :is-active="entry.active"
                   :tooltip="entry.label"
+                  :class="entry.nouveaux > 0 ? 'pr-10 group-data-[collapsible=icon]/sidebar:pr-0' : undefined"
                 >
                   <NuxtLink :to="entry.item.to" :aria-current="entry.active ? 'page' : undefined">
                     <component :is="entry.item.icon" aria-hidden="true" />
@@ -103,5 +106,18 @@ watch(
         </SidebarGroupContent>
       </SidebarGroup>
     </SidebarContent>
+
+    <SidebarFooter class="border-border border-t">
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton as-child tooltip="Voir le site public">
+            <NuxtLink to="/">
+              <Globe aria-hidden="true" />
+              <span>Voir le site public</span>
+            </NuxtLink>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    </SidebarFooter>
   </Sidebar>
 </template>

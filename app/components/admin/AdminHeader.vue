@@ -4,7 +4,7 @@ import { LogOut } from '@lucide/vue'
 import { toast } from 'vue-sonner'
 import { ROLE_LABELS } from '#shared/config/admin'
 import { ROLES } from '#shared/utils/roles'
-import { ADMIN_GROUP_NAME } from '@/config/admin-nav'
+import { ADMIN_NAV, isNavItemActive, navLabel } from '@/config/admin-nav'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { SidebarTrigger } from '@/components/ui/sidebar'
@@ -26,11 +26,15 @@ const { sites } = useAdminShell()
 const user = computed(() => authStore.user)
 const roleLabel = computed(() => (user.value ? ROLE_LABELS[user.value.role] : ''))
 
-// SUPER_ADMIN : le groupe ; ADMIN_FILIALE : sa filiale (seul site renvoyé par l'API) ; EMPLOYE :
-// aucun appel de données, donc le groupe.
+const route = useRoute()
+
+// Titre contextuel (le nom du groupe est déjà dans la barre latérale) : ADMIN_FILIALE → sa
+// filiale (seul site renvoyé par l'API) ; sinon la section courante.
 const contexteNom = computed(() => {
-  if (user.value?.role === ROLES.ADMIN_FILIALE) return sites.value[0]?.nom ?? ADMIN_GROUP_NAME
-  return ADMIN_GROUP_NAME
+  const role = user.value?.role
+  if (role === ROLES.ADMIN_FILIALE && sites.value[0]) return sites.value[0].nom
+  const item = ADMIN_NAV.find((entry) => isNavItemActive(entry, route.path))
+  return item && role ? navLabel(item, role) : 'Console d\'administration'
 })
 
 const deconnexionEnCours = ref(false)

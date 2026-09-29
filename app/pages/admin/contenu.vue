@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import AdminPageHeader from '@/components/admin/AdminPageHeader.vue'
+import { ADMIN_PAGE_WIDTH_CLASS } from '@/config/admin-nav'
+
 // Coquille des pages /admin/contenu/* : titre + onglets-liens dans le shell admin. `<NuxtPage/>`
 // rend la ressource sélectionnée (contenu/index.vue, services.vue, réalisations.vue, équipe.vue,
 // partenaires.vue).
@@ -23,16 +26,16 @@ useHead({ title: 'Contenu des sites — Administration' })
 </script>
 
 <template>
-  <div class="mx-auto max-w-6xl space-y-8">
-    <header class="border-border border-b pb-6">
-      <h1 class="font-display text-navy text-3xl font-semibold">Contenu des sites</h1>
-      <nav class="mt-6 flex flex-wrap gap-1" aria-label="Sections du contenu">
+  <div :class="[ADMIN_PAGE_WIDTH_CLASS, 'space-y-8']">
+    <header class="border-border space-y-6 border-b pb-6">
+      <AdminPageHeader titre="Contenu des sites" />
+      <nav class="flex flex-wrap gap-1" aria-label="Sections du contenu">
         <NuxtLink
           v-for="tab in TABS"
           :key="tab.to"
           :to="tab.to"
           class="focus-visible:ring-ring inline-flex min-h-11 items-center rounded-md px-3 text-sm transition-colors outline-hidden focus-visible:ring-2 md:min-h-9"
-          :class="route.path === tab.to ? 'bg-navy text-white' : 'text-muted-foreground hover:bg-card hover:text-navy'"
+          :class="route.path === tab.to ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:bg-card hover:text-navy'"
           :aria-current="route.path === tab.to ? 'page' : undefined"
         >
           {{ tab.label }}

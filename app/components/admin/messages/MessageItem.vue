@@ -39,6 +39,8 @@ const contacts = computed(() =>
     (v): v is string => typeof v === 'string' && v !== '',
   ),
 )
+const mailtoHref = computed(() => `mailto:${encodeURIComponent(props.message.email)}`)
+const telHref = computed(() => `tel:${(props.message.telephone ?? '').replace(/[^+0-9]/g, '')}`)
 const statutOptions = Object.entries(STATUT_MESSAGE_LABELS) as [StatutMessageDto, string][]
 </script>
 
@@ -57,10 +59,10 @@ const statutOptions = Object.entries(STATUT_MESSAGE_LABELS) as [StatutMessageDto
     <p class="flex flex-wrap items-center gap-x-2 text-sm text-muted-foreground">
       <span class="font-medium text-foreground">{{ message.nom }}</span>
       <span aria-hidden="true">·</span>
-      <a :href="`mailto:${message.email}`" class="break-all underline-offset-2 hover:underline">{{ message.email }}</a>
+      <a :href="mailtoHref" class="break-all underline-offset-2 hover:underline">{{ message.email }}</a>
       <template v-if="message.telephone">
         <span aria-hidden="true">·</span>
-        <a :href="`tel:${message.telephone}`" class="underline-offset-2 hover:underline">{{ message.telephone }}</a>
+        <a :href="telHref" class="underline-offset-2 hover:underline">{{ message.telephone }}</a>
       </template>
       <template v-for="info in contacts" :key="info">
         <span aria-hidden="true">·</span>

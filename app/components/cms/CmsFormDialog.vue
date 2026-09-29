@@ -4,7 +4,7 @@
 // (`schema.safeParse`) au submit — évite de recréer un typage vee-validate profondément
 // imbriqué pour les champs `liste`/`paragraphes` (un seul niveau, transformé ici). Les erreurs
 // vont sous le champ concerné (`setErrors`), jamais en toast (voir CLAUDE.md, ui-ux §7).
-import { watch } from 'vue'
+import { nextTick, ref, watch } from 'vue'
 import { useForm } from 'vee-validate'
 import type { ZodType } from 'zod'
 import type { CmsField } from '#shared/content/sections/types'
@@ -21,6 +21,8 @@ const props = defineProps<{
   initialValues: Record<string, unknown>
   siteUuid: string
   submitting: boolean
+  /** Erreurs renvoyées par le serveur (ex. 409), affichées sous le champ (clé = nom du champ). */
+  serverErrors?: Record<string, string>
 }>()
 
 const emit = defineEmits<{
@@ -91,6 +93,20 @@ const onSubmit = handleSubmit((formValues) => {
   emit('submit', parsed.data as Record<string, unknown>)
 })
 
+const formEl = ref<HTMLFormElement | null>(null)
+
+watch(
+  () => props.serverErrors,
+  async (errors) => {
+    const entries = errors ? Object.entries(errors) : []
+    const [first] = entries[0] ?? []
+    if (!first) return
+    setErrors(Object.fromEntries(entries))
+    await nextTick()
+    formEl.value?.querySelector<HTMLElement>(`#cms-field-${first.replace(/[^a-zA-Z0-9]/g, '-')}`)?.focus()
+  },
+)
+
 function onOpenChange(value: boolean): void {
   emit('update:open', value)
 }
@@ -104,7 +120,7 @@ function onOpenChange(value: boolean): void {
         <DialogDescription v-if="description">{{ description }}</DialogDescription>
       </DialogHeader>
 
-      <form class="space-y-4" @submit="onSubmit">
+      <form ref="formEl" class="space-y-4" @submit="onSubmit">
         <CmsFieldInput v-for="field in fields" :key="field.key" :field="field" :name="field.key" :site-uuid="siteUuid" />
 
         <DialogFooter>

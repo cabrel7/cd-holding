@@ -25,6 +25,8 @@ const props = defineProps<{
 const { value, errorMessage, handleChange, handleBlur } = useField<unknown>(() => props.name)
 
 const fieldId = computed(() => `cms-field-${props.name.replace(/[^a-zA-Z0-9]/g, '-')}`)
+const errorId = computed(() => `${fieldId.value}-error`)
+const describedBy = computed(() => (errorMessage.value ? errorId.value : undefined))
 
 // --- paragraphes : un seul textarea, paragraphes séparés par une ligne vide ---
 const paragraphesText = computed<string>({
@@ -84,6 +86,7 @@ function moveItem(index: number, direction: -1 | 1): void {
       :model-value="(value as string | number | undefined)"
       :maxlength="field.maxLength"
       :aria-invalid="!!errorMessage"
+      :aria-describedby="describedBy"
       @update:model-value="handleChange"
       @blur="handleBlur"
     />
@@ -94,6 +97,7 @@ function moveItem(index: number, direction: -1 | 1): void {
       type="url"
       :model-value="(value as string | number | undefined)"
       :aria-invalid="!!errorMessage"
+      :aria-describedby="describedBy"
       @update:model-value="handleChange"
       @blur="handleBlur"
     />
@@ -104,6 +108,7 @@ function moveItem(index: number, direction: -1 | 1): void {
       type="date"
       :model-value="(value as string | number | undefined)"
       :aria-invalid="!!errorMessage"
+      :aria-describedby="describedBy"
       @update:model-value="handleChange"
       @blur="handleBlur"
     />
@@ -115,6 +120,7 @@ function moveItem(index: number, direction: -1 | 1): void {
       :maxlength="field.maxLength"
       rows="5"
       :aria-invalid="!!errorMessage"
+      :aria-describedby="describedBy"
       @update:model-value="handleChange"
       @blur="handleBlur"
     />
@@ -125,6 +131,7 @@ function moveItem(index: number, direction: -1 | 1): void {
       v-model="paragraphesText"
       rows="8"
       :aria-invalid="!!errorMessage"
+      :aria-describedby="describedBy"
       @blur="handleBlur"
     />
 
@@ -138,7 +145,7 @@ function moveItem(index: number, direction: -1 | 1): void {
       :model-value="(value as string | undefined)"
       @update:model-value="handleChange"
     >
-      <SelectTrigger :id="fieldId" class="w-full" :aria-invalid="!!errorMessage">
+      <SelectTrigger :id="fieldId" class="w-full" :aria-invalid="!!errorMessage" :aria-describedby="describedBy">
         <SelectValue :placeholder="field.label" />
       </SelectTrigger>
       <SelectContent>
@@ -216,6 +223,6 @@ function moveItem(index: number, direction: -1 | 1): void {
     </div>
 
     <p v-if="field.helpText" class="text-xs text-muted-foreground">{{ field.helpText }}</p>
-    <p v-if="errorMessage" class="text-sm text-destructive" role="alert">{{ errorMessage }}</p>
+    <p v-if="errorMessage" :id="errorId" class="text-sm text-destructive" role="alert">{{ errorMessage }}</p>
   </div>
 </template>

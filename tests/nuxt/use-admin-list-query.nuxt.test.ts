@@ -31,6 +31,13 @@ describe('useAdminListQuery', () => {
     expect(w.vm.hasFilters).toBe(false)
   })
 
+  it('une valeur invalide ne supprime pas les autres filtres', async () => {
+    const w = await mountQuery('/?statut=BIDON&type=CONTACT&q=abc')
+    expect(w.vm.query.statut).toBeUndefined()
+    expect(w.vm.query.q).toBe('abc')
+    expect(w.vm.hasFilters).toBe(true)
+  })
+
   it('setFilter remet la page à 1 et écrit dans l’URL', async () => {
     const w = await mountQuery('/?page=3')
     await w.vm.setFilter('statut', 'TRAITE')

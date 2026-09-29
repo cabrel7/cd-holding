@@ -1,5 +1,6 @@
 import type { AdminSiteSummary } from '#shared/types/admin'
 import { ROLES } from '#shared/utils/roles'
+import { watchAdminUnauthorized } from '@/utils/admin-unauthorized'
 
 export const ADMIN_SITES_KEY = 'admin-sites'
 export const ADMIN_COMPTEURS_KEY = 'admin-compteurs'
@@ -22,18 +23,21 @@ export function useAdminShell(): {
   const { user } = useUserSession()
   const actif = !!user.value && user.value.role !== ROLES.EMPLOYE
 
-  const { data: sitesData } = useFetch<AdminSiteSummary[]>('/api/admin/sites', {
+  const { data: sitesData, error: sitesError } = useFetch<AdminSiteSummary[]>('/api/admin/sites', {
     key: ADMIN_SITES_KEY,
     server: false,
     immediate: actif,
     default: () => [],
   })
-  const { data: compteursData } = useFetch<AdminCompteurs | null>('/api/admin/messages/compteurs', {
+  const { data: compteursData, error: compteursError } = useFetch<AdminCompteurs | null>('/api/admin/messages/compteurs', {
     key: ADMIN_COMPTEURS_KEY,
     server: false,
     immediate: actif,
     default: () => null,
   })
+
+  watchAdminUnauthorized(sitesError)
+  watchAdminUnauthorized(compteursError)
 
   const sites = computed<readonly AdminSiteSummary[]>(() => sitesData.value ?? [])
   const compteurs = computed<AdminCompteurs | null>(() => compteursData.value ?? null)

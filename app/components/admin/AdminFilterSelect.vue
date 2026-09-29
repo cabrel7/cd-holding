@@ -17,7 +17,7 @@ const id = useId()
 </script>
 
 <template>
-  <div class="space-y-1.5">
+  <div class="w-full space-y-1.5 md:w-auto">
     <Label :for="id" class="text-xs text-muted-foreground">{{ label }}</Label>
     <Select :model-value="model ?? TOUT" @update:model-value="(v) => (model = v === TOUT ? undefined : String(v))">
       <SelectTrigger :id="id" class="w-full data-[size=default]:h-11 md:data-[size=default]:h-9 md:w-48">

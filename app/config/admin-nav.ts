@@ -7,6 +7,9 @@ import { ROLES, type AppRole } from '#shared/utils/roles'
 
 export const ADMIN_GROUP_NAME = 'Groupe CD'
 
+/** Largeur de contenu commune à toutes les pages du shell admin. */
+export const ADMIN_PAGE_WIDTH_CLASS = 'mx-auto w-full max-w-5xl'
+
 export type AdminCompteurKey = 'messagesNouveaux'
 
 export interface AdminNavItem {

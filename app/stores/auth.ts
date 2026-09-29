@@ -1,15 +1,14 @@
 import { toast } from 'vue-sonner'
-import { ADMIN_COMPTEURS_KEY, ADMIN_SITES_KEY } from '@/composables/useAdminShell'
+import { clearAdminCache } from '@/utils/admin-unauthorized'
 
 const LOGOUT_ERROR_MESSAGE = 'Déconnexion impossible. Réessayez.'
 
 export const useAuthStore = defineStore('auth', () => {
   const { user, loggedIn, clear, fetch } = useUserSession()
 
-  // Les données du shell dépendent du compte : ne jamais les laisser fuiter vers le suivant.
-  function clearShellData(): void {
-    clearNuxtData([ADMIN_SITES_KEY, ADMIN_COMPTEURS_KEY])
-  }
+  // Toutes les données admin (`admin-*` : sites, compteurs, listes, dashboard, ressources CMS)
+  // dépendent du compte : ne jamais les laisser fuiter vers le suivant.
+  const clearShellData = clearAdminCache
 
   async function login(email: string, password: string): Promise<void> {
     await $fetch('/api/auth/login', { method: 'POST', body: { email, password } })

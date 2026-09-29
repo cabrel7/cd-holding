@@ -21,6 +21,7 @@ import {
   clientFields,
   clientInitialValues,
 } from '@/config/admin-client-fields'
+import { ADMIN_PAGE_WIDTH_CLASS } from '@/config/admin-nav'
 
 definePageMeta({
   middleware: 'admin',
@@ -73,14 +74,17 @@ const formSchema = computed(() =>
     : clientCreateFormSchema(formWithSite.value),
 )
 const formValues = computed(() => clientInitialValues(editedClient.value, formWithSite.value))
+const formServerErrors = computed(() => (actions.emailError.value ? { email: actions.emailError.value } : undefined))
 const formTitre = computed(() => (editedClient.value ? 'Modifier le client' : 'Ajouter un client'))
 
 function openCreate(): void {
+  actions.clearFieldErrors()
   formMode.value = { kind: 'create' }
   formOpen.value = true
 }
 
 function openEdit(client: AdminClientDto): void {
+  actions.clearFieldErrors()
   formMode.value = { kind: 'edit', client }
   formOpen.value = true
 }
@@ -120,7 +124,7 @@ async function confirmDelete(): Promise<void> {
 </script>
 
 <template>
-  <div class="mx-auto w-full max-w-5xl space-y-6">
+  <div :class="[ADMIN_PAGE_WIDTH_CLASS, 'space-y-6']">
     <AdminPageHeader titre="Clients" description="Prospects et clients de vos sites.">
       <Button class="min-h-11 md:min-h-9" @click="openCreate">
         <Plus aria-hidden="true" />
@@ -148,9 +152,9 @@ async function confirmDelete(): Promise<void> {
       @reset="reset"
     >
       <template #vide-action>
-        <Button variant="outline" class="min-h-11 md:min-h-9" @click="openCreate">Ajouter un client</Button>
+        <Button class="min-h-11 md:min-h-9" @click="openCreate">Ajouter un client</Button>
       </template>
-      <div :class="{ 'opacity-60 transition-opacity': list.refreshing.value }">
+      <div :class="{ 'opacity-80 transition-opacity': list.refreshing.value }" :aria-busy="list.refreshing.value">
         <ClientsList
           :clients="list.items.value"
           :show-site="showSite"
@@ -175,6 +179,7 @@ async function confirmDelete(): Promise<void> {
       :initial-values="formValues"
       site-uuid=""
       :submitting="actions.submitting.value"
+      :server-errors="formServerErrors"
       @update:open="onFormOpen"
       @submit="onFormSubmit"
     />

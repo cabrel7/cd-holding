@@ -150,6 +150,9 @@ Convention de statut : ❌ pas commencé · 🔧 en cours · 👀 à vérifier (
 - 2026-09-25 — **Phase 1 tranchée** (page « Groupe CD — Décisions de conversion et questions client », rev 278). DEC-01…39 : recommandations retenues SAUF DEC-07 (textes marketing filiales **en base, éditables**), DEC-08 (sections de contenu **gardées + affichées sur leurs pages**), DEC-09 (statut de site **fonctionnel** : page maintenance — interprétation, précision non donnée), DEC-39 (réalisations holding **affichées sur une page dédiée**).
 - 2026-09-25 — Réponses client : principe **tout contenu éditable depuis l'admin** avec valeurs par défaut rédigées par nous. Q-01/Q-07 textes légaux (confidentialité Loi 25, mentions alcool) rédigés + éditables ; Q-02 coordonnées + nom du groupe éditables ; Q-03 effectif éditable ; Q-04 services éditables (CMS) ; Q-05 services « mis en avant » choisis dans l'admin, supermarchés par défaut ; Q-06 mention partenaire éditable, défaut neutre ; Q-08 infos restaurant (adresse, horaires, capacité) éditables ; Q-09 CV PDF uniquement ; Q-10 **courriels de confirmation à prévoir** (mailer) ; Q-11 libellé « Vous ne trouvez pas ce que vous cherchez ? ».
 - 2026-09-25 — `nuxt-security` 2.6.0 (ajouté hors session) configuré : CSP/HSTS/headers actifs ; `rateLimiter: false` (bypass XFF, doublon de `server/utils/rate-limit.ts`), `corsHandler: false` (monolithe same-origin — rouvrir avec origin précise si app mobile), `xssValidator: false` (stringifie les octets des uploads ; XSS couvert par zod + échappement Vue + CSP), `requestSizeLimiter` aligné sur `shared/config/upload.ts`. Ne pas réactiver sans revue.
+- 2026-09-29 — **Loi 25 candidatures (décision utilisateur)** : **anonymisation** (pas d'archivage nominatif) — suppression CV + documents, effacement nom/courriel/téléphone/adresse, conservation d'une ligne statistique (poste, catégorie, date, statut, filiale). Délai : **6 mois** après rejet ou après réception si jamais traitée ; retenue/vivier : 12 mois renouvelable avec nouveau consentement. Tâche planifiée quotidienne + bouton « Supprimer maintenant » (demande d'effacement). Durée à annoncer dans la politique de confidentialité et `OFFRES:candidature.consentement` (validation juriste). Migration au lot 5.
+- 2026-09-29 — **Réservations en double** : contrainte unique en base (décision utilisateur), migration au lot 5.
+- 2026-09-29 — **Migrations** : Claude écrit schéma + migration et montre le SQL ; l'utilisateur exécute la commande (`prisma migrate`) lui-même.
 - 2026-09-25 — `.nuxtrc` (setup @nuxt/test-utils) versionné.
 - 2026-09-25 — Écarts assumés au prompt correctif : schéma Prisma 7 existant conservé (pas remplacé), durcissement login conservé, `requireRole` conservé (pas de `?? -1`).
 
@@ -191,9 +194,9 @@ Corrigé : rate-limit contournable via X-Forwarded-For (XFF lu seulement si conn
 Conversion par lots (CLAUDE.md « Workflow de conversion ») — Lot 1 ✅ (2026-09-28, spec `docs/specs/lot1-pages-filiales.md`, suite e2e complète 127 ✅ + 1 relance ✅).
 
 1. ~~Lot 2~~ ✅ (2026-09-28, spec `docs/specs/lot2-contact-filiales.md`) — contact des 6 filiales + suggestion produit. Base de dev : textes contact placement / suggestion réalignés dans le seed seulement → saisir dans `/admin/contenu`.
-2. Lot 3 — pages spécifiques : `/placement/offres` + postuler, `/ccdpaa/restaurant` + réservation, assistant import-export.
-3. Lot 4 — admin socle : login, shell `/admin` (socle clair), messages, clients.
-4. Lot 5 — modules admin : planning ×3, dossiers comptables, placement ×3, réservations.
+2. ~~Lot 3~~ ✅ (2026-09-29) — offres placement + candidature, restaurant + réservation, assistant import-export.
+3. Lot 4 (en cours, spec `docs/specs/lot4-admin-socle.md`) — admin socle : login, shell, tableau de bord, messages, clients. Code + revues faits ; correctifs de revue, e2e, captures en cours.
+4. Lot 5 — modules admin, en sous-lots : placement ×3 (+ migration Loi 25 anonymisation 6 mois), réservations (+ contrainte unique), planning ×3 + mon planning, dossiers comptables, paramètres/mot de passe (bloquant prod).
 5. À la volée : recapture des 6 `/{filiale}/a-propos` → ✅.
 
 Base de dev : les surtitres ajoutés au seed par le lot 1 (« Portfolio », « Nos services », sauts de ligne des H1 filiales) ne sont pas dans une base déjà semée → saisir dans `/admin/contenu` ou `migrate reset` + seed avec accord.

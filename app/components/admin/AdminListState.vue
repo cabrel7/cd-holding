@@ -1,11 +1,14 @@
 <script setup lang="ts">
 // États d'une liste serveur : chargement, erreur (+ Réessayer), vide, vide filtré (+ Réinitialiser),
 // contenu. Le slot par défaut n'est rendu que dans l'état `ready`.
+import { onScopeDispose, ref, watch } from 'vue'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { AdminListState } from '@/composables/useAdminPagedList'
 
-withDefaults(
+const SKELETON_DELAY_MS = 150
+
+const props = withDefaults(
   defineProps<{
     state: AdminListState
     messageVide: string
@@ -24,16 +27,39 @@ const emit = defineEmits<{
   retry: []
   reset: []
 }>()
+
+// Squelette différé : un chargement plus court que le délai n'affiche pas de flash.
+const showSkeleton = ref(false)
+let timer: ReturnType<typeof setTimeout> | null = null
+
+function clearTimer(): void {
+  if (timer !== null) clearTimeout(timer)
+  timer = null
+}
+
+watch(
+  () => props.state === 'loading',
+  (loading) => {
+    clearTimer()
+    showSkeleton.value = false
+    if (loading) timer = setTimeout(() => (showSkeleton.value = true), SKELETON_DELAY_MS)
+  },
+  { immediate: true },
+)
+
+onScopeDispose(clearTimer)
 </script>
 
 <template>
   <div v-if="state === 'loading'" role="status" aria-live="polite" class="space-y-4">
     <span class="sr-only">Chargement…</span>
-    <div v-for="n in squelettes" :key="n" class="space-y-2 border-b border-border py-4">
-      <Skeleton class="h-5 w-1/3" />
-      <Skeleton class="h-4 w-2/3" />
-      <Skeleton class="h-4 w-1/2" />
-    </div>
+    <template v-if="showSkeleton">
+      <div v-for="n in squelettes" :key="n" class="space-y-2 border-b border-border py-4">
+        <Skeleton class="h-5 w-1/3" />
+        <Skeleton class="h-4 w-2/3" />
+        <Skeleton class="h-4 w-1/2" />
+      </div>
+    </template>
   </div>
 
   <div v-else-if="state === 'error'" role="alert" class="space-y-3 border-l-2 border-destructive py-2 pl-4">

@@ -39,13 +39,20 @@ const dateOuTiret = computed(() => (iso: string | null) => (iso ? formatDateQueb
         <TableHead v-if="showSite">Site</TableHead>
         <TableHead>Statut</TableHead>
         <TableHead>Dernière interaction</TableHead>
-        <TableHead class="w-24 text-right"><span class="sr-only">Actions</span></TableHead>
+        <TableHead class="w-28 text-right"><span class="sr-only">Actions</span></TableHead>
       </TableRow>
     </TableHeader>
     <TableBody>
       <TableRow v-for="client in clients" :key="client.uuid">
         <TableCell class="whitespace-normal">
-          <div class="font-medium text-foreground">{{ client.nom }}</div>
+          <button
+            type="button"
+            class="focus-visible:ring-ring text-foreground -mx-1 rounded-sm px-1 text-left font-medium underline-offset-2 outline-hidden hover:underline focus-visible:ring-2"
+            :title="`Modifier ${client.nom}`"
+            @click="emit('edit', client)"
+          >
+            {{ client.nom }}
+          </button>
           <div v-if="client.entreprise" class="text-muted-foreground">{{ client.entreprise }}</div>
         </TableCell>
         <TableCell class="whitespace-normal">
@@ -56,19 +63,29 @@ const dateOuTiret = computed(() => (iso: string | null) => (iso ? formatDateQueb
         <TableCell v-if="showSite">{{ client.site.nom }}</TableCell>
         <TableCell><Badge :variant="BADGE_VARIANTS[client.statut]">{{ STATUT_CLIENT_LABELS[client.statut] }}</Badge></TableCell>
         <TableCell>{{ dateOuTiret(client.derniereInteraction) }}</TableCell>
-        <TableCell class="text-right">
-          <Button variant="ghost" size="icon" class="size-9" :aria-label="`Modifier ${client.nom}`" @click="emit('edit', client)">
-            <Pencil aria-hidden="true" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            class="size-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
-            :aria-label="`Supprimer ${client.nom}`"
-            @click="emit('remove', client)"
-          >
-            <Trash2 aria-hidden="true" />
-          </Button>
+        <TableCell>
+          <div class="flex justify-end gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              class="size-9"
+              :aria-label="`Modifier ${client.nom}`"
+              :title="`Modifier ${client.nom}`"
+              @click="emit('edit', client)"
+            >
+              <Pencil aria-hidden="true" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              class="size-9 text-destructive hover:bg-destructive/10 hover:text-destructive"
+              :aria-label="`Supprimer ${client.nom}`"
+              :title="`Supprimer ${client.nom}`"
+              @click="emit('remove', client)"
+            >
+              <Trash2 aria-hidden="true" />
+            </Button>
+          </div>
         </TableCell>
       </TableRow>
     </TableBody>

@@ -38,6 +38,11 @@ function messagePourStatut(error: unknown): string {
   return MESSAGE_ERREUR_DEFAUT
 }
 
+function describedBy(champ: 'email' | 'password'): string | undefined {
+  const ids = [errors.value[champ] ? `${champ}-error` : null, erreur.value ? 'login-error' : null].filter(Boolean)
+  return ids.length > 0 ? ids.join(' ') : undefined
+}
+
 const onSubmit = handleSubmit(async (values) => {
   erreur.value = null
   try {
@@ -72,6 +77,7 @@ useHead({ title: 'Connexion — Administration' })
     <main class="flex w-full items-center justify-center p-6 lg:w-1/2">
       <div class="w-full max-w-md">
         <div class="mb-8">
+          <p class="font-display text-navy mb-6 text-lg font-semibold lg:hidden">{{ ADMIN_GROUP_NAME }}</p>
           <h1 class="font-display text-navy text-3xl font-semibold">Connexion</h1>
           <p class="text-muted-foreground mt-2 text-sm">Entrez vos identifiants pour accéder à la console.</p>
         </div>
@@ -86,8 +92,8 @@ useHead({ title: 'Connexion — Administration' })
               type="email"
               autocomplete="username"
               class="h-11"
-              :aria-invalid="!!errors.email"
-              :aria-describedby="errors.email ? 'email-error' : undefined"
+              :aria-invalid="!!errors.email || !!erreur"
+              :aria-describedby="describedBy('email')"
             />
             <p v-if="errors.email" id="email-error" class="text-destructive text-sm">{{ errors.email }}</p>
           </div>
@@ -101,13 +107,13 @@ useHead({ title: 'Connexion — Administration' })
               type="password"
               autocomplete="current-password"
               class="h-11"
-              :aria-invalid="!!errors.password"
-              :aria-describedby="errors.password ? 'password-error' : undefined"
+              :aria-invalid="!!errors.password || !!erreur"
+              :aria-describedby="describedBy('password')"
             />
             <p v-if="errors.password" id="password-error" class="text-destructive text-sm">{{ errors.password }}</p>
           </div>
 
-          <div role="alert">
+          <div id="login-error" role="alert">
             <p
               v-if="erreur"
               class="border-destructive/30 bg-destructive/5 text-destructive rounded-md border px-3 py-2 text-sm"
@@ -116,7 +122,7 @@ useHead({ title: 'Connexion — Administration' })
             </p>
           </div>
 
-          <Button type="submit" class="h-11 w-full" :disabled="isSubmitting">
+          <Button type="submit" class="h-11 w-full" :disabled="isSubmitting" :aria-busy="isSubmitting">
             {{ isSubmitting ? 'Connexion en cours…' : 'Se connecter' }}
           </Button>
         </form>

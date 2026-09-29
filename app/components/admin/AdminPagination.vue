@@ -18,8 +18,10 @@ const fin = computed(() => Math.min(props.page * props.pageSize, props.total))
 </script>
 
 <template>
-  <nav v-if="total > 0" aria-label="Pagination" class="flex flex-wrap items-center justify-between gap-3 pt-4">
-    <p class="text-sm text-muted-foreground" aria-live="polite">{{ debut }}–{{ fin }} sur {{ total }}</p>
+  <nav aria-label="Pagination" class="flex flex-wrap items-center justify-between gap-3 pt-4">
+    <p role="status" aria-live="polite" class="text-sm text-muted-foreground">
+      <template v-if="total > 0">{{ debut }}–{{ fin }} sur {{ total }}</template>
+    </p>
     <div v-if="pageCount > 1" class="flex items-center gap-2">
       <Button variant="outline" class="min-h-11 md:min-h-9" :disabled="page <= 1" @click="emit('update:page', page - 1)">
         <ChevronLeft aria-hidden="true" />
