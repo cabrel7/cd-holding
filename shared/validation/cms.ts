@@ -22,7 +22,7 @@ const httpsUrlSchema = z
   .refine((value) => value.startsWith('https://'), 'https uniquement')
 
 /** Refuse un objet de mise à jour vide (au moins un champ modifiable requis, `site` exclu). */
-function exigerAuMoinsUnChamp<T extends z.ZodRawShape>(schema: z.ZodObject<T>) {
+export function exigerAuMoinsUnChamp<T extends z.ZodRawShape>(schema: z.ZodObject<T>) {
   return schema.refine(
     (obj) => Object.entries(obj).some(([cle, valeur]) => cle !== 'site' && valeur !== undefined),
     { message: 'Au moins un champ à modifier est requis' },

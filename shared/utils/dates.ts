@@ -109,3 +109,30 @@ export function instantQuebec(dateIso: string, heure: string): Date {
   const premier = naif - decalageQuebecMs(new Date(naif))
   return new Date(naif - decalageQuebecMs(new Date(premier)))
 }
+
+const DATE_HEURE_QUEBEC_FORMATTER = new Intl.DateTimeFormat('fr-CA', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+  timeZone: FUSEAU_QUEBEC,
+})
+
+const DATE_QUEBEC_FORMATTER = new Intl.DateTimeFormat('fr-CA', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: FUSEAU_QUEBEC,
+})
+
+/** Instant (Date ou ISO) → "29 septembre 2026 à 22 h 05", à l'heure du Québec. */
+export function formatDateHeureQuebec(value: Date | string): string {
+  return DATE_HEURE_QUEBEC_FORMATTER.format(toDate(value))
+}
+
+/** Instant (Date ou ISO) → "29 septembre 2026", jour civil au Québec (22 h reste le même jour). */
+export function formatDateQuebec(value: Date | string): string {
+  return DATE_QUEBEC_FORMATTER.format(toDate(value))
+}
