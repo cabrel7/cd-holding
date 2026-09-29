@@ -54,7 +54,7 @@ const cibleChoisie = computed<string>({
 const [message, messageAttrs] = defineField('message')
 const [website] = defineField('website')
 
-const { envoyer, envoiEnCours } = usePublicFormSubmit<HoldingContactBody>('/api/public/contact')
+const { envoyer, envoiEnCours, verrouille, soumettre } = usePublicFormSubmit<HoldingContactBody>('/api/public/contact')
 const { notifierResultat } = usePublicFormFeedback()
 
 // Soumission native impossible avant hydratation (bug 12, §4.3) : pas de POST déguisé en GET.
@@ -74,7 +74,7 @@ function focusOn(target: unknown): void {
   if (el instanceof HTMLElement) el.focus()
 }
 
-const onSubmit = handleSubmit(
+const onSubmit = soumettre(handleSubmit(
   async (values) => {
     const resultat = await envoyer({ formulaire: 'holding', ...values })
     const succes = notifierResultat(resultat, {
@@ -91,7 +91,7 @@ const onSubmit = handleSubmit(
     else if (invalidErrors.cible) focusOn(cibleSelectRef.value)
     else if (invalidErrors.message) focusOn(messageInputRef.value)
   },
-)
+))
 </script>
 
 <template>
@@ -205,7 +205,7 @@ const onSubmit = handleSubmit(
       <div class="space-y-4">
         <Button
           type="submit"
-          :disabled="!hydrate || envoiEnCours"
+          :disabled="!hydrate || verrouille"
           class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent px-7 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
         >
           {{ envoiEnCours ? 'Envoi en cours…' : 'Envoyer le message' }}

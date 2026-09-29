@@ -16,8 +16,15 @@ type TestBody = {
 function mountSubmit(endpoint: `/api/public/${string}`) {
   const TestHost = defineComponent({
     setup() {
-      const { envoyer, envoiEnCours } = usePublicFormSubmit<TestBody>(endpoint)
-      return { envoyer, envoiEnCours }
+      const { envoyer, envoiEnCours, verrouille, soumettre } = usePublicFormSubmit<TestBody>(endpoint)
+      // Handler à validation async (comme handleSubmit de vee-validate) : l'envoi n'a lieu qu'après.
+      const appels = { valides: 0 }
+      const onSubmit = soumettre(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 0))
+        appels.valides += 1
+        await envoyer({ formulaire: 'holding', nom: 'Jean' })
+      })
+      return { envoyer, envoiEnCours, verrouille, onSubmit, appels }
     },
     template: '<div />',
   })
@@ -115,5 +122,29 @@ describe('usePublicFormSubmit', () => {
     expect(wrapper.vm.envoiEnCours).toBe(true)
     await promesse
     expect(wrapper.vm.envoiEnCours).toBe(false)
+  })
+
+  it('soumettre : un double déclenchement rapide n’appelle l’endpoint qu’une fois', async () => {
+    let appelsServeur = 0
+    registerEndpoint('/api/public/contact-test-double', {
+      method: 'POST',
+      handler: () => {
+        appelsServeur += 1
+        return { ok: true }
+      },
+    })
+
+    const wrapper = await mountSubmit('/api/public/contact-test-double')
+    const premier = wrapper.vm.onSubmit()
+    expect(wrapper.vm.verrouille).toBe(true)
+    const second = wrapper.vm.onSubmit()
+    await Promise.all([premier, second])
+
+    expect(appelsServeur).toBe(1)
+    expect(wrapper.vm.appels.valides).toBe(1)
+    expect(wrapper.vm.verrouille).toBe(false)
+
+    await wrapper.vm.onSubmit()
+    expect(appelsServeur).toBe(2)
   })
 })

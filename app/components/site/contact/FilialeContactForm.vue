@@ -52,7 +52,7 @@ const { handleSubmit, resetForm } = useForm({
 
 type FilialeContactBody = FilialeContactFormValues & { formulaire: FormulaireFilialeSlug }
 
-const { envoyer, envoiEnCours } = usePublicFormSubmit<FilialeContactBody>('/api/public/contact')
+const { envoyer, envoiEnCours, verrouille, soumettre } = usePublicFormSubmit<FilialeContactBody>('/api/public/contact')
 const { notifierResultat } = usePublicFormFeedback()
 
 // Soumission native impossible avant hydratation (même raison que HoldingContactForm) : pas de
@@ -64,7 +64,7 @@ onMounted(() => {
 
 const formRef = ref<HTMLFormElement | null>(null)
 
-const onSubmit = handleSubmit(
+const onSubmit = soumettre(handleSubmit(
   async (values) => {
     const resultat = await envoyer({ formulaire: props.slug, ...values } as FilialeContactBody)
     const succes = notifierResultat(resultat, {
@@ -81,7 +81,7 @@ const onSubmit = handleSubmit(
     await nextTick()
     formRef.value?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
   },
-)
+))
 
 const cleChamp = (champ: ChampContactConfig) => (estChampDetail(champ) ? champ.cle : champ.type)
 </script>
@@ -107,7 +107,7 @@ const cleChamp = (champ: ChampContactConfig) => (estChampDetail(champ) ? champ.c
       <div class="space-y-4">
         <Button
           type="submit"
-          :disabled="!hydrate || envoiEnCours"
+          :disabled="!hydrate || verrouille"
           class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent-strong px-7 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
         >
           {{ envoiEnCours ? 'Envoi en cours…' : cfg.bouton }}

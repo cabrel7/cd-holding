@@ -148,7 +148,7 @@ function construireFormData(formValues: CandidatureFormValues): FormData {
   return formData
 }
 
-const { envoyer, envoiEnCours } = usePublicFormSubmit<FormData>('/api/public/placement/candidatures')
+const { envoyer, envoiEnCours, verrouille, soumettre } = usePublicFormSubmit<FormData>('/api/public/placement/candidatures')
 const { notifierResultat } = usePublicFormFeedback()
 
 // Soumission native impossible avant hydratation (même raison que FilialeContactForm) : pas de
@@ -162,13 +162,17 @@ const formRef = ref<HTMLFormElement | null>(null)
 
 const offreIntrouvable = ref(false)
 
-// Le <fieldset disabled> pendant l'envoi retire le focus au bouton : on le lui rend après un échec.
-async function rendreFocusBouton(): Promise<void> {
+// Le bouton reste désactivé (verrou) jusqu'à la fin du handler : le focus lui est rendu une fois
+// le verrou relâché, après un échec d'envoi.
+const focusBoutonApresVerrou = ref(false)
+watch(verrouille, async (actif) => {
+  if (actif || !focusBoutonApresVerrou.value) return
+  focusBoutonApresVerrou.value = false
   await nextTick()
   formRef.value?.querySelector<HTMLElement>('button[type="submit"]')?.focus()
-}
+})
 
-const onSubmit = handleSubmit(
+const onSubmit = soumettre(handleSubmit(
   async (formValues) => {
     offreIntrouvable.value = false
     const resultat = await envoyer(construireFormData(formValues))
@@ -185,13 +189,13 @@ const onSubmit = handleSubmit(
     }
     if (!resultat.ok && resultat.raison === 'fichier') setFieldError('cv', MESSAGE_FICHIER)
     if (!resultat.ok && resultat.raison === 'introuvable') offreIntrouvable.value = true
-    await rendreFocusBouton()
+    focusBoutonApresVerrou.value = true
   },
   async () => {
     await nextTick()
     formRef.value?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
   },
-)
+))
 </script>
 
 <template>
@@ -405,7 +409,7 @@ const onSubmit = handleSubmit(
           </p>
           <Button
             type="submit"
-            :disabled="!hydrate || envoiEnCours"
+            :disabled="!hydrate || verrouille"
             class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent-strong px-7 text-sm font-semibold text-white transition-colors hover:bg-navy disabled:opacity-60"
           >
             {{ envoiEnCours ? 'Envoi en cours…' : CANDIDATURE_FORM.bouton }}

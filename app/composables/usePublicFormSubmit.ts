@@ -48,6 +48,14 @@ function extractRetryAfterSeconds(error: PublicFetchError): number | null {
 export interface UsePublicFormSubmitReturn<TBody extends Record<string, unknown> | FormData> {
   envoyer(body: TBody): Promise<PublicSubmitResult>
   readonly envoiEnCours: Readonly<Ref<boolean>>
+  /** Vrai dès l'entrée du handler enveloppé par `soumettre` (avant la validation async). */
+  readonly verrouille: Readonly<Ref<boolean>>
+  /** Enveloppe le handler de soumission d'un formulaire : verrou synchrone posé avant toute
+   * validation, relâché en finally. Un déclenchement pendant le verrou est ignoré (le submit
+   * natif est neutralisé). */
+  soumettre<TArgs extends unknown[]>(
+    handler: (...args: TArgs) => Promise<unknown>,
+  ): (...args: TArgs) => Promise<void>
 }
 
 /** POST JSON (ou FormData) générique vers un endpoint `/api/public/*` — pipeline serveur commun
@@ -56,6 +64,25 @@ export function usePublicFormSubmit<TBody extends Record<string, unknown> | Form
   endpoint: `/api/public/${string}`,
 ): UsePublicFormSubmitReturn<TBody> {
   const envoiEnCours = ref(false)
+  const verrouille = ref(false)
+
+  function soumettre<TArgs extends unknown[]>(
+    handler: (...args: TArgs) => Promise<unknown>,
+  ): (...args: TArgs) => Promise<void> {
+    return async (...args: TArgs): Promise<void> => {
+      if (verrouille.value) {
+        const [premier] = args
+        if (premier instanceof Event) premier.preventDefault()
+        return
+      }
+      verrouille.value = true
+      try {
+        await handler(...args)
+      } finally {
+        verrouille.value = false
+      }
+    }
+  }
 
   async function envoyer(body: TBody): Promise<PublicSubmitResult> {
     envoiEnCours.value = true
@@ -86,5 +113,10 @@ export function usePublicFormSubmit<TBody extends Record<string, unknown> | Form
     }
   }
 
-  return { envoyer, envoiEnCours: envoiEnCours as Readonly<Ref<boolean>> }
+  return {
+    envoyer,
+    envoiEnCours: envoiEnCours as Readonly<Ref<boolean>>,
+    verrouille: verrouille as Readonly<Ref<boolean>>,
+    soumettre,
+  }
 }

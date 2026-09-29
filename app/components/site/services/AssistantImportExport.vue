@@ -102,12 +102,12 @@ const { handleSubmit, resetForm } = useForm<AssistantFormValues>({
   initialValues: { nom: '', email: '', entreprise: '', telephone: '', website: '' },
 })
 
-const { envoyer, envoiEnCours } = usePublicFormSubmit<AssistantBody>('/api/public/contact')
+const { envoyer, envoiEnCours, verrouille, soumettre } = usePublicFormSubmit<AssistantBody>('/api/public/contact')
 const { notifierResultat } = usePublicFormFeedback()
 
 const contactFormRef = ref<HTMLFormElement | null>(null)
 
-const onSubmitContact = handleSubmit(
+const onSubmitContact = soumettre(handleSubmit(
   async (contactValues) => {
     // Seul cast du fichier : `reponses` est garanti complet à ce stade (chaque étape bloque
     // « Continuer » sans réponse), couvert par tests/nuxt/assistant.nuxt.test.ts.
@@ -130,7 +130,7 @@ const onSubmitContact = handleSubmit(
     await nextTick()
     contactFormRef.value?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
   },
-)
+))
 
 function recommencer() {
   for (const cle of Object.keys(reponses)) delete reponses[cle]
@@ -238,7 +238,7 @@ function recommencer() {
                     <button type="button" :class="CONTROLE_BASE" @click="retour">
                       <ArrowLeft :size="16" aria-hidden="true" /> Retour
                     </button>
-                    <Button type="submit" :disabled="envoiEnCours" :class="BOUTON_PRIMAIRE">
+                    <Button type="submit" :disabled="verrouille" :class="BOUTON_PRIMAIRE">
                       {{ envoiEnCours ? 'Envoi en cours…' : ASSISTANT_FORM.bouton }}
                       <Send :size="16" aria-hidden="true" class="transition-transform group-hover:translate-x-0.5" />
                     </Button>

@@ -38,7 +38,7 @@ const { handleSubmit, resetForm } = useForm({
   initialValues: { nom: '', email: '', produitSouhaite: '', paysOrigine: '', message: '', website: '' },
 })
 
-const { envoyer, envoiEnCours } = usePublicFormSubmit<SuggestionBody>('/api/public/contact')
+const { envoyer, envoiEnCours, verrouille, soumettre } = usePublicFormSubmit<SuggestionBody>('/api/public/contact')
 const { notifierResultat } = usePublicFormFeedback()
 
 const hydrate = ref(false)
@@ -48,7 +48,7 @@ onMounted(() => {
 
 const formRef = ref<HTMLFormElement | null>(null)
 
-const onSubmit = handleSubmit(
+const onSubmit = soumettre(handleSubmit(
   async (values) => {
     const resultat = await envoyer({ formulaire: 'suggestion', site: props.site, ...values })
     const succes = notifierResultat(resultat, {
@@ -63,7 +63,7 @@ const onSubmit = handleSubmit(
     await nextTick()
     formRef.value?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
   },
-)
+))
 </script>
 
 <template>
@@ -194,7 +194,7 @@ const onSubmit = handleSubmit(
             <div class="space-y-4">
               <Button
                 type="submit"
-                :disabled="!hydrate || envoiEnCours"
+                :disabled="!hydrate || verrouille"
                 class="group inline-flex min-h-12 items-center gap-2 rounded-full bg-site-accent-strong px-7 text-sm font-semibold text-white transition-transform hover:-translate-y-0.5 disabled:opacity-60"
               >
                 {{ envoiEnCours ? 'Envoi en cours…' : SUGGESTION_FORM.bouton }}

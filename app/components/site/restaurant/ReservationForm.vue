@@ -67,7 +67,7 @@ const { handleSubmit, resetForm, values, setFieldValue } = useForm<ReservationFo
   initialValues,
 })
 
-const { envoyer, envoiEnCours } = usePublicFormSubmit<ReservationBody>('/api/public/restaurant/reservations')
+const { envoyer, envoiEnCours, verrouille, soumettre } = usePublicFormSubmit<ReservationBody>('/api/public/restaurant/reservations')
 const { notifierResultat } = usePublicFormFeedback()
 
 // Bornes de date posées seulement après hydratation : les figer au rendu serveur les daterait
@@ -93,7 +93,7 @@ const nombresPersonnesOptions = computed(() =>
 
 const formRef = ref<HTMLFormElement | null>(null)
 
-const onSubmit = handleSubmit(
+const onSubmit = soumettre(handleSubmit(
   async (v) => {
     const resultat = await envoyer(v as unknown as ReservationBody)
     const succes = notifierResultat(resultat, {
@@ -108,7 +108,7 @@ const onSubmit = handleSubmit(
     await nextTick()
     formRef.value?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
   },
-)
+))
 </script>
 
 <template>
@@ -238,7 +238,7 @@ const onSubmit = handleSubmit(
           <div class="space-y-4">
             <Button
               type="submit"
-              :disabled="!hydrate || envoiEnCours"
+              :disabled="!hydrate || verrouille"
               :class="`group inline-flex min-h-12 items-center gap-2 rounded-full bg-white px-7 text-sm font-semibold text-site-accent-strong transition-colors hover:bg-cream disabled:opacity-60 ${FOCUS_CARTE_SOMBRE}`"
             >
               {{ envoiEnCours ? 'Envoi en cours…' : 'Réserver ma table' }}
