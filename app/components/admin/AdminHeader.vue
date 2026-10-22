@@ -59,7 +59,7 @@ async function deconnecter(): Promise<void> {
 </script>
 
 <template>
-  <header class="border-border bg-card flex h-16 shrink-0 items-center justify-between gap-3 border-b px-3 md:px-8">
+  <header class="border-border bg-card sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-3 border-b px-3 md:px-8">
     <div class="flex min-w-0 flex-1 items-center gap-2">
       <SidebarTrigger />
       <span class="font-display text-navy truncate text-sm font-semibold">{{ contexteNom }}</span>

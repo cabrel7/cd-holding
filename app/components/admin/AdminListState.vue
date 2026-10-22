@@ -67,12 +67,12 @@ onScopeDispose(clearTimer)
     <Button variant="outline" class="min-h-11 lg:min-h-9" @click="emit('retry')">Réessayer</Button>
   </div>
 
-  <div v-else-if="state === 'filtered-empty'" class="space-y-3 py-8">
+  <div v-else-if="state === 'filtered-empty'" class="flex flex-col items-center gap-3 py-8 text-center">
     <p class="text-sm text-foreground">{{ messageVideFiltre }}</p>
     <Button variant="outline" class="min-h-11 lg:min-h-9" @click="emit('reset')">Réinitialiser</Button>
   </div>
 
-  <div v-else-if="state === 'empty'" class="space-y-3 py-8">
+  <div v-else-if="state === 'empty'" class="flex flex-col items-center gap-3 py-8 text-center">
     <p class="text-sm text-foreground">{{ messageVide }}</p>
     <slot name="vide-action" />
   </div>
