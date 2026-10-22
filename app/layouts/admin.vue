@@ -10,6 +10,16 @@ import { SidebarInset, SidebarProvider } from '@/components/ui/sidebar'
 const route = useRoute()
 // Les onglets de /admin/contenu/* ne rejouent pas la transition de tout le shell.
 const pageKey = computed(() => route.matched[0]?.path ?? route.path)
+
+// SEO console : tout le dashboard est désindexé (meta + robots.txt /admin + header edge).
+useSeoMeta({ robots: 'noindex, nofollow' })
+useHead({
+  link: [
+    { rel: 'icon', type: 'image/png', sizes: '32x32', href: '/favicons/holding-32.png' },
+    { rel: 'icon', type: 'image/png', sizes: '16x16', href: '/favicons/holding-16.png' },
+    { rel: 'apple-touch-icon', sizes: '180x180', href: '/favicons/holding-180.png' },
+  ],
+})
 </script>
 
 <template>

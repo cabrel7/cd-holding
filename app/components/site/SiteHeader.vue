@@ -78,9 +78,19 @@ function isActive(item: NavItem): boolean {
     <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:py-5">
       <div class="flex items-center gap-4">
         <template v-if="variant === 'holding'">
-          <NuxtLink to="/" class="inline-flex items-baseline gap-1">
-            <span class="font-display text-2xl font-bold tracking-tight text-navy">{{ groupeLead }}</span>
-            <span class="font-display text-2xl font-bold tracking-tight text-gold-deep">{{ groupeLast }}</span>
+          <NuxtLink to="/" class="inline-flex items-center gap-2.5">
+            <img
+              src="/favicons/holding-192.webp"
+              alt=""
+              aria-hidden="true"
+              width="36"
+              height="36"
+              class="h-9 w-9 shrink-0"
+            />
+            <span class="flex items-baseline gap-1">
+              <span class="font-display text-2xl font-bold tracking-tight text-navy">{{ groupeLead }}</span>
+              <span class="font-display text-2xl font-bold tracking-tight text-gold-deep">{{ groupeLast }}</span>
+            </span>
           </NuxtLink>
         </template>
         <template v-else>
@@ -91,8 +101,18 @@ function isActive(item: NavItem): boolean {
             <ArrowLeft :size="14" aria-hidden="true" /> {{ groupe }}
           </NuxtLink>
           <span class="hidden h-4 w-px bg-border lg:block" aria-hidden="true" />
-          <span class="font-display text-lg font-bold leading-tight text-navy lg:text-xl">
-            {{ displayName }}
+          <span class="flex items-center gap-2.5">
+            <img
+              :src="`/favicons/${site.slug}-192.webp`"
+              alt=""
+              aria-hidden="true"
+              width="32"
+              height="32"
+              class="h-8 w-8 shrink-0"
+            />
+            <span class="font-display text-lg font-bold leading-tight text-navy lg:text-xl">
+              {{ displayName }}
+            </span>
           </span>
         </template>
       </div>

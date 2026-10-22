@@ -55,12 +55,57 @@ const urlCanonical = computed(() => {
   return chemin === null ? null : `${origine}${chemin}`
 })
 
+// Logo du site courant (assets statiques par slug, lot logos) — servi en absolute sur
+// l'hôte connu uniquement (og:image doit être absolue ; jamais d'URL dev).
+const urlLogo = computed(() => (urlCanonical.value ? `${origine}/logos/${slug.value}.webp` : null))
+const nomSeo = computed(() => site.value?.nomCourt ?? site.value?.nom ?? 'Groupe CD')
+
 useHead(
-  computed(() =>
-    urlCanonical.value ? { link: [{ rel: 'canonical', href: urlCanonical.value }] } : {},
-  ),
+  computed(() => {
+    // GEO : Québec (siège du groupe) — repères utilisés par les moteurs/générateurs IA.
+    const metas = [
+      { name: 'geo.region', content: 'CA-QC' },
+      { name: 'geo.placename', content: 'Québec, Canada' },
+      { name: 'geo.position', content: '46.8139;-71.2080' },
+      { name: 'ICBM', content: '46.8139, -71.2080' },
+    ]
+    // JSON-LD WebSite : identité du site pour la search (search enhancements).
+    const ld = {
+      '@context': 'https://schema.org',
+      '@type': 'WebSite',
+      name: nomSeo.value,
+      inLanguage: 'fr-CA',
+      ...(urlCanonical.value ? { url: urlCanonical.value } : {}),
+      ...(site.value?.description ? { description: site.value.description } : {}),
+      ...(site.value?.groupe?.nom ? { publisher: { '@type': 'Organization', name: site.value.groupe.nom } } : {}),
+    }
+    return {
+      link: [
+        { rel: 'icon', type: 'image/png', sizes: '32x32', href: `/favicons/${slug.value}-32.png` } as const,
+        { rel: 'icon', type: 'image/png', sizes: '16x16', href: `/favicons/${slug.value}-16.png` } as const,
+        { rel: 'apple-touch-icon', sizes: '180x180', href: `/favicons/${slug.value}-180.png` } as const,
+        { rel: 'icon', type: 'image/webp', sizes: '192x192', href: `/favicons/${slug.value}-192.webp` } as const,
+        { rel: 'icon', type: 'image/webp', sizes: '512x512', href: `/favicons/${slug.value}-512.webp` } as const,
+        ...(urlCanonical.value
+          ? [{ rel: 'canonical' as const, href: urlCanonical.value }]
+          : []),
+      ],
+      meta: metas,
+      script: [{ type: 'application/ld+json', innerHTML: () => JSON.stringify(ld) }],
+    }
+  }),
 )
-useSeoMeta({ ogUrl: () => urlCanonical.value ?? undefined })
+
+useSeoMeta({
+  ogUrl: () => urlCanonical.value ?? undefined,
+  ogType: 'website',
+  ogSiteName: () => nomSeo.value,
+  ogLocale: 'fr_CA',
+  ogImage: () => urlLogo.value ?? undefined,
+  twitterCard: 'summary_large_image',
+  twitterImage: () => urlLogo.value ?? undefined,
+  description: () => site.value?.description ?? undefined,
+})
 
 if (import.meta.server && isMaintenance.value) {
   const event = useRequestEvent()
