@@ -34,8 +34,9 @@ pnpm exec prisma migrate deploy                # migrations versionnées (user :
 SEED_DEMO_DATA=true pnpm db:seed              # amorçage seulement, jamais sur base déjà éditée
 pnpm build
 
-pm2 start .output/server/index.mjs --name cd-holding --update-env --cwd /home/deploy/cd-holding
-pm2 save && pm2 startup                       # redémarrage au reboot
+pm2 start node --name cd-holding --update-env --cwd /opt/cd-holding \
+  -- --env-file=.env .output/server/index.mjs
+pm2 save && pm2 startup   # redémarrage au reboot (user cabrel)
 ```
 
 Vérif locale sur le VPS : `curl -sI 127.0.0.1:3000/ | head -1` → `200`.
@@ -91,13 +92,14 @@ server {
 server {
   listen 80; listen [::]:80;
   server_name entretien.chauvierdelor.com;
+  location ^~ /.well-known/acme-challenge/ { root /var/www/html; }
 
-  # Strip 301 au edge (anti-boucle, spec D5 ajout 2026-10-21) : l'app re-voit du préfixé si
+  # Strip 301 au edge (anti-boucle, spec D5) : l'app re-voit du préfixé si
   # on proxy_pass direct (son middleware 301 répondrait vers le nu → boucle). La cible bare
-  # ne re-matche jamais ce location → zéro boucle. Un seul hop si un client tape l'URL
-  # préfixée à la main (ou payload préfixé émis par le SSR : stripé → bare → réécrit → 200).
+  # ne re-matche jamais ce location → zéro boucle.
   location ^~ /entretien/ { rewrite ^/entretien(/.*)$ https://entretien.chauvierdelor.com$1 permanent; }
   location = /entretien   { return 301 https://entretien.chauvierdelor.com/; }
+  location ^~ /admin      { return 301 https://admin.chauvierdelor.com/; }
 
   # Exceptions système (jamais réécrites, jamais stripées)
   location ^~ /api/    { proxy_pass http://127.0.0.1:3000; include proxy_params.conf; }
@@ -108,10 +110,21 @@ server {
   # Page holding partagée (politique groupe, Loi 25) : servie telle quelle
   location = /confidentialite { proxy_pass http://127.0.0.1:3000; include proxy_params.conf; }
 
-  # Réécriture bare → préfixé (spec D2) : la clé routeRules/records SSR reste préfixée
+  # Racine bare → SSR préfixé : `break` DIRECT (2026-10-22). Un `last` re-entrerait dans
+  # location = /entretien → 301 → / → loop. Le marqueur X-Edge-Rewrite signale à l'app
+  # que le préfixe vient de l'edge : le middleware n'enlève pas (sinon /services →
+  # /entretien/services → 301 /services → boucle — bug déploiement 2026-10-22, fix 74ef6c8).
+  location = / {
+    rewrite . /entretien break;
+    proxy_set_header X-Edge-Rewrite "1";
+    proxy_pass http://127.0.0.1:3000;
+    include proxy_params.conf;
+  }
+
+  # Réécriture bare → préfixé (spec D2)
   location / {
-    rewrite ^/$ /entretien last;
     rewrite ^/(.*)$ /entretien/$1 break;
+    proxy_set_header X-Edge-Rewrite "1";
     proxy_pass http://127.0.0.1:3000;
     include proxy_params.conf;
   }
@@ -153,14 +166,9 @@ proxy_read_timeout 60s;
 client_max_body_size 16m;          # ≥ MAX_UPLOAD_REQUEST_BYTES (shared/config/upload.ts)
 ```
 
-Gzip (global, `http {}`) :
-
-```nginx
-gzip on;
-gzip_comp_level 5;
-gzip_min_length 1024;
-gzip_types text/plain text/css application/json application/javascript image/svg+xml;
-```
+Gzip : le `nginx.conf` d'Ubuntu 24.04 l'active déjà (niveau `http`) — **ne pas** redéclarer
+`gzip on` dans `conf.d/` (erreur « directive is duplicate » au `nginx -t`). `server_tokens off`
+va dans un snippet `conf.d/00-http.conf`.
 
 Recharger : `nginx -t && systemctl reload nginx`.
 
@@ -196,10 +204,12 @@ curl -sI 'https://chauvierdelor.com/entretien/services?q=1' | grep -i '^location
 curl -sI https://chauvierdelor.com/admin/utilisateurs | grep -i '^location'  # → https://admin.chauvierdelor.com/utilisateurs
 curl -sI https://chauvierdelor.com/admin             | grep -i '^location'  # → https://admin.chauvierdelor.com/
 
-# Chemins nus sur sous-domaines
+# Chemins nus sur sous-domaines (200 services ET racine — la racine teste l'anti-boucle
+# réécriture edge + X-Edge-Rewrite ; un 301 ici = boucle, voir fix 74ef6c8)
 for s in entretien transport comptable placement ccdpaa boissons; do
-  curl -so /dev/null -w "%{http_code} $s\n" "https://$s.chauvierdelor.com/services"
-done                                                              # 6 × 200
+  curl -so /dev/null -w "%{http_code} $s/services\n" "https://$s.chauvierdelor.com/services"
+  curl -so /dev/null -w "%{http_code} $s/\n" "https://$s.chauvierdelor.com/"
+done                                                              # 12 × 200
 curl -so /dev/null -w "%{http_code}\n" https://entretien.chauvierdelor.com/confidentialite   # 200 (holding)
 curl -so /dev/null -w "%{http_code}\n" https://chauvierdelor.com/services                   # 404 (validate)
 
@@ -223,13 +233,20 @@ Contrôle ISR (spec D3-C3) : `redis-cli`/fs selon storage — aujourd'hui aucune
 `cache:nitro:routes` ne doit exister (ISR inert) ; si des clés apparaissent après un upgrade
 Nitro, elles doivent porter le chemin **préfixé**.
 
-## 6. Sauvegardes
+## 6. Sauvegardes + surveillance (déployé 2026-10-22)
 
-- **Base** : `pg_dump -Fc "$DATABASE_URL" > /var/backups/cd-holding-$(date +%F).dump`
-  (cron quotidien, rétention ≥ 14 j, copie hors VPS).
-- **Uploads** : `rsync -a "$NUXT_UPLOADS_DIR"/ backup@…:/backups/uploads/`
-  (les fichiers ne sont ni dans git ni dans `.output`).
-- Restauration testée une fois : `pg_restore -d … < dump` sur instance jetable.
+- **Base + uploads** : `/usr/local/bin/cd-holding-backup.sh` (cron `/etc/cron.d/cd-holding-backup`,
+  3h30) — `pg_dump -Fc` + `rsync` uploads vers `/var/backups/cd-holding/`, rétention 14 j.
+  **Copie hors VPS encore à configurer** (aucune cible distante connue).
+- **Watchdog** : `/usr/local/bin/cd-holding-watchdog.sh` (cron 7h30) — disque ≥ 85 %,
+  services (nginx/postgresql/fail2ban/ssh), process PM2, expiry cert < 21 j, erreurs app 24 h
+  → mail `levisscat@gmail.com` via **msmtp** (`/etc/msmtprc`, relay Namecheap du compte
+  `noreply@chauvierdelor.com` — mêmes identifiants SMTP que l'app).
+- **Alertes** : canal testé (SMTP 250). Restauration dump : `pg_restore -d cd_holding < dump`
+  sur instance jetable — **à tester une fois**.
+- Hardening appliqué : sshd clé-seule / root login off / MaxAuthTries 3
+  (`/etc/ssh/sshd_config.d/60-cd-holding.conf`), fail2ban jail sshd, UFW 22/80/443,
+  unattended-upgrades. `cabrel` en sudo NOPASSWD (bootstrapped une fois).
 
 ## 7. Déploiement (cadré par CLAUDE.md : un commit = une unité)
 
