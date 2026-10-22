@@ -14,6 +14,14 @@ export default defineEventHandler((event) => {
   const host = getHeader(event, 'host') ?? ''
   if (!host) return
 
+  // Topologie Nginx (D5) : la réécriture bare → préfixé de l'edge envoie /services à
+  // l'app sous /entretien/services. Si on stripait ce préfixe ici, on renverrait le
+  // client sur /services, que Nginx réécrirait à nouveau → boucle 301. L'edge marque
+  // ses réécritures internes (X-Edge-Rewrite) : le 301 canonique sur URL préfixée
+  // reste son rôle (strip au edge avant proxy), celui du middleware est le repli en
+  // exposition directe — là où aucun marqueur n'existe.
+  if (getHeader(event, 'x-edge-rewrite')) return
+
   const cible = cibleRedirection(host, event.path, getRequestURL(event).origin)
   if (cible) sendRedirect(event, cible, 301)
 })
