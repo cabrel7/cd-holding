@@ -182,6 +182,12 @@ Recharger : `nginx -t && systemctl reload nginx`.
 Recommandé : **un seul certificat HTTP-01 avec 9 SANs** (tous les noms pointent sur ce VPS →
 le défi ACME est servi par les blocs ci-dessus) :
 
+> État réel 2026-10-22 : **10 SANs** — `ccdpaa.chauvierdelor.com` est conservé dans le cert
+> pour un bloc serveur dédié qui 301-redirige l'ancien hôte vers `cdpaa` (rename de marque) ;
+> son DNS étant supprimé, le bloc dort inoffensivement (retirable d'un coup avec le SAN).
+> Chaque bloc filiale a aussi `location ^~ /logos/` (assets de marque par slug, og:image) —
+> la location `/favicon` existante couvre déjà `/favicons/…`.
+
 ```bash
 certbot --nginx -d chauvierdelor.com -d www.chauvierdelor.com \
   -d entretien.chauvierdelor.com -d transport.chauvierdelor.com -d comptable.chauvierdelor.com \
