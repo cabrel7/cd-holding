@@ -40,6 +40,7 @@ const cotes = computed(() => [
           :file-key="cote.imageKey"
           :alt="imageAlt(cote)"
           fallback="aplat"
+          sizes="(min-width: 768px) 50vw, 100vw"
           class="absolute inset-0 h-full w-full"
         />
         <div :class="cote.imageKey ? 'absolute inset-x-0 bottom-0 bg-navy/85 p-6' : ''">

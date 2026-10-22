@@ -120,6 +120,7 @@ useSeoMeta({
               fallback="aplat"
               :initiales="nomCourt.charAt(0)"
               priority
+              sizes="(min-width: 768px) 42vw, 100vw"
               class="aspect-[4/5] w-full rounded-[2rem] shadow-xl"
             />
           </div>
@@ -155,6 +156,7 @@ useSeoMeta({
               :alt="item.imageAlt || item.titre"
               fallback="aplat"
               :initiales="item.titre.charAt(0)"
+              sizes="(min-width: 768px) 45vw, 100vw"
               class="aspect-square w-full rounded-2xl"
             />
             <p v-if="item.sousTitre" class="mt-4 text-xs uppercase tracking-widest text-site-accent-strong">

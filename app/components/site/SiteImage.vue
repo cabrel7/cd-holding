@@ -1,9 +1,11 @@
 <script setup lang="ts">
 // Image publique (héros, équipe, partenaires...) servie via /api/files/[key] (jamais de
-// fichier statique hors passerelle applicative, CLAUDE.md §Backend). Repli sans dégradé
+// fichier statique hors passerelle applicative, CLAUDE.md §Backend). Dérivés WebP
+// responsives générés à la volée (voir shared/utils/image-src.ts). Repli sans dégradé
 // (CLAUDE.md §Design) : aplat teinté de l'accent du site + initiales.
 import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
+import { srcsetImage, srcsetImageMax, urlImage, type LargeurDerivee } from '#shared/utils/image-src'
 
 const props = withDefaults(
   defineProps<{
@@ -22,18 +24,37 @@ const props = withDefaults(
     tone?: 'clair' | 'sombre'
     /** Image purement décorative : `alt` vide et repli masqué aux technologies d'assistance. */
     decorative?: boolean
+    /** Hinte de dimension (`sizes` du navigateur) : active le srcset responsive. */
+    sizes?: string
+    /** Plafond de largeur (avatars, vignettes) : une seule variante WebP sous ce plafond. */
+    largeurMax?: LargeurDerivee
   }>(),
-  { initiales: '', priority: false, tone: 'clair', decorative: false },
+  { initiales: '', priority: false, tone: 'clair', decorative: false, sizes: undefined, largeurMax: undefined },
 )
 
 const fondRepli = computed(() => (props.tone === 'sombre' ? 'bg-cream/15' : 'bg-site-accent/10'))
 const texteInitiales = computed(() => (props.tone === 'sombre' ? 'text-cream' : 'text-site-accent-strong'))
+
+// Sans sizes → srcset inutile (le navigateur viderait 100vw) : une seule URL WebP, convertie
+// sans redimensionnement. largeurMax prime sur sizes (vignette qui n'a jamais besoin du ladder).
+const src = computed(() => {
+  if (!props.fileKey) return ''
+  if (props.largeurMax) return srcsetImageMax(props.fileKey, props.largeurMax)
+  if (props.sizes) return urlImage(props.fileKey, { largeur: 1024, format: 'webp' })
+  return urlImage(props.fileKey, { format: 'webp' })
+})
+const srcset = computed(() => {
+  if (!props.fileKey || props.largeurMax || !props.sizes) return undefined
+  return srcsetImage(props.fileKey)
+})
 </script>
 
 <template>
   <img
     v-if="props.fileKey"
-    :src="`/api/files/${props.fileKey}`"
+    :src="src"
+    :srcset="srcset"
+    :sizes="props.sizes"
     :alt="props.decorative ? '' : props.alt"
     :loading="props.priority ? 'eager' : 'lazy'"
     :fetchpriority="props.priority ? 'high' : undefined"

@@ -100,6 +100,7 @@ useSeoMeta({
                 :alt="realisation.titre"
                 fallback="aplat"
                 :initiales="realisation.titre.charAt(0)"
+                sizes="(min-width: 768px) 45vw, 100vw"
                 class="h-full w-full transition-transform duration-700 group-hover:scale-[1.03]"
               />
             </div>

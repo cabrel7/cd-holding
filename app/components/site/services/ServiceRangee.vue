@@ -34,6 +34,7 @@ const inverse = computed(() => props.index % 2 === 1)
         fallback="aplat"
         :initiales="numero"
         :decorative="!service.imageKey"
+        sizes="(min-width: 768px) 50vw, 100vw"
         class="aspect-[4/3] w-full rounded-[1.5rem]"
       />
     </div>

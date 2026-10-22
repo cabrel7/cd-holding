@@ -87,6 +87,7 @@ const enTete = computed<SectionData | undefined>(() =>
                   :alt="f.nom"
                   fallback="aplat"
                   :initiales="initiales(f.nom)"
+                  sizes="(min-width: 768px) 58vw, 100vw"
                   class="aspect-[4/3] w-full transition-transform duration-[900ms] hover:scale-105"
                 />
                 <div class="absolute inset-x-0 bottom-0 h-2 bg-site-accent" aria-hidden="true" />

@@ -66,6 +66,7 @@ const colsClass = computed(() => {
                 fallback="aplat"
                 tone="sombre"
                 :initiales="realisation.titre.charAt(0)"
+                sizes="(min-width: 768px) 33vw, 100vw"
                 class="aspect-[4/5] w-full"
               />
             </div>

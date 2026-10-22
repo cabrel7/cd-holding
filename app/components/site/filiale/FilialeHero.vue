@@ -95,6 +95,7 @@ const imageAlt = computed(() => interpoler(props.hero?.imageAlt ?? props.nomCour
             fallback="aplat"
             :initiales="nomCourt.charAt(0)"
             priority
+            sizes="(min-width: 1024px) 50vw, 100vw"
             class="h-full w-full"
           />
         </div>

@@ -14,6 +14,9 @@ const OFFRES_ISR_TTL_SECONDS = 60
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 8 // 8 h
 const MAX_UPLOAD_REQUEST_BYTES = MAX_UPLOAD_BYTES + MULTIPART_OVERHEAD_BYTES
 const FONT_CACHE_CONTROL = 'public, max-age=31536000, immutable'
+// Favicons/logos : noms de fichiers NON hashés (ils changent à chaque update client) →
+// 7 j, pas `immutable` (sinon un logo mis à jour reste en cache navigateur jusqu'à 1 an).
+const STATIC_ASSET_CACHE_CONTROL = 'public, max-age=604800'
 
 // Polices auto-hébergées (spec phase 2 §4.4). "v1" est notre propre révision d'asset (bump si
 // les fichiers dans public/fonts/ sont remplacés), pas le numéro de version fontsource — évite
@@ -99,6 +102,10 @@ export default defineNuxtConfig({
 
     // Polices auto-hébergées : jamais invalidées (nom de fichier versionné, voir FONT_*).
     '/fonts/**': { headers: { 'cache-control': FONT_CACHE_CONTROL } },
+
+    // Logos + favicons servis en statique (lot logos 2026-10-22) — voir STATIC_ASSET_CACHE_CONTROL.
+    '/logos/**': { headers: { 'cache-control': STATIC_ASSET_CACHE_CONTROL } },
+    '/favicons/**': { headers: { 'cache-control': STATIC_ASSET_CACHE_CONTROL } },
 
     // Dashboards : SPA pure, pas de SSR
     '/admin/**': { ssr: false },

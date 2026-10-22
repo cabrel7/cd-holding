@@ -148,6 +148,7 @@ useSeoMeta({
                       fallback="initiales"
                       tone="sombre"
                       :initiales="initiales(membre.nom)"
+                      sizes="(min-width: 768px) 33vw, 100vw"
                       class="aspect-[4/5] w-full"
                     />
                   </div>
@@ -200,6 +201,7 @@ useSeoMeta({
                 :alt="partenaire.nom"
                 fallback="initiales"
                 :initiales="initiales(partenaire.nom)"
+                :largeur-max="480"
                 class="h-16 w-16 rounded-md"
               />
               <div class="flex-1">
