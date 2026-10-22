@@ -23,9 +23,11 @@ export default defineVitestConfig({
   test: {
     // Le boot Nuxt complet (project "nuxt" ci-dessus) dépasse le hookTimeout par défaut de
     // vitest (10s) sur certaines machines/CI — relevé globalement plutôt que par fichier,
-    // sans effet sur le project "node" (rapide, jamais concerné par ce hook). Le premier test
+    // sans effet sur le project "node" (rapide, jamais concerné). Le premier test
     // du fichier paie aussi ce coût de montage (mountSuspended) : testTimeout relevé de même.
-    hookTimeout: 60_000,
+    // 120 s (au lieu de 60) : le boot à froid après une modif du code dépasse 60 s sur ce poste
+    // (cache Vite/Nuxt invalidé), ce qui faisait échouer tests/nuxt/*.nuxt.test.ts par hook.
+    hookTimeout: 120_000,
     testTimeout: 20_000,
     // Les specs Playwright (tests/e2e/**) sont lancées par `playwright test`, jamais par vitest.
     exclude: ['**/node_modules/**', 'tests/e2e/**'],
