@@ -171,9 +171,25 @@ proxy_read_timeout 60s;
 client_max_body_size 16m;          # ≥ MAX_UPLOAD_REQUEST_BYTES (shared/config/upload.ts)
 ```
 
-Gzip : le `nginx.conf` d'Ubuntu 24.04 l'active déjà (niveau `http`) — **ne pas** redéclarer
-`gzip on` dans `conf.d/` (erreur « directive is duplicate » au `nginx -t`). `server_tokens off`
-va dans un snippet `conf.d/00-http.conf`.
+Gzip — **piège corrigé 2026-10-22** (PageSpeed mobile : CSS 91 Ko et HTML 58 Ko serviés
+*bruts*, « économies » de 450 ms de rendu bloquant) : le `nginx.conf` d'Ubuntu 24.04 a
+`gzip on;` mais `gzip_proxied off` (défaut) et `gzip_types` limité au HTML → **aucune
+compression des réponses proxied** (i.e. de tout le site). Bloc `http` à maintenir :
+
+```nginx
+gzip on;
+gzip_vary on;
+gzip_proxied any;            # sans ça : zéro gzip derrière proxy_pass
+gzip_comp_level 6;
+gzip_min_length 1024;
+gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript image/svg+xml;
+```
+
+**Ne pas** redéclarer `gzip on` dans `conf.d/` (erreur « directive is duplicate » au
+`nginx -t`). `server_tokens off` va dans un snippet `conf.d/00-http.conf`.
+Bench mesuré après mise en place (curl `Accept-Encoding: gzip`) : HTML 58,6→12,7 Ko,
+`entry.*.css` 91,2→16,1 Ko, JS entry 204,5→69,5 Ko ; images non touchées (pas dans
+`gzip_types` — webp/jpeg déjà compressés). Backup : `/etc/nginx/nginx.conf.bak-20261022-gzip`.
 
 Recharger : `nginx -t && systemctl reload nginx`.
 
