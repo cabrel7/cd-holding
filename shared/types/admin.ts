@@ -232,7 +232,7 @@ export interface AdminCandidatureDto {
   readonly site: AdminSiteRef
 }
 
-// --- Lot 5 : réservations (restaurant CCDPAA) ------------------------------------------------
+// --- Lot 5 : réservations (restaurant CDPAA) ------------------------------------------------
 
 export type StatutReservationDto = 'EN_ATTENTE' | 'CONFIRMEE' | 'ANNULEE'
 
@@ -250,7 +250,7 @@ export interface AdminReservationDto {
   readonly createdAt: string
 }
 
-// --- Lot 5 : planning (entretien, transport, ccdpaa + mon-planning) ---------------------------
+// --- Lot 5 : planning (entretien, transport, cdpaa + mon-planning) ---------------------------
 
 export interface AdminQuartDto {
   readonly uuid: string

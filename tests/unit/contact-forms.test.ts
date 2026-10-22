@@ -148,7 +148,7 @@ describe('contactBodySchema — subsidiary variants', () => {
 describe('contactBodySchema — suggestion', () => {
   const suggestion = {
     formulaire: 'suggestion',
-    site: 'ccdpaa',
+    site: 'cdpaa',
     nom: 'Awa Diallo',
     email: 'awa@exemple.ca',
     produitSouhaite: 'Fonio précuit',
@@ -156,7 +156,7 @@ describe('contactBodySchema — suggestion', () => {
     message: 'Introuvable à Montréal, très demandé.',
   }
 
-  it('should accept a valid suggestion for ccdpaa or boissons', () => {
+  it('should accept a valid suggestion for cdpaa or boissons', () => {
     expect(contactBodySchema.safeParse(suggestion).success).toBe(true)
     expect(contactBodySchema.safeParse({ ...suggestion, site: 'boissons' }).success).toBe(true)
   })

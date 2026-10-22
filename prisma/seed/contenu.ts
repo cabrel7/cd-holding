@@ -97,8 +97,8 @@ async function seedServices(prisma: PrismaClient, companies: SeededCompanies): P
     const ordonnes = supermarches ? [supermarches, ...services.filter((s) => s !== supermarches)] : services
 
     // "Mis en avant" par défaut : les 3 premiers par ordre final, sauf le service Restaurant de
-    // ccdpaa (le restaurant n'est jamais mis en avant sur la page services — spec §3.3, point ouvert #13).
-    const eligibles = ordonnes.filter((s) => !(slug === 'ccdpaa' && s.titre === RESTAURANT_TITRE))
+    // cdpaa (le restaurant n'est jamais mis en avant sur la page services — spec §3.3, point ouvert #13).
+    const eligibles = ordonnes.filter((s) => !(slug === 'cdpaa' && s.titre === RESTAURANT_TITRE))
     const misEnAvantTitres = new Set(eligibles.slice(0, 3).map((s) => s.titre))
 
     await prisma.service.createMany({

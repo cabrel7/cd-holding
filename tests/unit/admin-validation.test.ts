@@ -28,7 +28,7 @@ describe('messagesQuerySchema', () => {
     expect(messagesQuerySchema.safeParse({ q: 'a'.repeat(ADMIN_SEARCH_MAX + 1) }).success).toBe(false)
   })
   it('should validate site, type and statut enums', () => {
-    expect(messagesQuerySchema.safeParse({ site: 'ccdpaa', type: 'CONTACT', statut: 'NOUVEAU' }).success).toBe(true)
+    expect(messagesQuerySchema.safeParse({ site: 'cdpaa', type: 'CONTACT', statut: 'NOUVEAU' }).success).toBe(true)
     expect(messagesQuerySchema.safeParse({ statut: 'ARCHIVE' }).success).toBe(false)
     expect(messagesQuerySchema.safeParse({ site: 'nope' }).success).toBe(false)
   })
@@ -84,7 +84,7 @@ describe('clientUpdateSchema', () => {
     expect(r.statut).toBeUndefined()
   })
   it('should refuse changing the site', () => {
-    expect(clientUpdateSchema.safeParse({ site: 'ccdpaa', nom: 'X' }).success).toBe(false)
+    expect(clientUpdateSchema.safeParse({ site: 'cdpaa', nom: 'X' }).success).toBe(false)
   })
 })
 

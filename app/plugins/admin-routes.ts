@@ -7,7 +7,7 @@
 // - Tout autre hôte : les clones nus ADMIN (`bare-admin*`) sont retirés — sinon leurs chemins
 //   statiques (`/comptable`, `/placement`, `/utilisateurs`, `/messages`…) écraseraient les
 //   routes publiques (vue-router : statique bat param `[filiale]`, et une page admin se
-//   rendrait sur un site public). Les clones nus PUBLICS (`bare-filiale-*`, `bare-ccdpaa-*`…)
+//   rendrait sur un site public). Les clones nus PUBLICS (`bare-filiale-*`, `bare-cdpaa-*`…)
 //   restent : leur `validate` gate le mode sous-domaine.
 
 /**
@@ -46,7 +46,7 @@ export default defineNuxtPlugin(() => {
       const name = route.name
       if (typeof name !== 'string') continue
       // Clone nu d'une page admin (`bare-admin`, `bare-admin-comptable`…) — `bare-admin` seul
-      // est le clone du tableau de bord ; les nus publics (bare-filiale-*, bare-ccdpaa-*,
+      // est le clone du tableau de bord ; les nus publics (bare-filiale-*, bare-cdpaa-*,
       // bare-placement-offres-*) ne matchent jamais ce préfixe.
       if (name === PREFIXE_NUE_ADMIN || name.startsWith(`${PREFIXE_NUE_ADMIN}-`)) {
         router.removeRoute(name)

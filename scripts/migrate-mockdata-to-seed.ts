@@ -73,7 +73,7 @@ const FETCH_RETRIES = 3
 const UNSPLASH_HOST = 'images.unsplash.com'
 
 // --- Schémas zod locaux de garde-fou (spec §3.1) ----------------------------------------
-const FILIALE_SLUGS_PROTO = ['entretien', 'transport', 'comptable', 'placement', 'ccdpaa', 'boissons'] as const
+const FILIALE_SLUGS_PROTO = ['entretien', 'transport', 'comptable', 'placement', 'cdpaa', 'boissons'] as const
 const SITE_SLUGS_PROTO = ['holding', ...FILIALE_SLUGS_PROTO] as const
 
 const mockCompanySchema = z.object({
@@ -173,13 +173,13 @@ function normalizedSourceUrl(photoId: string): string {
 /** Sources d'images hors mockdata : textes JSX des routes spécifiques (spec §3.2). */
 const EXTRA_IMAGE_SOURCES: readonly { readonly url: string; readonly ref: string }[] = [
   { url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390', ref: 'components/holding/Hero.tsx:93' },
-  { url: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9', ref: 'routes/ccdpaa.index.tsx:30' },
-  { url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1', ref: 'routes/ccdpaa.index.tsx:41' },
-  { url: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445', ref: 'routes/ccdpaa.restaurant.tsx:38' },
-  { url: 'https://images.unsplash.com/photo-1550547660-d9450f859349', ref: 'routes/ccdpaa.restaurant.tsx:39' },
-  { url: 'https://images.unsplash.com/photo-1543353071-873f17a7a088', ref: 'routes/ccdpaa.restaurant.tsx:40' },
-  { url: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327', ref: 'routes/ccdpaa.restaurant.tsx:41' },
-  { url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0', ref: 'routes/ccdpaa.restaurant.tsx:74' },
+  { url: 'https://images.unsplash.com/photo-1488459716781-31db52582fe9', ref: 'routes/cdpaa.index.tsx:30' },
+  { url: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1', ref: 'routes/cdpaa.index.tsx:41' },
+  { url: 'https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445', ref: 'routes/cdpaa.restaurant.tsx:38' },
+  { url: 'https://images.unsplash.com/photo-1550547660-d9450f859349', ref: 'routes/cdpaa.restaurant.tsx:39' },
+  { url: 'https://images.unsplash.com/photo-1543353071-873f17a7a088', ref: 'routes/cdpaa.restaurant.tsx:40' },
+  { url: 'https://images.unsplash.com/photo-1476224203421-9ac39bcb3327', ref: 'routes/cdpaa.restaurant.tsx:41' },
+  { url: 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0', ref: 'routes/cdpaa.restaurant.tsx:74' },
 ]
 
 function sleep(ms: number): Promise<void> {

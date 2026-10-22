@@ -2,7 +2,7 @@
 import type { SiteSlug } from './sites'
 
 /** Filiales portant le module planning — miroir de SITE_MODULES (source : modules.ts). */
-export const PLANNING_SITES = ['entretien', 'transport', 'ccdpaa'] as const satisfies readonly SiteSlug[]
+export const PLANNING_SITES = ['entretien', 'transport', 'cdpaa'] as const satisfies readonly SiteSlug[]
 
 export type PlanningSite = (typeof PLANNING_SITES)[number]
 

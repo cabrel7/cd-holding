@@ -2,8 +2,8 @@
 // Services — filiales (spec §1 « /{filiale}/services », prototype SubServicesPage.tsx).
 // Écarts assumés (spec §4/§0) : pas de dégradé, visuel de repli numéroté plutôt que l'id brut,
 // un seul CTA (encadré navy). Assistant import-export (lot3 §4) : affiché seulement si la
-// section éditable `SERVICES:assistant` existe pour ce site (ccdpaa aujourd'hui) — aucun
-// `if (slug === 'ccdpaa')` ici, la condition est portée entièrement par le catalogue. Placé
+// section éditable `SERVICES:assistant` existe pour ce site (cdpaa aujourd'hui) — aucun
+// `if (slug === 'cdpaa')` ici, la condition est portée entièrement par le catalogue. Placé
 // avant le CTA générique (spec lot3 §4, écart assumé au prototype) : le CTA « un besoin qui ne
 // rentre pas dans une case » sert de repli après l'assistant plutôt que deux cartes navy collées.
 import { isFilialeSlug, contactPath } from '#shared/config/sites'

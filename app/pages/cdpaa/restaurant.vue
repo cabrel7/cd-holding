@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// Restaurant — ccdpaa (spec lot3 §1/§4, prototype ccdpaa.restaurant.tsx). Route dédiée (pas
-// `[filiale]/restaurant.vue`) : cette page n'existe que pour ccdpaa (DEC workflow lot3 §1, pages
+// Restaurant — cdpaa (spec lot3 §1/§4, prototype cdpaa.restaurant.tsx). Route dédiée (pas
+// `[filiale]/restaurant.vue`) : cette page n'existe que pour cdpaa (DEC workflow lot3 §1, pages
 // spécifiques). Horaires et adresse viennent uniquement de `ReglagesRestaurant` (GET
 // /api/public/restaurant) — jamais en dur (écart assumé au prototype, qui les codait en dur).
 import type { FormulaireData, HeroData, SeoData } from '@/composables/useSiteSections'
@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button'
 
 definePageMeta({
   // Gate du mode chemin (spec lot 8, D4) : forme préfixée (mode chemin, prod réécrit par Nginx)
-  // ou chemin nu `/restaurant` servi sur `ccdpaa.<domaine>`. Ailleurs → 404, comme aujourd'hui.
+  // ou chemin nu `/restaurant` servi sur `cdpaa.<domaine>`. Ailleurs → 404, comme aujourd'hui.
   validate: (route) =>
     route.path.startsWith(`/${RESTAURANT_SLUG}/`) || useSiteHost().value.slug === RESTAURANT_SLUG,
 })
@@ -47,7 +47,7 @@ const { data: reglages } = await useFetch<PublicRestaurantDto>('/api/public/rest
   key: 'restaurant-reglages',
 })
 
-const nomCourt = computed(() => site.value?.nomCourt ?? site.value?.nom ?? 'CCDPAA')
+const nomCourt = computed(() => site.value?.nomCourt ?? site.value?.nom ?? 'CDPAA')
 const vars = computed(() => ({ nomCourt: nomCourt.value, nom: site.value?.nom }))
 
 const seo = computed(() => sections.value?.seo as SeoData | undefined)

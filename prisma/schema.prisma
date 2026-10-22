@@ -316,7 +316,7 @@ model SectionContenu {
   @@index([companyId, updatedAt])
 }
 
-// Réglages du restaurant CCDPAA (1:1 avec Company) — consommés par la validation métier des
+// Réglages du restaurant CDPAA (1:1 avec Company) — consommés par la validation métier des
 // réservations côté serveur (colonnes typées plutôt qu'un JSON, pour ne jamais casser
 // silencieusement cette validation, spec §1.2).
 model ReglagesRestaurant {

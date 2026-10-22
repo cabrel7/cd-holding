@@ -1,4 +1,4 @@
-// Validation de la réservation du restaurant (ccdpaa). Imports relatifs uniquement (seed/tsx).
+// Validation de la réservation du restaurant (cdpaa). Imports relatifs uniquement (seed/tsx).
 import { z } from 'zod'
 import { ADMIN_PAGE_MAX, ADMIN_SEARCH_MAX } from '../config/admin'
 import { CONTROLE_PATTERN, emailContactSchema, honeypotSchema, nomContactSchema, telephoneContactSchema } from './contact'

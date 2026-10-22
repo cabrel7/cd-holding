@@ -2,7 +2,7 @@
 // code (couplée au zod, shared/validation/contact.ts) ; intro et recommandations éditables
 // (section SERVICES:assistant, voir shared/content/sections/catalog.ts). Imports relatifs
 // uniquement (seed/tsx).
-export const ASSISTANT_SITE = 'ccdpaa' as const
+export const ASSISTANT_SITE = 'cdpaa' as const
 
 interface OptionAssistant {
   readonly value: string

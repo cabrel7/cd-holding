@@ -1,6 +1,6 @@
 // Lot 4 — /admin/messages (spec docs/specs/lot4-admin-socle.md §6 critères 2, 3, 4, 5, 6, 8).
 // Données : 30 messages semés par scripts/cleanup-test-data.ts (25 entretien « Pagination <m> »,
-// transport avec details réalistes, holding, suggestion ccdpaa, contact ccdpaa, courriel en casse
+// transport avec details réalistes, holding, suggestion cdpaa, contact cdpaa, courriel en casse
 // mixte), tous suffixés `-<marqueur>@example.test`, purgés en afterAll (clients convertis inclus).
 // Ordre du fichier (1 worker, sans parallélisme) : les tests de mutation (statut, conversion, suppression) passent APRÈS les tests
 // qui comptent les 25 messages de pagination.
@@ -83,23 +83,23 @@ test.describe('API /api/admin/messages', () => {
     const sa = await apiAs(testInfo, SUPER_ADMIN)
     const af = await apiAs(testInfo, ADMIN_FILIALE_ENTRETIEN)
     try {
-      const etranger = await trouverMessage(sa, emailTest('ccdpaa', marqueur))
-      expect(etranger.site.slug).toBe('ccdpaa')
+      const etranger = await trouverMessage(sa, emailTest('cdpaa', marqueur))
+      expect(etranger.site.slug).toBe('cdpaa')
 
-      expect((await af.get('/api/admin/messages?site=ccdpaa')).status()).toBe(HTTP.FORBIDDEN)
-      expect((await af.get('/api/admin/clients?site=ccdpaa')).status()).toBe(HTTP.FORBIDDEN)
+      expect((await af.get('/api/admin/messages?site=cdpaa')).status()).toBe(HTTP.FORBIDDEN)
+      expect((await af.get('/api/admin/clients?site=cdpaa')).status()).toBe(HTTP.FORBIDDEN)
       expect((await af.patch(`/api/admin/messages/${etranger.uuid}`, { data: { statut: 'TRAITE' } })).status()).toBe(HTTP.NOT_FOUND)
       expect((await af.post(`/api/admin/messages/${etranger.uuid}/client`)).status()).toBe(HTTP.NOT_FOUND)
       expect((await af.delete(`/api/admin/messages/${etranger.uuid}`)).status()).toBe(HTTP.NOT_FOUND)
 
-      const encore = await trouverMessage(sa, emailTest('ccdpaa', marqueur))
+      const encore = await trouverMessage(sa, emailTest('cdpaa', marqueur))
       expect(encore.statut, 'le message étranger ne doit pas avoir changé').toBe('NOUVEAU')
 
-      // Liste sans filtre : uniquement sa filiale, et jamais le message ccdpaa semé.
+      // Liste sans filtre : uniquement sa filiale, et jamais le message cdpaa semé.
       const liste = (await (await af.get(`/api/admin/messages?q=${encodeURIComponent(marqueur)}`)).json()) as AdminPage<AdminMessageDto>
       expect(liste.total).toBeGreaterThan(0)
       expect(liste.items.every((m) => m.site.slug === 'entretien')).toBe(true)
-      expect(liste.items.some((m) => m.email === emailTest('ccdpaa', marqueur))).toBe(false)
+      expect(liste.items.some((m) => m.email === emailTest('cdpaa', marqueur))).toBe(false)
       const compteurs = await af.get('/api/admin/messages/compteurs')
       expect(compteurs.status()).toBe(HTTP.OK)
       expect(Object.keys(await compteurs.json())).toEqual(['nouveaux'])
@@ -316,7 +316,7 @@ test.describe('UI /admin/messages', () => {
     await messages.goto(`?q=${encodeURIComponent(marqueur)}`)
     await expect(messages.articles.first()).toBeVisible()
     await expect(messages.filtres.getByRole('combobox', { name: 'Site' })).toHaveCount(0)
-    await expect(messages.article(emailTest('ccdpaa', marqueur))).toHaveCount(0)
+    await expect(messages.article(emailTest('cdpaa', marqueur))).toHaveCount(0)
     await expect(messages.article(emailTest('transport', marqueur))).toHaveCount(0)
   })
 })

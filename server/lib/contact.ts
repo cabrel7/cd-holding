@@ -12,7 +12,7 @@ import {
   palierRecommandation,
   recapReponses,
   type ReponsesAssistant,
-} from '#shared/content/ccdpaa/assistant-import-export'
+} from '#shared/content/cdpaa/assistant-import-export'
 import type { ContactBody, ContactFormulaire } from '#shared/validation/contact'
 
 /** Société résolue depuis Prisma (select explicite, jamais l'objet brut) — cible ou holding. */
@@ -137,7 +137,7 @@ function messageAssistant(reponses: ReponsesAssistant): string {
 }
 
 /**
- * Variante de `POST /api/public/contact` pour l'assistant import-export (ccdpaa, spec lot 3 §3) :
+ * Variante de `POST /api/public/contact` pour l'assistant import-export (cdpaa, spec lot 3 §3) :
  * questionnaire scripté (aucune IA), cible fixe (jamais une valeur du corps), `palier` calculé
  * côté serveur à partir du volume déclaré et stocké dans `details` pour l'admin (lot 5).
  */
@@ -168,7 +168,7 @@ const REGISTRE = {
   transport: handlerFiliale('transport'),
   comptable: handlerFiliale('comptable'),
   placement: handlerFiliale('placement'),
-  ccdpaa: handlerFiliale('ccdpaa'),
+  cdpaa: handlerFiliale('cdpaa'),
   boissons: handlerFiliale('boissons'),
   suggestion: suggestionHandler,
   assistant: assistantHandler,

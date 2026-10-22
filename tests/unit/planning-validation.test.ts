@@ -5,7 +5,7 @@ import { planningSiteSchema, planningSemaineQuerySchema, quartCreateSchema, quar
 
 describe('planningSiteSchema', () => {
   it('accepte les 3 filiales du module, refuse les autres', () => {
-    expect([...PLANNING_SITES]).toEqual(['entretien', 'transport', 'ccdpaa'])
+    expect([...PLANNING_SITES]).toEqual(['entretien', 'transport', 'cdpaa'])
     expect(planningSiteSchema.parse('entretien')).toBe('entretien')
     expect(() => planningSiteSchema.parse('holding')).toThrow()
     expect(() => planningSiteSchema.parse('comptable')).toThrow()

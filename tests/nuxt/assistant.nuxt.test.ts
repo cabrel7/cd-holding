@@ -105,7 +105,7 @@ describe('AssistantImportExport', () => {
     expect(succesSpy).toHaveBeenCalled()
     succesSpy.mockRestore()
 
-    // Volume '1-5t' → palier 'grand' (shared/content/ccdpaa/assistant-import-export.ts)
+    // Volume '1-5t' → palier 'grand' (shared/content/cdpaa/assistant-import-export.ts)
     expect(wrapper.text()).toContain(SECTION.recommandations.grand)
     expect(wrapper.text()).toContain(SECTION.mentionDelai)
   })

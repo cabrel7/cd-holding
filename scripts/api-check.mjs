@@ -157,8 +157,8 @@ async function main() {
     )
   }
   {
-    const res = await fetch(`${BASE}/api/admin/messages?site=ccdpaa`, { headers: { cookie: sessions.ADMIN_FILIALE } })
-    check('A.3 messages ADMIN_FILIALE (entretien) ?site=ccdpaa -> 403', res.status === 403, res.status)
+    const res = await fetch(`${BASE}/api/admin/messages?site=cdpaa`, { headers: { cookie: sessions.ADMIN_FILIALE } })
+    check('A.3 messages ADMIN_FILIALE (entretien) ?site=cdpaa -> 403', res.status === 403, res.status)
   }
   {
     const res = await fetch(`${BASE}/api/admin/messages`, { headers: { cookie: sessions.SUPER_ADMIN } })

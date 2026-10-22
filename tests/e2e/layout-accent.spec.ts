@@ -10,7 +10,7 @@ const PAGES: ReadonlyArray<{ slug: string; path: string }> = [
   { slug: 'transport', path: '/transport/a-propos' },
   { slug: 'comptable', path: '/comptable/a-propos' },
   { slug: 'placement', path: '/placement/a-propos' },
-  { slug: 'ccdpaa', path: '/ccdpaa/a-propos' },
+  { slug: 'cdpaa', path: '/cdpaa/a-propos' },
   { slug: 'boissons', path: '/boissons/a-propos' },
 ]
 
@@ -80,7 +80,7 @@ test.describe('Accent de navigation par filiale — /a-propos (7 sites)', () => 
       const restaurantCount = await page.getByRole('link', { name: 'Restaurant' }).count()
       const offresCount = await page.getByRole('link', { name: 'Offres' }).count()
 
-      if (slug === 'ccdpaa') {
+      if (slug === 'cdpaa') {
         expect(restaurantCount).toBeGreaterThan(0)
         await expect.poll(() => anyVisible(page.getByRole('link', { name: 'Restaurant' }))).toBe(true)
       } else {

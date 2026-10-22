@@ -8,7 +8,7 @@ const DETAILS_FILIALES = {
   transport: { typeTransport: 'demenagement-commercial', dateSouhaitee: '2026-11-12', origine: 'Laval', destination: 'Québec' },
   comptable: { structure: 'obnl', besoin: 'paie' },
   placement: { poste: 'manutention', nombrePostes: 5 },
-  ccdpaa: { categorie: 'fruits-legumes', volume: '500 kg / mois' },
+  cdpaa: { categorie: 'fruits-legumes', volume: '500 kg / mois' },
   boissons: { typeEtablissement: 'bar-lounge', ville: 'Montréal', marques: 'sodas' },
 } as const
 

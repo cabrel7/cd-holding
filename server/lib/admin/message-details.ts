@@ -8,7 +8,7 @@ import {
   palierRecommandation,
   recapReponses,
   type PalierRecommandation,
-} from '#shared/content/ccdpaa/assistant-import-export'
+} from '#shared/content/cdpaa/assistant-import-export'
 import { formatDateLongue, isDateISOValide } from '#shared/utils/dates'
 import { reponsesAssistantSchema, type ContactFormulaire } from '#shared/validation/contact'
 import type { ChampAffiche, TypeMessageDto } from '#shared/types/admin'
@@ -24,7 +24,7 @@ const FORMULAIRES_CONNUS: readonly ContactFormulaire[] = [
   'transport',
   'comptable',
   'placement',
-  'ccdpaa',
+  'cdpaa',
   'boissons',
   'suggestion',
   'assistant',

@@ -14,8 +14,8 @@ describe('SITE_MODULES', () => {
     expect(SITE_MODULES.boissons).toEqual([])
   })
 
-  it('should give ccdpaa both planning and reservations', () => {
-    expect(SITE_MODULES.ccdpaa).toEqual([MODULES.PLANNING, MODULES.RESERVATIONS])
+  it('should give cdpaa both planning and reservations', () => {
+    expect(SITE_MODULES.cdpaa).toEqual([MODULES.PLANNING, MODULES.RESERVATIONS])
   })
 })
 

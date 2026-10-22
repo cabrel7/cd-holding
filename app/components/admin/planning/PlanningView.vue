@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Grille hebdomadaire des quarts d'un site (entretien/transport/ccdpaa) : lignes = employés,
+// Grille hebdomadaire des quarts d'un site (entretien/transport/cdpaa) : lignes = employés,
 // colonnes = lun→dim. `semaine` vit dans l'URL (survit au rechargement). Table ≥1024px, liste
 // par jour en dessous. `QuartDialog` + suppression pilotés ici, fermés seulement après succès
 // (pattern candidatures.vue). Un quart appartient à la semaine de son `dateDebut` (spec §1).

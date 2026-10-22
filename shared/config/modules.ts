@@ -18,7 +18,7 @@ export const SITE_MODULES: Record<SiteSlug, readonly ModuleKey[]> = {
   transport: [MODULES.PLANNING],
   comptable: [MODULES.COMPTABLE],
   placement: [MODULES.PLACEMENT],
-  ccdpaa: [MODULES.PLANNING, MODULES.RESERVATIONS],
+  cdpaa: [MODULES.PLANNING, MODULES.RESERVATIONS],
   boissons: [],
 }
 

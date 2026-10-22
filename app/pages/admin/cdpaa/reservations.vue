@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Réservations du restaurant CCDPAA : liste + changement de statut en ligne (rien d'autre,
+// Réservations du restaurant CDPAA : liste + changement de statut en ligne (rien d'autre,
 // comme le prototype). Filtres et page vivent dans l'URL.
 import { ADMIN_PAGE_SIZE } from '#shared/config/admin'
 import type { AdminReservationDto } from '#shared/types/admin'
@@ -18,7 +18,7 @@ definePageMeta({
   roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN_FILIALE],
 })
 
-useHead({ title: 'CCDPAA — Réservations' })
+useHead({ title: 'CDPAA — Réservations' })
 
 const { query, searchInput, hasFilters, setFilter, setPage, reset } = useAdminListQuery<ReservationsQuery>(
   reservationsQuerySchema,
@@ -37,7 +37,7 @@ const actions = useReservationActions(list.refresh)
 
 <template>
   <div :class="[ADMIN_PAGE_WIDTH_CLASS, 'space-y-6']">
-    <AdminPageHeader titre="Réservations" description="Les réservations du restaurant CCDPAA arrivent ici." />
+    <AdminPageHeader titre="Réservations" description="Les réservations du restaurant CDPAA arrivent ici." />
 
     <ReservationFilters
       v-model:search="searchInput"

@@ -1,4 +1,4 @@
-// /ccdpaa/restaurant — page + réservation (spec docs/specs/lot3-pages-specifiques.md §3, §5 T3,
+// /cdpaa/restaurant — page + réservation (spec docs/specs/lot3-pages-specifiques.md §3, §5 T3,
 // §6 critères 1, 7, 8 (lecture), 11). Exécuté contre le BUILD DE PRODUCTION.
 //
 // Source de vérité des horaires : `GET /api/public/restaurant` (ReglagesRestaurant). Les créneaux
@@ -89,7 +89,7 @@ const rgb = (css: string): number[] => (css.match(/[\d.]+/g) ?? []).slice(0, 3).
 class RestaurantPage {
   constructor(private readonly page: Page) {}
   goto() {
-    return this.page.goto('/ccdpaa/restaurant')
+    return this.page.goto('/cdpaa/restaurant')
   }
   get h1(): Locator { return this.page.getByRole('heading', { level: 1 }) }
   get form(): Locator {
@@ -141,7 +141,7 @@ function corpsReservation(email: string, r: ReglagesReservation, extra: Record<s
   }
 }
 
-test.describe('ccdpaa — restaurant et réservation', () => {
+test.describe('cdpaa — restaurant et réservation', () => {
   test.afterAll(() => {
     test.setTimeout(240_000)
     nettoyer({ reservationEmails })
@@ -152,7 +152,7 @@ test.describe('ccdpaa — restaurant et réservation', () => {
   })
 
   test('should answer 200, render the H1 and show opening days/hours read from the restaurant settings', async ({ page, request }) => {
-    const res = await request.get('/ccdpaa/restaurant')
+    const res = await request.get('/cdpaa/restaurant')
     expect(res.status()).toBe(HTTP.ok)
     const r = await chargerReglages(request)
     const cles = Object.keys(r)
@@ -167,12 +167,12 @@ test.describe('ccdpaa — restaurant et réservation', () => {
   })
 
   test('should not expose the nav « Restaurant » link as a 404', async ({ page }) => {
-    await page.goto('/ccdpaa')
+    await page.goto('/cdpaa')
     if ((page.viewportSize()?.width ?? 1440) < 768) await page.getByRole('button', { name: 'Menu' }).click()
     const lien = page.getByRole('link', { name: 'Restaurant', exact: true }).first()
     await expect(lien).toBeVisible()
     await lien.click()
-    await expect(page).toHaveURL(/\/ccdpaa\/restaurant$/)
+    await expect(page).toHaveURL(/\/cdpaa\/restaurant$/)
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
   })
 

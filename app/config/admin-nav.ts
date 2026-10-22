@@ -63,7 +63,7 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
   { to: '/admin/placement', label: 'Placement', icon: BriefcaseBusiness, roles: ROLES_GESTION, module: MODULES.PLACEMENT },
   { to: '/admin/comptable/dossiers', label: 'Dossiers', icon: Calculator, roles: ROLES_GESTION, module: MODULES.COMPTABLE },
   {
-    to: '/admin/ccdpaa/reservations',
+    to: '/admin/cdpaa/reservations',
     label: 'Réservations',
     icon: UtensilsCrossed,
     roles: ROLES_GESTION,
@@ -86,12 +86,12 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
     site: 'transport',
   },
   {
-    to: '/admin/ccdpaa/planning',
-    label: 'Planning — CCDPAA',
+    to: '/admin/cdpaa/planning',
+    label: 'Planning — CDPAA',
     icon: CalendarDays,
     roles: ROLES_GESTION,
     module: MODULES.PLANNING,
-    site: 'ccdpaa',
+    site: 'cdpaa',
   },
   {
     to: '/admin/mon-planning',

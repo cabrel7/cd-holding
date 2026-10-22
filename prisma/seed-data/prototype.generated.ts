@@ -35,7 +35,7 @@ export const GENERATED: GeneratedPrototype = {
       effectif: 18,
     },
     {
-      slug: "ccdpaa",
+      slug: "cdpaa",
       description: "Importation de produits agricoles issus du continent africain et exploitation d'espaces de restauration mettant en valeur ces saveurs. Un pont commercial et culinaire entre l'Afrique et le Québec.",
       secteurPrototype: "Import-export de produits agricoles d'Afrique et restauration",
       heroImageId: "1488459716781-31db52582fe9",
@@ -159,25 +159,25 @@ export const GENERATED: GeneratedPrototype = {
       ordre: 3,
     },
     {
-      filiale: "ccdpaa",
+      filiale: "cdpaa",
       titre: "Import de produits agricoles",
       description: "Manioc, gombo, plantain, patate douce, gingembre et piment importés depuis l'Afrique de l'Ouest et Centrale.",
       ordre: 0,
     },
     {
-      filiale: "ccdpaa",
+      filiale: "cdpaa",
       titre: "Épices et condiments",
       description: "Poudre de baobab, poivre de Penja, nététou, ndjansang, sélectionnés directement auprès des producteurs.",
       ordre: 1,
     },
     {
-      filiale: "ccdpaa",
+      filiale: "cdpaa",
       titre: "Distribution B2B",
       description: "Approvisionnement d'épiceries spécialisées, de restaurateurs et de grossistes à travers le Québec et l'Ontario.",
       ordre: 2,
     },
     {
-      filiale: "ccdpaa",
+      filiale: "cdpaa",
       titre: "Restaurant Les Ambassades d'Afrique",
       description: "Restaurant panafricain à Montréal qui met en scène les produits que nous importons, midi et soir, avec bar complet.",
       ordre: 3,
@@ -305,7 +305,7 @@ export const GENERATED: GeneratedPrototype = {
       ordre: 1,
     },
     {
-      filiale: "ccdpaa",
+      filiale: "cdpaa",
       titre: "Référencement en épiceries spécialisées",
       description: "Référencement d'une gamme complète d'épices africaines dans une douzaine d'épiceries spécialisées du Grand Montréal.",
       date: "2024-07-01",
@@ -313,7 +313,7 @@ export const GENERATED: GeneratedPrototype = {
       ordre: 0,
     },
     {
-      filiale: "ccdpaa",
+      filiale: "cdpaa",
       titre: "Ouverture des Ambassades d'Afrique",
       description: "Ouverture officielle du restaurant panafricain sur le Plateau Mont-Royal, avec une carte de treize cuisines.",
       date: "2025-05-01",
@@ -416,14 +416,14 @@ export const GENERATED: GeneratedPrototype = {
       ordre: 1,
     },
     {
-      filiale: "ccdpaa",
+      filiale: "cdpaa",
       nom: "Ibrahim Diarra",
       poste: "Directeur import-export",
       bio: "Ibrahim sélectionne et négocie directement avec les producteurs en Afrique de l'Ouest et Centrale.",
       ordre: 0,
     },
     {
-      filiale: "ccdpaa",
+      filiale: "cdpaa",
       nom: "Chef Aminata Cissé",
       poste: "Cheffe exécutive · Les Ambassades d'Afrique",
       bio: "Aminata compose une carte qui traverse treize cuisines du continent africain, midi et soir.",
@@ -512,13 +512,13 @@ export const GENERATED: GeneratedPrototype = {
       ordre: 1,
     },
     {
-      filiale: "ccdpaa",
+      filiale: "cdpaa",
       nom: "Coopérative des producteurs du Sahel",
       typeRelation: "Fournisseur direct",
       ordre: 0,
     },
     {
-      filiale: "ccdpaa",
+      filiale: "cdpaa",
       nom: "Marché Jean-Talon",
       typeRelation: "Point de vente",
       ordre: 1,
@@ -594,8 +594,8 @@ export const GENERATED: GeneratedPrototype = {
       successMsg: "notre équipe vous recontacte rapidement",
     },
     {
-      filiale: "ccdpaa",
-      shortName: "CCDPAA",
+      filiale: "cdpaa",
+      shortName: "CDPAA",
       tagline: "Import-export · Restauration",
       headlineLead: "De la",
       headlineAccent: "terre africaine",
@@ -673,7 +673,7 @@ export const GENERATED: GeneratedPrototype = {
         date: "2026-09-01T00:00:00.000Z",
       },
       {
-        filiale: "ccdpaa",
+        filiale: "cdpaa",
         nom: "Ibrahim Sow",
         email: "ibrahim@epiceriesahel.ca",
         sujet: "Distribution d'épices",
@@ -693,7 +693,7 @@ export const GENERATED: GeneratedPrototype = {
     ],
     suggestions: [
       {
-        filiale: "ccdpaa",
+        filiale: "cdpaa",
         nom: "Awa Sy",
         email: "awa@exemple.ca",
         produit: "Fonio précuit",
@@ -783,7 +783,7 @@ export const GENERATED: GeneratedPrototype = {
         statut: "actif",
       },
       {
-        filiale: "ccdpaa",
+        filiale: "cdpaa",
         nom: "Aminata Cissé",
         poste: "Cheffe exécutive",
         email: "aminata@groupecd.ca",
@@ -848,7 +848,7 @@ export const GENERATED: GeneratedPrototype = {
         lieu: "Entrepôt Lachine",
       },
       {
-        employeFiliale: "ccdpaa",
+        employeFiliale: "cdpaa",
         employeNom: "Aminata Cissé",
         jour: "samedi",
         debut: "15:00",
@@ -902,7 +902,7 @@ export const GENERATED: GeneratedPrototype = {
         entreprise: "Épicerie Sahel",
         email: "ibrahim@epiceriesahel.ca",
         telephone: "514-555-0177",
-        filiale: "ccdpaa",
+        filiale: "cdpaa",
         statut: "prospect",
         notes: "Commande test d'épices en discussion.",
         creeLe: "2026-08-21T00:00:00.000Z",

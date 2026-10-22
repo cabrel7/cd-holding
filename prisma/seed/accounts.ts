@@ -1,4 +1,4 @@
-// Comptes du dashboard (spec §2) : SUPER_ADMIN toujours ; ADMIN_FILIALE (entretien, ccdpaa) et
+// Comptes du dashboard (spec §2) : SUPER_ADMIN toujours ; ADMIN_FILIALE (entretien, cdpaa) et
 // EMPLOYE (lié à l'Employe "Awa Diallo", DEC-29 — liaison faite par seedDemo, qui possède la
 // ligne Employe) seulement si SEED_DEMO_DATA=true. Mots de passe lus depuis .env, jamais en dur —
 // même driver de hash que nuxt-auth-utils (`#auth-utils` non importable hors contexte Nitro).
@@ -51,10 +51,10 @@ export async function seedAccounts(prisma: PrismaClient, companies: SeededCompan
     passwordEnv: 'SEED_ADMIN_FILIALE_PASSWORD',
   })
   await upsertUser(prisma, {
-    email: 'admin@ccdpaa.groupecd.ca',
-    nom: 'Admin CCDPAA',
+    email: 'admin@cdpaa.groupecd.ca',
+    nom: 'Admin CDPAA',
     role: Role.ADMIN_FILIALE,
-    companyId: companies.filiales.ccdpaa.id,
+    companyId: companies.filiales.cdpaa.id,
     passwordEnv: 'SEED_ADMIN_FILIALE_PASSWORD',
   })
   await upsertUser(prisma, {

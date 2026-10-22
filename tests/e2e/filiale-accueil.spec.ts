@@ -14,7 +14,7 @@ import { test, expect, type Locator, type Page } from '@playwright/test'
 import { FILIALE_SLUGS, type FilialeSlug } from '#shared/config/sites'
 
 const EXTERNAL_HOST_ALLOWLIST = ['localhost']
-const DUO_SLUGS: readonly FilialeSlug[] = ['placement', 'ccdpaa']
+const DUO_SLUGS: readonly FilialeSlug[] = ['placement', 'cdpaa']
 
 interface AccueilSectionsDto {
   readonly hero?: { readonly titre: string }
@@ -75,7 +75,7 @@ class FilialeAccueilPage {
 }
 
 test.describe('/{filiale} — accueil, contenu public depuis la base (6 filiales)', () => {
-  test('should render a single H1, the duo only for placement/ccdpaa, and ordered services/réalisations previews matching the API (no error state, no external host request)', async ({
+  test('should render a single H1, the duo only for placement/cdpaa, and ordered services/réalisations previews matching the API (no error state, no external host request)', async ({
     page,
     request,
   }) => {
@@ -99,7 +99,7 @@ test.describe('/{filiale} — accueil, contenu public depuis la base (6 filiales
       await expect(accueilPage.h1, `un seul H1 attendu sur /${slug}`).toHaveCount(1)
       await expect(accueilPage.h1).toHaveText(plainTitre(sections.hero!.titre))
 
-      // --- Duo (audiences/métiers) uniquement pour placement et ccdpaa --------------------
+      // --- Duo (audiences/métiers) uniquement pour placement et cdpaa --------------------
       const duo = sections.audiences ?? sections.metiers
       const isDuoSlug = (DUO_SLUGS as readonly string[]).includes(slug)
       expect(!!duo, `présence de la section duo API cohérente avec la liste attendue pour ${slug}`).toBe(isDuoSlug)

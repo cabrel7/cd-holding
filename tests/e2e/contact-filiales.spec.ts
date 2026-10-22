@@ -205,7 +205,7 @@ class FilialeContactPage {
    * Le bouton "Envoyer la demande" (COMMUN.bouton) est identique aux 6 configs de filiale et
    * distinct du bouton de suggestion ("Proposer ce produit", SUGGESTION_FORM.bouton) : sert à
    * isoler le <form> du contact filiale de celui de la suggestion de produit (rendu après, sur
-   * ccdpaa/boissons uniquement) sans dépendre de l'ordre du DOM entre les 2 <form> de la page.
+   * cdpaa/boissons uniquement) sans dépendre de l'ordre du DOM entre les 2 <form> de la page.
    */
   contactForm(slug: FormulaireFilialeSlug): Locator {
     return this.page.locator('form').filter({ has: this.page.getByRole('button', { name: CONTACT_FORMS[slug].bouton, exact: true }) })
@@ -233,7 +233,7 @@ async function remplirFormulaireValide(form: Locator, champs: readonly ChampCont
 
 test.describe('/{filiale}/contact — 6 formulaires pilotés par CONTACT_FORMS + suggestion de produit', () => {
   // --- Rendu (§6 critères 1, 2, 5) + envoi vide (§6 critère 3) -------------------------------
-  test('should render CONTACT_FORMS fields (order, labels, select options, non-selectable placeholder), H1/surtitre from CONTACT:contact, the suggestion form only for ccdpaa/boissons, and reject an empty submission with one error per field, focus on the first field and zero HTTP requests', async ({
+  test('should render CONTACT_FORMS fields (order, labels, select options, non-selectable placeholder), H1/surtitre from CONTACT:contact, the suggestion form only for cdpaa/boissons, and reject an empty submission with one error per field, focus on the first field and zero HTTP requests', async ({
     page,
     request,
   }) => {
@@ -299,7 +299,7 @@ test.describe('/{filiale}/contact — 6 formulaires pilotés par CONTACT_FORMS +
         }
       }
 
-      // --- Suggestion : présente seulement pour ccdpaa/boissons (§6 critère 5) --------------
+      // --- Suggestion : présente seulement pour cdpaa/boissons (§6 critère 5) --------------
       // eslint-disable-next-line no-await-in-loop
       const suggestionButtonCount = await page.getByRole('button', { name: SUGGESTION_FORM.bouton }).count()
       expect(suggestionButtonCount, `formulaire de suggestion sur /${slug}/contact`).toBe(estSiteSuggestion(slug) ? 1 : 0)
@@ -389,8 +389,8 @@ test.describe('/{filiale}/contact — 6 formulaires pilotés par CONTACT_FORMS +
     }
   })
 
-  // --- Suggestion : ccdpaa et boissons (§6 critère 5) -----------------------------------------
-  test('ccdpaa and boissons: submitting the suggestion form should create a SUGGESTION_PRODUIT message (produitSouhaite, paysOrigine)', async ({
+  // --- Suggestion : cdpaa et boissons (§6 critère 5) -----------------------------------------
+  test('cdpaa and boissons: submitting the suggestion form should create a SUGGESTION_PRODUIT message (produitSouhaite, paysOrigine)', async ({
     page,
     request,
     browser,
@@ -484,7 +484,7 @@ test.describe('/{filiale}/contact — 6 formulaires pilotés par CONTACT_FORMS +
       headers: { 'x-forwarded-for': ip },
       data: {
         formulaire: 'suggestion',
-        site: 'entretien', // 'entretien' n'est ni ccdpaa ni boissons
+        site: 'entretien', // 'entretien' n'est ni cdpaa ni boissons
         nom: 'Jean Tremblay',
         email: emailSuggestionMismatch,
         produitSouhaite: 'Produit test',
@@ -493,7 +493,7 @@ test.describe('/{filiale}/contact — 6 formulaires pilotés par CONTACT_FORMS +
         website: '',
       },
     }))
-    expect(resSuggestion.status(), 'une suggestion pour un site autre que ccdpaa/boissons doit être rejetée').toBe(400)
+    expect(resSuggestion.status(), 'une suggestion pour un site autre que cdpaa/boissons doit être rejetée').toBe(400)
 
     const emailDatePassee = makeTestEmail('400-date-passee', testInfo.project.name)
     const corpsTransport = corpsValideFiliale('transport', emailDatePassee)

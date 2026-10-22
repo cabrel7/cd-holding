@@ -1,5 +1,5 @@
 // Service admin "planning" (lot 5, sous-lot planning) : grille hebdomadaire des quarts
-// (entretien/transport/ccdpaa) + lecture employé. Aucune référence à l'event H3 : les handlers
+// (entretien/transport/cdpaa) + lecture employé. Aucune référence à l'event H3 : les handlers
 // (server/api/admin/planning/**, server/api/admin/mon-planning.get.ts) font la validation zod +
 // `requireModule`/`requireRole`, puis appellent ces fonctions. Scoping systématique sur
 // `ctx.company.id` (la filiale du `site` — déjà épinglée par requireModule, SUPER_ADMIN compris).

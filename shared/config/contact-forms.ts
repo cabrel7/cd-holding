@@ -40,7 +40,7 @@ export const FORMULAIRES_FILIALES = [
   'transport',
   'comptable',
   'placement',
-  'ccdpaa',
+  'cdpaa',
   'boissons',
 ] as const satisfies readonly FilialeSlug[]
 export type FormulaireFilialeSlug = (typeof FORMULAIRES_FILIALES)[number]
@@ -189,7 +189,7 @@ export const CONTACT_FORMS = {
       message('Contexte', 'Lieu, horaires, urgence…', 4),
     ],
   },
-  ccdpaa: {
+  cdpaa: {
     ...COMMUN,
     sujet: 'Demande de catalogue (distribution B2B)',
     champs: [
@@ -249,7 +249,7 @@ export const CONTACT_FORMS = {
   },
 } as const satisfies Record<FormulaireFilialeSlug, ConfigFormulaireContact>
 
-export const SITES_SUGGESTION = ['ccdpaa', 'boissons'] as const satisfies readonly FilialeSlug[]
+export const SITES_SUGGESTION = ['cdpaa', 'boissons'] as const satisfies readonly FilialeSlug[]
 export type SiteSuggestion = (typeof SITES_SUGGESTION)[number]
 
 export function estSiteSuggestion(value: string): value is SiteSuggestion {
@@ -260,7 +260,7 @@ export const SUGGESTION_FORM = {
   sujet: 'Suggestion de produit',
   bouton: 'Proposer ce produit',
   toastTitre: 'Suggestion envoyée',
-  placeholdersProduit: { ccdpaa: 'Ex. Fonio précuit', boissons: 'Ex. Bissap pétillant' },
+  placeholdersProduit: { cdpaa: 'Ex. Fonio précuit', boissons: 'Ex. Bissap pétillant' },
 } as const satisfies Omit<ConfigFormulaireContact, 'champs'> & {
   readonly placeholdersProduit: Record<SiteSuggestion, string>
 }

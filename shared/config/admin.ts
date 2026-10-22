@@ -33,7 +33,7 @@ export const ORIGINE_FORMULAIRE_LABELS: Record<ContactFormulaire, string> = {
   transport: 'Site de la filiale',
   comptable: 'Site de la filiale',
   placement: 'Site de la filiale',
-  ccdpaa: 'Site de la filiale',
+  cdpaa: 'Site de la filiale',
   boissons: 'Site de la filiale',
   suggestion: 'Suggestion de produit',
   assistant: 'Assistant import-export',
@@ -131,7 +131,7 @@ export const PLACEMENT_TEXT_BOUNDS = {
   notes: { max: 2000 },
 } as const
 
-// --- Lot 5 : réservations (restaurant CCDPAA) ----------------------------------------------
+// --- Lot 5 : réservations (restaurant CDPAA) ----------------------------------------------
 
 export const STATUT_RESERVATION_LABELS: Record<StatutReservationDto, string> = {
   EN_ATTENTE: 'En attente',

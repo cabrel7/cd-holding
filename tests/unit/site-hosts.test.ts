@@ -7,7 +7,7 @@ describe('SITE_HOSTS', () => {
     expect(SITE_HOSTS['chauvierdelor.com']).toBe('holding')
     expect(SITE_HOSTS['www.chauvierdelor.com']).toBe('holding')
     expect(SITE_HOSTS['admin.chauvierdelor.com']).toBe('admin')
-    for (const filiale of ['entretien', 'transport', 'comptable', 'placement', 'ccdpaa', 'boissons']) {
+    for (const filiale of ['entretien', 'transport', 'comptable', 'placement', 'cdpaa', 'boissons']) {
       expect(SITE_HOSTS[`${filiale}.chauvierdelor.com`]).toBe(filiale)
     }
   })

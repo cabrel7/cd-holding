@@ -1,4 +1,4 @@
-// /admin/{entretien,transport,ccdpaa}/planning + /admin/mon-planning — grille semaine, CRUD quarts,
+// /admin/{entretien,transport,cdpaa}/planning + /admin/mon-planning — grille semaine, CRUD quarts,
 // lecture employé (spec docs/specs/lot5-planning.md §4, critères §7). Exécuté contre le BUILD DE
 // PRODUCTION (même outillage que admin-reservations.spec.ts : loginAs, marqueurs, apiAs, clesInterdites).
 //
@@ -13,7 +13,7 @@
 //
 // Écarts à la spec §4 assumés et documentés :
 // - ADMIN_FILIALE_TRANSPORT n'existe pas dans prisma/seed/accounts.ts (et prisma/** est hors
-//   périmètre T3) : le 403 inter-filiale est testé avec l'AF entretien ET l'AF ccdpaa SUR
+//   périmètre T3) : le 403 inter-filiale est testé avec l'AF entretien ET l'AF cdpaa SUR
 //   /api/admin/planning/transport (requireModule scoping company, équivalent).
 // - Employé sans dossier (404 mon-planning) : aucun compte EMPLOYE non lié n'existe au seed
 //   (accounts.ts n'en crée qu'un, lié par demo.ts) et en créer un demanderait prisma/seed —
@@ -23,7 +23,7 @@ import type { AdminQuartDto, MonPlanningDto, PlanningSemaineDto } from '#shared/
 import { ajouterJoursIso, formatDateLongue, instantQuebec } from '#shared/utils/dates'
 import { lundiDeSemaineQuebec, totalHeures } from '#shared/utils/planning'
 import {
-  ADMIN_FILIALE_CCDPAA,
+  ADMIN_FILIALE_CDPAA,
   ADMIN_FILIALE_ENTRETIEN,
   EMPLOYE_ENTRETIEN,
   SUPER_ADMIN,
@@ -107,7 +107,7 @@ test.describe('API /api/admin/planning', () => {
 
   test('403 AF/EMPLOYE hors site planning ; 403 SA/AF sur mon-planning', async ({}, testInfo) => {
     const afEntretien = await apiAs(testInfo, ADMIN_FILIALE_ENTRETIEN)
-    const afCcdpaa = await apiAs(testInfo, ADMIN_FILIALE_CCDPAA)
+    const afCdpaa = await apiAs(testInfo, ADMIN_FILIALE_CDPAA)
     const employe = await apiAs(testInfo, EMPLOYE_ENTRETIEN)
     const sa = await apiAs(testInfo, SUPER_ADMIN)
     try {
@@ -115,7 +115,7 @@ test.describe('API /api/admin/planning', () => {
       // (requireModule scoping company) → 403 inter-filiale.
       expect((await afEntretien.get(URL_TRANSPORT)).status(), 'AF entretien GET transport').toBe(HTTP.FORBIDDEN)
       expect((await afEntretien.post(URL_TRANSPORT, { data: {} })).status(), 'AF entretien POST transport').toBe(HTTP.FORBIDDEN)
-      expect((await afCcdpaa.get(URL_TRANSPORT)).status(), 'AF ccdpaa GET transport').toBe(HTTP.FORBIDDEN)
+      expect((await afCdpaa.get(URL_TRANSPORT)).status(), 'AF cdpaa GET transport').toBe(HTTP.FORBIDDEN)
 
       // EMPLOYE : jamais de gestion planning.
       expect((await employe.get(URL_TRANSPORT)).status(), 'EMPLOYE GET transport').toBe(HTTP.FORBIDDEN)
@@ -124,10 +124,10 @@ test.describe('API /api/admin/planning', () => {
       // mon-planning : réservé aux EMPLOYE (requireRole, pas requireModule).
       expect((await sa.get('/api/admin/mon-planning')).status(), 'SA mon-planning').toBe(HTTP.FORBIDDEN)
       expect((await afEntretien.get('/api/admin/mon-planning')).status(), 'AF entretien mon-planning').toBe(HTTP.FORBIDDEN)
-      expect((await afCcdpaa.get('/api/admin/mon-planning')).status(), 'AF ccdpaa mon-planning').toBe(HTTP.FORBIDDEN)
+      expect((await afCdpaa.get('/api/admin/mon-planning')).status(), 'AF cdpaa mon-planning').toBe(HTTP.FORBIDDEN)
     } finally {
       await afEntretien.dispose()
-      await afCcdpaa.dispose()
+      await afCdpaa.dispose()
       await employe.dispose()
       await sa.dispose()
     }
@@ -468,7 +468,7 @@ test.describe('UI planning', () => {
       await shell.ouvrirNavigation()
       await expect(shell.navigation.getByRole('link', { name: 'Planning — Entretien' })).toBeVisible()
       await expect(shell.navigation.getByRole('link', { name: 'Planning — Transport' })).toBeVisible()
-      await expect(shell.navigation.getByRole('link', { name: 'Planning — CCDPAA' })).toBeVisible()
+      await expect(shell.navigation.getByRole('link', { name: 'Planning — CDPAA' })).toBeVisible()
       await expect(shell.navigation.getByRole('link', { name: 'Mon planning' })).toHaveCount(0)
       await shell.fermerNavigation()
     })
@@ -597,7 +597,7 @@ test.describe('UI planning', () => {
       await shell.ouvrirNavigation()
       await expect(shell.navigation.getByRole('link', { name: 'Planning — Entretien' })).toBeVisible()
       await expect(shell.navigation.getByRole('link', { name: 'Planning — Transport' })).toHaveCount(0)
-      await expect(shell.navigation.getByRole('link', { name: 'Planning — CCDPAA' })).toHaveCount(0)
+      await expect(shell.navigation.getByRole('link', { name: 'Planning — CDPAA' })).toHaveCount(0)
       await shell.fermerNavigation()
 
       await page.goto('/admin/transport/planning')

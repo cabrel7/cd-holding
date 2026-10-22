@@ -13,7 +13,7 @@ import {
   type FormulaireFilialeSlug,
 } from '../config/contact-forms'
 import { ajouterJoursIso, dateDuJourQuebec, isDateCalendaireValide } from '../utils/dates'
-import { ETAPES_ASSISTANT, type ReponsesAssistant } from '../content/ccdpaa/assistant-import-export'
+import { ETAPES_ASSISTANT, type ReponsesAssistant } from '../content/cdpaa/assistant-import-export'
 
 export const CONTACT_LIMITS = {
   nomMin: 2,
@@ -172,7 +172,7 @@ export function filialeContactFormSchema(slug: FormulaireFilialeSlug) {
 const varianteFiliale = <S extends FormulaireFilialeSlug>(slug: S) =>
   filialeContactFormSchema(slug).extend({ formulaire: z.literal(slug) })
 
-/** Valeurs du formulaire « suggestion de produit » (ccdpaa, boissons). */
+/** Valeurs du formulaire « suggestion de produit » (cdpaa, boissons). */
 export const suggestionFormSchema = z
   .object({
     nom: nomContactSchema,
@@ -189,7 +189,7 @@ export const suggestionBodySchema = suggestionFormSchema.extend({
   site: z.enum(SITES_SUGGESTION),
 })
 
-// --- Assistant import-export (ccdpaa) : variante de POST /api/public/contact (T0, spec lot 3 §3) ---
+// --- Assistant import-export (cdpaa) : variante de POST /api/public/contact (T0, spec lot 3 §3) ---
 
 const videEnUndefined = (v: unknown) => (typeof v === 'string' && v.trim() === '' ? undefined : v)
 
@@ -226,7 +226,7 @@ export const contactBodySchema = z.discriminatedUnion('formulaire', [
   varianteFiliale('transport'),
   varianteFiliale('comptable'),
   varianteFiliale('placement'),
-  varianteFiliale('ccdpaa'),
+  varianteFiliale('cdpaa'),
   varianteFiliale('boissons'),
   suggestionBodySchema,
   assistantBodySchema,

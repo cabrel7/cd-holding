@@ -92,12 +92,12 @@ const PUBLIC_ROUTES = [
   { path: "/placement/realisations", file: "placement.realisations.tsx" },
   { path: "/placement/services", file: "placement.services.tsx" },
 
-  { path: "/ccdpaa", file: "ccdpaa.index.tsx" },
-  { path: "/ccdpaa/a-propos", file: "ccdpaa.a-propos.tsx" },
-  { path: "/ccdpaa/contact", file: "ccdpaa.contact.tsx" },
-  { path: "/ccdpaa/realisations", file: "ccdpaa.realisations.tsx" },
-  { path: "/ccdpaa/restaurant", file: "ccdpaa.restaurant.tsx" },
-  { path: "/ccdpaa/services", file: "ccdpaa.services.tsx" },
+  { path: "/cdpaa", file: "cdpaa.index.tsx" },
+  { path: "/cdpaa/a-propos", file: "cdpaa.a-propos.tsx" },
+  { path: "/cdpaa/contact", file: "cdpaa.contact.tsx" },
+  { path: "/cdpaa/realisations", file: "cdpaa.realisations.tsx" },
+  { path: "/cdpaa/restaurant", file: "cdpaa.restaurant.tsx" },
+  { path: "/cdpaa/services", file: "cdpaa.services.tsx" },
 
   { path: "/boissons", file: "boissons.index.tsx" },
   { path: "/boissons/a-propos", file: "boissons.a-propos.tsx" },

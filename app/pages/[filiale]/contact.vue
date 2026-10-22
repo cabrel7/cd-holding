@@ -2,7 +2,7 @@
 // Contact — filiales (spec docs/specs/lot2-contact-filiales.md §4, prototype SubContactPage.tsx).
 // Même charpente que /contact (holding, ContactIntro réutilisé tel quel) mais la carte formulaire
 // est entièrement pilotée par CONTACT_FORMS[slug] (FilialeContactForm) — aucun `if (slug === …)`
-// ici. Suggestion de produit (ccdpaa, boissons) affichée seulement si la section éditable existe.
+// ici. Suggestion de produit (cdpaa, boissons) affichée seulement si la section éditable existe.
 import { isFilialeSlug } from '#shared/config/sites'
 import { estFormulaireFiliale, estSiteSuggestion, FORMULAIRES_FILIALES, type FormulaireFilialeSlug, type SiteSuggestion } from '#shared/config/contact-forms'
 import { interpoler } from '#shared/utils/texte'

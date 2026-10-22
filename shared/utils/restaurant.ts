@@ -2,7 +2,7 @@
 // `ReglagesRestaurant` (aucun horaire en dur) — imports relatifs uniquement (seed/tsx).
 import { ajouterJoursIso, dateDuJourQuebec, instantQuebec, isDateCalendaireValide, jourIsoSemaine } from './dates'
 
-export const RESTAURANT_SLUG = 'ccdpaa' as const
+export const RESTAURANT_SLUG = 'cdpaa' as const
 
 export interface ReglagesReservation {
   readonly joursOuverture: readonly number[] // ISO 1 = lundi … 7 = dimanche

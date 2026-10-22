@@ -1,8 +1,8 @@
-// Assistant import-export (ccdpaa /services) — spec docs/specs/lot3-pages-specifiques.md §4,
+// Assistant import-export (cdpaa /services) — spec docs/specs/lot3-pages-specifiques.md §4,
 // §6 critère 9 et 11. Questionnaire SCRIPTÉ (DEC-14) : aucune IA. Exécuté contre le BUILD DE
 // PRODUCTION. Le texte de la recommandation attendu est lu dans l'API des sections
 // (SERVICES:assistant.recommandations[palier]) : aucune chaîne marketing recopiée ici. Les
-// questions/options/libellés d'étapes viennent de shared/content/ccdpaa/assistant-import-export.ts
+// questions/options/libellés d'étapes viennent de shared/content/cdpaa/assistant-import-export.ts
 // (structure du questionnaire = code, pas contenu éditable).
 //
 // Isolation rate-limit : le bucket `contact` (5 / 10 min / IP) est partagé avec les formulaires de
@@ -17,7 +17,7 @@ import {
   palierRecommandation,
   recapReponses,
   type ReponsesAssistant,
-} from '#shared/content/ccdpaa/assistant-import-export'
+} from '#shared/content/cdpaa/assistant-import-export'
 import { loginAs, SUPER_ADMIN } from './helpers/auth'
 import type { AdminMessageDto, AdminPage } from '#shared/types/admin'
 import { nextTestIp } from './helpers/ip'
@@ -53,7 +53,7 @@ function reponsesChoisies(): ReponsesAssistant {
 class ServicesAssistantPage {
   constructor(private readonly page: Page) {}
   goto() {
-    return this.page.goto('/ccdpaa/services')
+    return this.page.goto('/cdpaa/services')
   }
   get continuer(): Locator { return this.page.getByRole('button', { name: 'Continuer' }) }
   get retour(): Locator { return this.page.getByRole('button', { name: 'Retour' }) }
@@ -114,7 +114,7 @@ function suivreContact(page: Page): string[] {
   return corps
 }
 
-test.describe('ccdpaa — assistant import-export (services)', () => {
+test.describe('cdpaa — assistant import-export (services)', () => {
   test.afterAll(() => {
     test.setTimeout(240_000)
     nettoyer({ contactEmails })
@@ -124,8 +124,8 @@ test.describe('ccdpaa — assistant import-export (services)', () => {
     await page.setExtraHTTPHeaders({ 'x-forwarded-for': nextTestIp() })
   })
 
-  test('should render the assistant on ccdpaa/services (200) with « Continuer » disabled, no « Retour » and a 5-step counter on step 1', async ({ page, request }) => {
-    expect((await request.get('/ccdpaa/services')).status()).toBe(200)
+  test('should render the assistant on cdpaa/services (200) with « Continuer » disabled, no « Retour » and a 5-step counter on step 1', async ({ page, request }) => {
+    expect((await request.get('/cdpaa/services')).status()).toBe(200)
     const a = new ServicesAssistantPage(page)
     await a.goto()
     await expect(a.question(ETAPES_ASSISTANT[0].question)).toBeVisible()
@@ -135,7 +135,7 @@ test.describe('ccdpaa — assistant import-export (services)', () => {
     for (const option of ETAPES_ASSISTANT[0].options) await expect(a.radio(option.label)).toBeAttached()
   })
 
-  test('should not show the assistant on the other subsidiaries services pages (no ccdpaa hard-coding)', async ({ page }) => {
+  test('should not show the assistant on the other subsidiaries services pages (no cdpaa hard-coding)', async ({ page }) => {
     await page.goto('/entretien/services')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     await expect(page.getByRole('button', { name: 'Continuer' })).toHaveCount(0)
@@ -158,8 +158,8 @@ test.describe('ccdpaa — assistant import-export (services)', () => {
 
   test('should complete the 5 steps with the keyboard only, validate the contact step, then show the recommendation and a labelled recap (no raw keys, no « IA »)', async ({ page, request }) => {
     test.slow()
-    const sections = (await (await request.get('/api/public/sites/ccdpaa/sections?page=SERVICES')).json()) as { assistant?: AssistantSectionDto }
-    expect(sections.assistant, 'SERVICES:assistant doit exister pour ccdpaa (base de dev : seed en amorçage)').toBeTruthy()
+    const sections = (await (await request.get('/api/public/sites/cdpaa/sections?page=SERVICES')).json()) as { assistant?: AssistantSectionDto }
+    expect(sections.assistant, 'SERVICES:assistant doit exister pour cdpaa (base de dev : seed en amorçage)').toBeTruthy()
 
     const reponses = reponsesChoisies()
     const palier = palierRecommandation(reponses.volume)
@@ -207,7 +207,7 @@ test.describe('ccdpaa — assistant import-export (services)', () => {
       const cree = page.items.find((m) => m.email === email)
       expect(cree, 'le message doit être visible via GET /api/admin/messages').toBeTruthy()
       expect(cree!.type).toBe('ASSISTANT_IMPORT_EXPORT')
-      expect(cree!.site.slug).toBe('ccdpaa')
+      expect(cree!.site.slug).toBe('cdpaa')
       expect(cree!.formulaire).toBe('assistant')
       expect(cree, 'details ne doit jamais être renvoyé brut').not.toHaveProperty('details')
       // Le palier est recalculé côté serveur et traduit en libellé (jamais la clé brute).

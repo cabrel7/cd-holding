@@ -3,7 +3,7 @@
 // (clients supprimés, dossiers en cascade). Marqueur régénéré par projet (desktop, mobile).
 import { test, expect, request as pwRequest, type TestInfo } from '@playwright/test'
 import type { AdminDossierComptableDto, AdminDossiersPageDto } from '#shared/types/admin'
-import { loginAs, SUPER_ADMIN, ADMIN_FILIALE_ENTRETIEN, ADMIN_FILIALE_CCDPAA, EMPLOYE_ENTRETIEN } from './helpers/auth'
+import { loginAs, SUPER_ADMIN, ADMIN_FILIALE_ENTRETIEN, ADMIN_FILIALE_CDPAA, EMPLOYE_ENTRETIEN } from './helpers/auth'
 import { apiAs, clesInterdites, AdminShell } from './fixtures/admin-pages'
 import { emailTest, nouveauMarqueur, purgerDonneesAdmin } from './fixtures/admin-data'
 
@@ -54,7 +54,7 @@ test.describe('API /api/admin/comptable/dossiers', () => {
 
   test('forbids EMPLOYE and an AF without the comptable module (403)', async ({}, testInfo) => {
     const emp = await apiAs(testInfo, EMPLOYE_ENTRETIEN)
-    const afEtranger = await apiAs(testInfo, ADMIN_FILIALE_CCDPAA)
+    const afEtranger = await apiAs(testInfo, ADMIN_FILIALE_CDPAA)
     try {
       expect((await emp.get(ROUTES[0])).status(), 'EMPLOYE').toBe(HTTP.FORBIDDEN)
       expect((await afEtranger.get(ROUTES[0])).status(), 'AF sans le module').toBe(HTTP.FORBIDDEN)

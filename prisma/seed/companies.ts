@@ -5,14 +5,14 @@
 import { CompanyType, type PrismaClient } from '../../server/generated/prisma/client'
 
 // Secteur affiché publiquement : aligné sur PROJECT_CONTEXT.md §2 (comptable : mention de la
-// création/régularisation d'entreprise ; ccdpaa : mention du restaurant), PAS sur
+// création/régularisation d'entreprise ; cdpaa : mention du restaurant), PAS sur
 // `secteurPrototype` du générateur (explicitement informatif, jamais semé — spec §3.2).
 const FILIALES = [
   { slug: 'entretien', nom: 'Chaudetcha Entretiens et Sanitations', couleurAccent: '#0F6E56', secteur: 'Entretien ménager résidentiel et commercial' },
   { slug: 'transport', nom: 'Chaudetcha Transport et Logistique', couleurAccent: '#D85A30', secteur: 'Transport de marchandises, déménagement, logistique' },
   { slug: 'comptable', nom: 'CD Tenue de Livre Comptable', couleurAccent: '#185FA5', secteur: 'Comptabilité, paie, déclarations fiscales, création et régularisation d’entreprise' },
   { slug: 'placement', nom: 'Placement CD Pro', couleurAccent: '#D4537E', secteur: 'Placement de personnel et recrutement de travailleurs étrangers temporaires' },
-  { slug: 'ccdpaa', nom: 'CCDPAA', couleurAccent: '#BA7517', secteur: 'Import-export de produits agricoles d’Afrique et restaurant Les Ambassades d’Afrique' },
+  { slug: 'cdpaa', nom: 'CDPAA', couleurAccent: '#BA7517', secteur: 'Import-export de produits agricoles d’Afrique et restaurant Les Ambassades d’Afrique' },
   { slug: 'boissons', nom: "CD Boissons d'Afrique", couleurAccent: '#A32D2D', secteur: 'Représentation et distribution de boissons' },
 ] as const
 

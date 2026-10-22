@@ -3,7 +3,7 @@ import { decideReadScope, decideSitesListScope, decideWriteCompany } from '../..
 import { ROLES } from '../../shared/utils/roles'
 
 const ENTRETIEN = 1
-const CCDPAA = 2
+const CDPAA = 2
 
 describe('decideReadScope', () => {
   it('lets SUPER_ADMIN read everything when no site is requested', () => {
@@ -30,7 +30,7 @@ describe('decideReadScope', () => {
 
   it('forbids ADMIN_FILIALE from reading another company', () => {
     expect(
-      decideReadScope({ role: ROLES.ADMIN_FILIALE, sessionCompanyId: ENTRETIEN, requestedCompanyId: CCDPAA }),
+      decideReadScope({ role: ROLES.ADMIN_FILIALE, sessionCompanyId: ENTRETIEN, requestedCompanyId: CDPAA }),
     ).toBe('forbidden')
   })
 
@@ -74,7 +74,7 @@ describe('decideWriteCompany', () => {
 
   it('lets SUPER_ADMIN write to any explicitly named company', () => {
     expect(
-      decideWriteCompany({ role: ROLES.SUPER_ADMIN, sessionCompanyId: null, requestedCompanyId: CCDPAA }),
+      decideWriteCompany({ role: ROLES.SUPER_ADMIN, sessionCompanyId: null, requestedCompanyId: CDPAA }),
     ).toBe('company')
   })
 
@@ -86,7 +86,7 @@ describe('decideWriteCompany', () => {
 
   it('forbids ADMIN_FILIALE from writing to another company', () => {
     expect(
-      decideWriteCompany({ role: ROLES.ADMIN_FILIALE, sessionCompanyId: ENTRETIEN, requestedCompanyId: CCDPAA }),
+      decideWriteCompany({ role: ROLES.ADMIN_FILIALE, sessionCompanyId: ENTRETIEN, requestedCompanyId: CDPAA }),
     ).toBe('forbidden')
   })
 

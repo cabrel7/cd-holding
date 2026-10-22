@@ -237,47 +237,47 @@ const FILIALES: Record<FilialeSlug, FilialeTextes> = {
       },
     },
   },
-  ccdpaa: {
-    nomCourt: 'CCDPAA',
+  cdpaa: {
+    nomCourt: 'CDPAA',
     tagline: 'Import-export · Restauration',
-    heroTitre: 'De la\n*terre africaine*\nà la table québécoise.', // routes/ccdpaa.index.tsx:24-26
+    heroTitre: 'De la\n*terre africaine*\nà la table québécoise.', // routes/cdpaa.index.tsx:24-26
     heroTexte:
       'Deux métiers, un même continent : import de produits agricoles africains vers le Canada, et restaurant panafricain Les Ambassades d’Afrique à Montréal.',
     heroCta: 'Recevoir le catalogue',
-    heroImageAlt: 'Produits agricoles importés par CCDPAA',
-    servicesTitre: 'Notre catalogue import-export', // routes/ccdpaa.index.tsx:58
+    heroImageAlt: 'Produits agricoles importés par CDPAA',
+    servicesTitre: 'Notre catalogue import-export', // routes/cdpaa.index.tsx:58
     servicesTexte:
       'Produits agricoles, épices et condiments importés d’Afrique de l’Ouest et Centrale, distribués auprès d’épiceries spécialisées, de restaurateurs et de grossistes.',
     ctaTitre: 'Envie de distribuer nos produits ?',
     ctaTexte: 'Écrivez-nous pour recevoir notre catalogue import complet.',
     realisationsTitre: 'Réalisations récentes',
     histoireP1:
-      'CCDPAA importe des produits agricoles issus du continent africain et exploite Les Ambassades d’Afrique, un restaurant qui met en valeur ces saveurs. Un pont commercial et culinaire entre l’Afrique et le Québec.',
+      'CDPAA importe des produits agricoles issus du continent africain et exploite Les Ambassades d’Afrique, un restaurant qui met en valeur ces saveurs. Un pont commercial et culinaire entre l’Afrique et le Québec.',
     histoireP2:
-      'Filiale du {groupe}, CCDPAA bénéficie du savoir-faire mutualisé de la holding tout en gardant sa spécialisation métier et son équipe dédiée.',
+      'Filiale du {groupe}, CDPAA bénéficie du savoir-faire mutualisé de la holding tout en gardant sa spécialisation métier et son équipe dédiée.',
     contactSurtitre: 'Distribution B2B',
     contactTitre: 'Demandez notre\ncatalogue.',
     contactTexte: 'Épiceries spécialisées, restaurateurs, grossistes : recevez notre catalogue import complet.',
     seo: {
       accueil: {
-        title: 'CCDPAA — Import-export et restauration africaine',
+        title: 'CDPAA — Import-export et restauration africaine',
         description:
           'Import de produits agricoles d’Afrique et restaurant panafricain Les Ambassades d’Afrique, à Montréal.',
       },
       services: {
-        title: 'Catalogue import-export — CCDPAA',
+        title: 'Catalogue import-export — CDPAA',
         description: 'Produits agricoles, épices et condiments importés d’Afrique, distribués en épicerie, restauration et gros.',
       },
       realisations: {
-        title: 'Réalisations — CCDPAA',
+        title: 'Réalisations — CDPAA',
         description: 'Référencements en épiceries spécialisées, ouverture du restaurant : nos réalisations récentes.',
       },
       aPropos: {
-        title: 'À propos — CCDPAA',
-        description: 'L’équipe et les partenaires de CCDPAA, filiale du Groupe CD spécialisée en import-export et restauration.',
+        title: 'À propos — CDPAA',
+        description: 'L’équipe et les partenaires de CDPAA, filiale du Groupe CD spécialisée en import-export et restauration.',
       },
       contact: {
-        title: 'Contact — CCDPAA',
+        title: 'Contact — CDPAA',
         description: 'Demandez notre catalogue import-export ou contactez notre équipe pour toute question.',
       },
     },
@@ -460,19 +460,19 @@ function accueilPlacement(): Record<string, Donnees> {
   }
 }
 
-function accueilCcdpaa(): Record<string, Donnees> {
-  const t = FILIALES.ccdpaa
+function accueilCdpaa(): Record<string, Donnees> {
+  const t = FILIALES.cdpaa
   return {
     seo: t.seo.accueil,
     hero: {
-      surtitre: 'Deux métiers, un même continent', // routes/ccdpaa.index.tsx:21
+      surtitre: 'Deux métiers, un même continent', // routes/cdpaa.index.tsx:21
       titre: t.heroTitre,
       texte: t.heroTexte,
       ctaLibelle: t.heroCta,
       imageKey: null,
       imageAlt: t.heroImageAlt,
     },
-    // routes/ccdpaa.index.tsx:29-49
+    // routes/cdpaa.index.tsx:29-49
     metiers: {
       a: {
         surtitre: 'Import-export',
@@ -499,7 +499,7 @@ function servicesFiliale(slug: FilialeSlug): Record<string, Donnees> {
     entete: { surtitre: 'Nos services', titre: t.servicesTitre, texte: t.servicesTexte },
     cta: { titre: t.ctaTitre, texte: t.ctaTexte, ctaLibelle: t.heroCta },
   }
-  if (slug === 'ccdpaa') {
+  if (slug === 'cdpaa') {
     // PROJECT_CONTEXT.md §7 : questionnaire scripté, pas une IA (aucun appel LLM). Réaligné sur
     // le prototype validé par le client (lot 3, spec §0) : titre et recommandations par palier de
     // volume ; « six à huit semaines » (promesse commerciale non validée) neutralisé.
@@ -599,10 +599,10 @@ function contactFiliale(slug: SiteSlug): Record<string, Donnees> {
         }
 
   const result: Record<string, Donnees> = { seo, contact }
-  if (slug === 'ccdpaa' || slug === 'boissons') {
+  if (slug === 'cdpaa' || slug === 'boissons') {
     // Libellé confirmé (Q-11, PROJECT_STATE.md) ; texte par site, repris du prototype (lot 2 §3b).
-    const texteParSite: Record<'ccdpaa' | 'boissons', string> = {
-      ccdpaa:
+    const texteParSite: Record<'cdpaa' | 'boissons', string> = {
+      cdpaa:
         'Dites-nous ce que vous aimeriez retrouver sur nos étals. Chaque suggestion est étudiée par notre équipe d’approvisionnement.',
       boissons:
         'Dites-nous ce que vous aimeriez retrouver dans notre portefeuille de marques. Chaque suggestion est étudiée par notre équipe d’approvisionnement.',
@@ -617,13 +617,13 @@ function contactFiliale(slug: SiteSlug): Record<string, Donnees> {
   return result
 }
 
-function restaurantCcdpaa(): Record<string, Donnees> {
+function restaurantCdpaa(): Record<string, Donnees> {
   return {
     seo: {
       title: 'Les Ambassades d’Afrique — Restaurant panafricain à Montréal',
       description: 'Restaurant panafricain à Montréal célébrant treize cuisines du continent. Bar complet, midi et soir.',
     },
-    // routes/ccdpaa.restaurant.tsx:51-59,74
+    // routes/cdpaa.restaurant.tsx:51-59,74
     hero: {
       surtitre: 'Restaurant · Plateau Mont-Royal',
       titre: 'Les *Ambassades* d’Afrique.',
@@ -635,7 +635,7 @@ function restaurantCcdpaa(): Record<string, Donnees> {
       // `ReglagesRestaurant` — les recopier ici créerait une deuxième source qui diverge dès
       // la première édition des réglages. Le bloc « Ouverture » de la page les lit directement.
     },
-    // routes/ccdpaa.restaurant.tsx:37-42,84-89
+    // routes/cdpaa.restaurant.tsx:37-42,84-89
     menu: {
       surtitre: 'Un aperçu de la carte',
       titre: 'Treize cuisines, une même table.',
@@ -776,12 +776,12 @@ function mentionsLegalesBoissons(): Record<string, Donnees> {
 
 // --- Table finale : `${page}:${cle}` → (slug) => donnees ---------------------------------
 // Portée "AUTRES_FILIALES" du catalogue (entretien, transport, comptable, boissons) : couverte
-// par le repli `accueilFilialeStandard` ci-dessous (placement et ccdpaa ont leur propre builder).
+// par le repli `accueilFilialeStandard` ci-dessous (placement et cdpaa ont leur propre builder).
 
 function accueilBySlug(slug: SiteSlug): Record<string, Donnees> {
   if (slug === HOLDING_SLUG) return accueilHolding()
   if (slug === 'placement') return accueilPlacement()
-  if (slug === 'ccdpaa') return accueilCcdpaa()
+  if (slug === 'cdpaa') return accueilCdpaa()
   return accueilFilialeStandard(slug)
 }
 
@@ -803,8 +803,8 @@ function buildersFor(slug: SiteSlug): Record<string, Donnees> {
   } else {
     for (const [cle, donnees] of Object.entries(servicesFiliale(slug))) entries[`SERVICES:${cle}`] = donnees
     for (const [cle, donnees] of Object.entries(aProposFiliale(slug))) entries[`A_PROPOS:${cle}`] = donnees
-    if (slug === 'ccdpaa') {
-      for (const [cle, donnees] of Object.entries(restaurantCcdpaa())) entries[`RESTAURANT:${cle}`] = donnees
+    if (slug === 'cdpaa') {
+      for (const [cle, donnees] of Object.entries(restaurantCdpaa())) entries[`RESTAURANT:${cle}`] = donnees
     }
     if (slug === 'placement') {
       for (const [cle, donnees] of Object.entries(offresPlacement())) entries[`OFFRES:${cle}`] = donnees

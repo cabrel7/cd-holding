@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Assistant import-export (ccdpaa) — spec lot3 §3/§4, questionnaire SCRIPTÉ (DEC-14) : aucune
+// Assistant import-export (cdpaa) — spec lot3 §3/§4, questionnaire SCRIPTÉ (DEC-14) : aucune
 // IA, aucun appel LLM, jamais présenté comme tel. Affiché par la page appelante seulement si la
 // section éditable `SERVICES:assistant` existe (aucun `if (slug)` ici). Carte sombre (fidélité
 // prototype) rendue accessible : champs/mention via <ChampContact>/<MentionConfidentialite>
@@ -17,7 +17,7 @@ import {
   recapReponses,
   type PalierRecommandation,
   type ReponsesAssistant,
-} from '#shared/content/ccdpaa/assistant-import-export'
+} from '#shared/content/cdpaa/assistant-import-export'
 import { assistantFormSchema, type AssistantFormValues } from '#shared/validation/contact'
 import type { TexteVars } from '#shared/utils/texte'
 import { usePublicFormSubmit } from '@/composables/usePublicFormSubmit'

@@ -24,7 +24,7 @@ export const SITE_HOSTS: Record<string, SiteHostTarget> = {
   'transport.chauvierdelor.com': 'transport',
   'comptable.chauvierdelor.com': 'comptable',
   'placement.chauvierdelor.com': 'placement',
-  'ccdpaa.chauvierdelor.com': 'ccdpaa',
+  'cdpaa.chauvierdelor.com': 'cdpaa',
   'boissons.chauvierdelor.com': 'boissons',
   'admin.chauvierdelor.com': 'admin',
 }

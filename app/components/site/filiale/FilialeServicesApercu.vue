@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Aperçu "Nos services" de l'accueil filiale (rangée numérotée), spec lot1 §1 : même mise en
-// page pour les 6 filiales (placement/ccdpaa compris, unifiés — spec §0 §4, pas de grille de
+// page pour les 6 filiales (placement/cdpaa compris, unifiés — spec §0 §4, pas de grille de
 // cartes générique). Liste = jusqu'à 3 services mis en avant (API), repli défensif sur les 3
 // premiers si le CMS en renvoie davantage.
 import { ArrowRight } from '@lucide/vue'

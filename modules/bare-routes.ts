@@ -23,7 +23,7 @@ const PREFIXE_ADMIN = '/admin'
 const CIBLES_PUBLIQUES: ReadonlyArray<readonly [finFichier: string, cheminNu: string]> = [
   ['pages/[filiale]/services.vue', '/services'],
   ['pages/[filiale]/mentions-legales.vue', '/mentions-legales'],
-  ['pages/ccdpaa/restaurant.vue', '/restaurant'],
+  ['pages/cdpaa/restaurant.vue', '/restaurant'],
   ['pages/placement/offres/index.vue', '/offres'],
   ['pages/placement/offres/[uuid].vue', '/offres/[uuid]'],
   ['pages/placement/offres/candidature-spontanee.vue', '/offres/candidature-spontanee'],

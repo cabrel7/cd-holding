@@ -99,7 +99,7 @@ test.describe('sous-domaines — gate mode chemin (régression)', () => {
     expect(utilisateurs?.status()).toBe(404)
   })
 
-  test('chemins nus spécifiques : /offres sur placement.localhost, /restaurant sur ccdpaa.localhost', async ({ page }) => {
+  test('chemins nus spécifiques : /offres sur placement.localhost, /restaurant sur cdpaa.localhost', async ({ page }) => {
     await page.goto('http://placement.localhost:3200/offres')
     await expect(racine(page)).toHaveAttribute('data-site', 'placement')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
@@ -107,11 +107,11 @@ test.describe('sous-domaines — gate mode chemin (régression)', () => {
     const offresHorsPlacement = await page.goto('http://entretien.localhost:3200/offres')
     expect(offresHorsPlacement?.status()).toBe(404)
 
-    await page.goto('http://ccdpaa.localhost:3200/restaurant')
-    await expect(racine(page)).toHaveAttribute('data-site', 'ccdpaa')
+    await page.goto('http://cdpaa.localhost:3200/restaurant')
+    await expect(racine(page)).toHaveAttribute('data-site', 'cdpaa')
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    const restaurantHorsCcdpaa = await page.goto('http://entretien.localhost:3200/restaurant')
-    expect(restaurantHorsCcdpaa?.status()).toBe(404)
+    const restaurantHorsCdpaa = await page.goto('http://entretien.localhost:3200/restaurant')
+    expect(restaurantHorsCdpaa?.status()).toBe(404)
   })
 })
 

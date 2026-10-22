@@ -2,7 +2,7 @@
 // Consommés par prisma/seed/*.ts. Import relatif uniquement (exécuté hors Nuxt par tsx) —
 // ce fichier n'importe rien de `shared/` pour rester un simple contrat de données.
 
-export type FilialeSlugPrototype = 'entretien' | 'transport' | 'comptable' | 'placement' | 'ccdpaa' | 'boissons'
+export type FilialeSlugPrototype = 'entretien' | 'transport' | 'comptable' | 'placement' | 'cdpaa' | 'boissons'
 export type SiteSlugPrototype = 'holding' | FilialeSlugPrototype
 
 /** Une image source, dédoublonnée par identifiant de photo Unsplash (spec §3.2). */
@@ -87,7 +87,7 @@ export interface GeneratedMessage {
 }
 
 export interface GeneratedSuggestion {
-  readonly filiale: 'ccdpaa' | 'boissons'
+  readonly filiale: 'cdpaa' | 'boissons'
   readonly nom: string
   readonly email: string
   readonly produit: string

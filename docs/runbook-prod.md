@@ -13,7 +13,7 @@ Nginx ; les hôtes ne sont qu'une affaire de DNS + `server_name` + réécritures
 | `transport` | A | `IP_VPS` |
 | `comptable` | A | `IP_VPS` |
 | `placement` | A | `IP_VPS` |
-| `ccdpaa` | A | `IP_VPS` |
+| `cdpaa` | A | `IP_VPS` |
 | `boissons` | A | `IP_VPS` |
 | `admin` | A | `IP_VPS` |
 
@@ -69,7 +69,7 @@ server {
 
   # 301 stripés : /entretien/services -> https://entretien.chauvierdelor.com/services
   # (regex à captures nomées : gère /slug, /slug/x et query ; $is_args$args conserve la query)
-  location ~ ^/(?<fs>entretien|transport|comptable|placement|ccdpaa|boissons)(?<rest>/.*)?$ {
+  location ~ ^/(?<fs>entretien|transport|comptable|placement|cdpaa|boissons)(?<rest>/.*)?$ {
     return 301 https://$fs.chauvierdelor.com$rest$is_args$args;
   }
   location ~ ^/admin(?:/(?<rest>.*))?$ {
@@ -88,7 +88,7 @@ server {
 # Variante si le PCRE ci-dessus pose problème : 14 locations explicites
 #   location = /entretien { return 301 https://entretien.chauvierdelor.com/; }
 #   location ^~ /entretien/ { return 301 https://entretien.chauvierdelor.com$request_uri; }
-#   … idem pour transport, comptable, placement, ccdpaa, boissons
+#   … idem pour transport, comptable, placement, cdpaa, boissons
 #   location = /admin { return 301 https://admin.chauvierdelor.com/; }
 #   location ^~ /admin/ { return 301 https://admin.chauvierdelor.com$request_uri; }
 # (le prefix-match est testé AVANT les regex → placer ces locations avant toute regex.)
@@ -185,7 +185,7 @@ le défi ACME est servi par les blocs ci-dessus) :
 ```bash
 certbot --nginx -d chauvierdelor.com -d www.chauvierdelor.com \
   -d entretien.chauvierdelor.com -d transport.chauvierdelor.com -d comptable.chauvierdelor.com \
-  -d placement.chauvierdelor.com -d ccdpaa.chauvierdelor.com -d boissons.chauvierdelor.com \
+  -d placement.chauvierdelor.com -d cdpaa.chauvierdelor.com -d boissons.chauvierdelor.com \
   -d admin.chauvierdelor.com --redirect --hsts
 certbot renew --dry-run   # cron certbot.timer déjà actif
 ```
@@ -211,7 +211,7 @@ curl -sI https://chauvierdelor.com/admin             | grep -i '^location'  # �
 
 # Chemins nus sur sous-domaines (200 services ET racine — la racine teste l'anti-boucle
 # réécriture edge + X-Edge-Rewrite ; un 301 ici = boucle, voir fix 74ef6c8)
-for s in entretien transport comptable placement ccdpaa boissons; do
+for s in entretien transport comptable placement cdpaa boissons; do
   curl -so /dev/null -w "%{http_code} $s/services\n" "https://$s.chauvierdelor.com/services"
   curl -so /dev/null -w "%{http_code} $s/\n" "https://$s.chauvierdelor.com/"
 done                                                              # 12 × 200

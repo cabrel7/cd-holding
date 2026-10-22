@@ -64,18 +64,18 @@ export const CATALOG: readonly CatalogEntry[] = [
   { page: PAGE_SITE.ACCUEIL, cle: 'services', type: 'section', portee: ['placement'] },
   { page: PAGE_SITE.ACCUEIL, cle: 'realisations', type: 'section', portee: ['placement'] },
 
-  // ACCUEIL — ccdpaa
-  { page: PAGE_SITE.ACCUEIL, cle: 'seo', type: 'seo', portee: ['ccdpaa'] },
-  { page: PAGE_SITE.ACCUEIL, cle: 'hero', type: 'hero', portee: ['ccdpaa'] },
-  { page: PAGE_SITE.ACCUEIL, cle: 'metiers', type: 'duo', portee: ['ccdpaa'] },
-  { page: PAGE_SITE.ACCUEIL, cle: 'services', type: 'section', portee: ['ccdpaa'] },
-  { page: PAGE_SITE.ACCUEIL, cle: 'realisations', type: 'section', portee: ['ccdpaa'] },
+  // ACCUEIL — cdpaa
+  { page: PAGE_SITE.ACCUEIL, cle: 'seo', type: 'seo', portee: ['cdpaa'] },
+  { page: PAGE_SITE.ACCUEIL, cle: 'hero', type: 'hero', portee: ['cdpaa'] },
+  { page: PAGE_SITE.ACCUEIL, cle: 'metiers', type: 'duo', portee: ['cdpaa'] },
+  { page: PAGE_SITE.ACCUEIL, cle: 'services', type: 'section', portee: ['cdpaa'] },
+  { page: PAGE_SITE.ACCUEIL, cle: 'realisations', type: 'section', portee: ['cdpaa'] },
 
-  // SERVICES — filiales (+ assistant pour ccdpaa)
+  // SERVICES — filiales (+ assistant pour cdpaa)
   { page: PAGE_SITE.SERVICES, cle: 'seo', type: 'seo', portee: 'filiales' },
   { page: PAGE_SITE.SERVICES, cle: 'entete', type: 'section', portee: 'filiales' },
   { page: PAGE_SITE.SERVICES, cle: 'cta', type: 'cta', portee: 'filiales' },
-  { page: PAGE_SITE.SERVICES, cle: 'assistant', type: 'assistant', portee: ['ccdpaa'] },
+  { page: PAGE_SITE.SERVICES, cle: 'assistant', type: 'assistant', portee: ['cdpaa'] },
 
   // REALISATIONS — tous (holding compris, DEC-39)
   { page: PAGE_SITE.REALISATIONS, cle: 'seo', type: 'seo', portee: TOUS },
@@ -94,16 +94,16 @@ export const CATALOG: readonly CatalogEntry[] = [
   { page: PAGE_SITE.A_PROPOS, cle: 'equipe', type: 'section', portee: 'filiales' },
   { page: PAGE_SITE.A_PROPOS, cle: 'partenaires', type: 'section', portee: 'filiales' },
 
-  // CONTACT — tous (+ suggestion pour ccdpaa, boissons)
+  // CONTACT — tous (+ suggestion pour cdpaa, boissons)
   { page: PAGE_SITE.CONTACT, cle: 'seo', type: 'seo', portee: TOUS },
   { page: PAGE_SITE.CONTACT, cle: 'contact', type: 'formulaire', portee: TOUS },
-  { page: PAGE_SITE.CONTACT, cle: 'suggestion', type: 'formulaire', portee: ['ccdpaa', 'boissons'] },
+  { page: PAGE_SITE.CONTACT, cle: 'suggestion', type: 'formulaire', portee: ['cdpaa', 'boissons'] },
 
-  // RESTAURANT — ccdpaa
-  { page: PAGE_SITE.RESTAURANT, cle: 'seo', type: 'seo', portee: ['ccdpaa'] },
-  { page: PAGE_SITE.RESTAURANT, cle: 'hero', type: 'hero', portee: ['ccdpaa'] },
-  { page: PAGE_SITE.RESTAURANT, cle: 'menu', type: 'galerie', portee: ['ccdpaa'] },
-  { page: PAGE_SITE.RESTAURANT, cle: 'reservation', type: 'formulaire', portee: ['ccdpaa'] },
+  // RESTAURANT — cdpaa
+  { page: PAGE_SITE.RESTAURANT, cle: 'seo', type: 'seo', portee: ['cdpaa'] },
+  { page: PAGE_SITE.RESTAURANT, cle: 'hero', type: 'hero', portee: ['cdpaa'] },
+  { page: PAGE_SITE.RESTAURANT, cle: 'menu', type: 'galerie', portee: ['cdpaa'] },
+  { page: PAGE_SITE.RESTAURANT, cle: 'reservation', type: 'formulaire', portee: ['cdpaa'] },
 
   // OFFRES — placement
   { page: PAGE_SITE.OFFRES, cle: 'seo', type: 'seo', portee: ['placement'] },

@@ -12,11 +12,11 @@ describe('usePublicFormFeedback', () => {
 
     const resultat = notifierResultat(
       { ok: true },
-      { titreSucces: 'Demande reçue', messageSucces: 'Merci {nomCourt}, nous répondons vite.', vars: { nomCourt: 'CCDPAA' } },
+      { titreSucces: 'Demande reçue', messageSucces: 'Merci {nomCourt}, nous répondons vite.', vars: { nomCourt: 'CDPAA' } },
     )
 
     expect(resultat).toBe(true)
-    expect(succesSpy).toHaveBeenCalledWith('Demande reçue', { description: 'Merci CCDPAA, nous répondons vite.' })
+    expect(succesSpy).toHaveBeenCalledWith('Demande reçue', { description: 'Merci CDPAA, nous répondons vite.' })
     succesSpy.mockRestore()
   })
 

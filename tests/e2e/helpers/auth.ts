@@ -34,8 +34,8 @@ export const ADMIN_FILIALE_ENTRETIEN: AdminAccount = {
   },
 }
 
-export const ADMIN_FILIALE_CCDPAA: AdminAccount = {
-  email: 'admin@ccdpaa.groupecd.ca',
+export const ADMIN_FILIALE_CDPAA: AdminAccount = {
+  email: 'admin@cdpaa.groupecd.ca',
   get password() {
     return requireEnv('SEED_ADMIN_FILIALE_PASSWORD')
   },

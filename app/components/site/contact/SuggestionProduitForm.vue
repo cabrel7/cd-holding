@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Suggestion de produit — ccdpaa et boissons seulement (spec lot 2 §1, §4, Q-11). Carte séparée
+// Suggestion de produit — cdpaa et boissons seulement (spec lot 2 §1, §4, Q-11). Carte séparée
 // sous le formulaire de contact filiale, affichée par la page appelante seulement si la section
 // éditable `CONTACT:suggestion` existe pour ce site. Écarts assumés vs le prototype (§0 CHALLENGE
 // de la spec) : sans icône Lightbulb décorative, toast sans reprendre la saisie de l'utilisateur.

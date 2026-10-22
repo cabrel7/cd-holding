@@ -22,7 +22,7 @@ describe('SITE_SLUGS', () => {
 
 describe('isFilialeSlug', () => {
   it('should accept a filiale slug', () => {
-    expect(isFilialeSlug('ccdpaa')).toBe(true)
+    expect(isFilialeSlug('cdpaa')).toBe(true)
   })
 
   it('should reject the holding slug', () => {
@@ -58,8 +58,8 @@ describe('siteSlugSchema', () => {
 })
 
 describe('SITE_EXTRA_PAGES', () => {
-  it('should list restaurant for ccdpaa and offres for placement only', () => {
-    expect(SITE_EXTRA_PAGES.ccdpaa).toEqual(['restaurant'])
+  it('should list restaurant for cdpaa and offres for placement only', () => {
+    expect(SITE_EXTRA_PAGES.cdpaa).toEqual(['restaurant'])
     expect(SITE_EXTRA_PAGES.placement).toEqual(['offres'])
     expect(SITE_EXTRA_PAGES.entretien).toBeUndefined()
   })
@@ -72,8 +72,8 @@ describe('publicNav', () => {
     expect(nav[0]?.hash).toBe('#filiales')
   })
 
-  it('should add Restaurant only for ccdpaa', () => {
-    const nav = publicNav('ccdpaa')
+  it('should add Restaurant only for cdpaa', () => {
+    const nav = publicNav('cdpaa')
     expect(nav.map((item) => item.label)).toContain('Restaurant')
     expect(publicNav('entretien').map((item) => item.label)).not.toContain('Restaurant')
   })
@@ -100,16 +100,16 @@ describe('contactPath', () => {
   })
 
   it('should match the Contact entry of each site navigation', () => {
-    for (const slug of ['holding', 'ccdpaa'] as const) {
+    for (const slug of ['holding', 'cdpaa'] as const) {
       expect(publicNav(slug).find((item) => item.label === 'Contact')?.to).toBe(contactPath(slug))
     }
   })
 })
 
 describe('FILIALE_DUO_LIENS', () => {
-  it('should define duo links only for placement (audiences) and ccdpaa (metiers)', () => {
-    expect(Object.keys(FILIALE_DUO_LIENS).sort()).toEqual(['ccdpaa', 'placement'])
+  it('should define duo links only for placement (audiences) and cdpaa (metiers)', () => {
+    expect(Object.keys(FILIALE_DUO_LIENS).sort()).toEqual(['cdpaa', 'placement'])
     expect(FILIALE_DUO_LIENS.placement).toEqual({ cle: 'audiences', a: contactPath('placement'), b: '/placement/offres' })
-    expect(FILIALE_DUO_LIENS.ccdpaa?.cle).toBe('metiers')
+    expect(FILIALE_DUO_LIENS.cdpaa?.cle).toBe('metiers')
   })
 })

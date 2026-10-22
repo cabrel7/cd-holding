@@ -34,7 +34,7 @@ const authStore = useAuthStore()
 
 // Cibles normalisées vers la forme servie sur l'hôte admin (D8) : nu là-bas, préfixée ailleurs.
 const cheminMessages = toAdminPath('/admin/messages')
-const cheminReservations = toAdminPath('/admin/ccdpaa/reservations')
+const cheminReservations = toAdminPath('/admin/cdpaa/reservations')
 
 const { data, status, error, refresh } = useFetch<AdminDashboardDto | null>('/api/admin/dashboard', {
   server: false,

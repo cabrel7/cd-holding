@@ -23,7 +23,7 @@
 // Lot 4 (e2e admin messages / clients) — marqueur = suffixe unique en minuscules ; toutes les
 // lignes créées ont un e-mail se terminant par `-<marqueur>@example.test` :
 //   --seed-admin-messages <m>   crée 25 messages entretien (pagination) + transport (details
-//                               réalistes) + holding + suggestion ccdpaa + contact ccdpaa
+//                               réalistes) + holding + suggestion cdpaa + contact cdpaa
 //   --seed-dossier <email>      crée un DossierComptable pour le client de cet e-mail
 //   --purge-admin-data <m>      supprime messages ET clients (dossiers en cascade) du marqueur
 //
@@ -35,7 +35,7 @@
 //                               (affectations en cascade) et demandes du marqueur
 //
 // Lot 5 (e2e admin réservations) — marqueur : courriels `resa-<i>-<marqueur>@example.test`
-// (ccdpaa, sauf une ligne entretien pour le 404 hors module) :
+// (cdpaa, sauf une ligne entretien pour le 404 hors module) :
 //   --seed-reservations <m>     crée 27 ReservationRestaurant (dates J+2..J+24 via instantQuebec,
 //                               statuts variés, dont un couple même courriel + même créneau J+26 :
 //                               une ANNULEE et une EN_ATTENTE, pour le test 409 ; une ANNULEE
@@ -315,7 +315,7 @@ async function supprimerCandidatures(where: { email?: { in: string[] }; demandeI
   await supprimerFichiersParCle(rows.flatMap((r) => [r.cvKey, ...r.autresDocumentsKeys]))
 }
 
-// Lot 5 (e2e admin réservations) : 27 ReservationRestaurant — 23 lignes isolées ccdpaa
+// Lot 5 (e2e admin réservations) : 27 ReservationRestaurant — 23 lignes isolées cdpaa
 // (courriels `resa-<i>-<marqueur>@example.test`, dates J+2..J+24, statuts alternés), un couple
 // même courriel + même créneau (J+26) dont une ANNULEE et une EN_ATTENTE (l'index partiel
 // `ReservationRestaurant_doublon_key` autorise la coexistence ; le PATCH qui réactiverait
@@ -325,7 +325,7 @@ const STATUTS_SEED_RESERVATIONS: Array<'EN_ATTENTE' | 'CONFIRMEE' | 'ANNULEE'> =
 const HEURE_SEED_RESERVATIONS = '19:30'
 
 async function semerReservations(marker: string): Promise<void> {
-  const ccdpaa = await companyId('ccdpaa')
+  const cdpaa = await companyId('cdpaa')
   const entretien = await companyId('entretien')
   const aujourdHui = dateDuJourQuebec()
   const lignes: Array<{
@@ -341,7 +341,7 @@ async function semerReservations(marker: string): Promise<void> {
   for (let i = 0; i < 23; i++) {
     const n = String(i).padStart(2, '0')
     lignes.push({
-      companyId: ccdpaa,
+      companyId: cdpaa,
       nom: `Client Resa ${n} ${marker}`,
       email: `resa-${n}-${marker}@example.test`,
       telephone: `514-555-01${n}`,
@@ -354,7 +354,7 @@ async function semerReservations(marker: string): Promise<void> {
   const creneauCouple = instantQuebec(ajouterJoursIso(aujourdHui, 26), HEURE_SEED_RESERVATIONS)
   for (const statut of ['ANNULEE', 'EN_ATTENTE'] as const) {
     lignes.push({
-      companyId: ccdpaa,
+      companyId: cdpaa,
       nom: `Client Resa Couple ${marker}`,
       email: `resa-23-${marker}@example.test`,
       telephone: '514-555-0199',
@@ -366,7 +366,7 @@ async function semerReservations(marker: string): Promise<void> {
   }
   // ANNULEE isolée (aucune ligne active sur ce courriel/créneau) : réactivation légale → 200.
   lignes.push({
-    companyId: ccdpaa,
+    companyId: cdpaa,
     nom: `Client Resa Solo ${marker}`,
     email: `resa-24-${marker}@example.test`,
     telephone: '514-555-0198',
@@ -564,8 +564,8 @@ async function companyId(slug: string): Promise<number> {
 }
 
 async function seedAdminMessages(marker: string): Promise<void> {
-  const [entretien, transport, holding, ccdpaa] = await Promise.all(
-    ['entretien', 'transport', 'holding', 'ccdpaa'].map((slug) => companyId(slug)),
+  const [entretien, transport, holding, cdpaa] = await Promise.all(
+    ['entretien', 'transport', 'holding', 'cdpaa'].map((slug) => companyId(slug)),
   )
   const now = Date.now()
   const pagination = Array.from({ length: NOMBRE_MESSAGES_PAGINATION }, (_, i) => {
@@ -609,7 +609,7 @@ async function seedAdminMessages(marker: string): Promise<void> {
         createdAt: new Date(now - 3 * MINUTE_MS),
       },
       {
-        companyId: ccdpaa,
+        companyId: cdpaa,
         nom: 'Suggestion Produit',
         email: `suggestion-${marker}@example.test`,
         sujet: 'Suggestion de produit',
@@ -630,12 +630,12 @@ async function seedAdminMessages(marker: string): Promise<void> {
         createdAt: new Date(now - 6 * MINUTE_MS),
       },
       {
-        companyId: ccdpaa,
-        nom: 'Contact Ccdpaa',
-        email: `ccdpaa-${marker}@example.test`,
-        sujet: 'Contact ccdpaa e2e',
-        message: 'Message ccdpaa hors périmètre entretien.',
-        details: { formulaire: 'ccdpaa' },
+        companyId: cdpaa,
+        nom: 'Contact Cdpaa',
+        email: `cdpaa-${marker}@example.test`,
+        sujet: 'Contact cdpaa e2e',
+        message: 'Message cdpaa hors périmètre entretien.',
+        details: { formulaire: 'cdpaa' },
         createdAt: new Date(now - 5 * MINUTE_MS),
       },
     ],

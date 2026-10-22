@@ -6,7 +6,7 @@ import {
   recapReponses,
   type ReponsesAssistant,
   type VolumeAssistant,
-} from '#shared/content/ccdpaa/assistant-import-export'
+} from '#shared/content/cdpaa/assistant-import-export'
 import { assistantBodySchema } from '#shared/validation/contact'
 
 const KEBAB_PATTERN = /^[a-z0-9]+(-[a-z0-9]+)*$/

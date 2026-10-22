@@ -4,7 +4,7 @@ import { z } from 'zod'
 // voir commentaire dans ce fichier), le layout (T3), le CMS (T4) et le seed (T2).
 export const HOLDING_SLUG = 'holding' as const
 
-export const FILIALE_SLUGS = ['entretien', 'transport', 'comptable', 'placement', 'ccdpaa', 'boissons'] as const
+export const FILIALE_SLUGS = ['entretien', 'transport', 'comptable', 'placement', 'cdpaa', 'boissons'] as const
 
 export const SITE_SLUGS = [HOLDING_SLUG, ...FILIALE_SLUGS] as const
 
@@ -24,7 +24,7 @@ export function isSiteSlug(value: string): value is SiteSlug {
 // Pages supplémentaires (au-delà du socle commun services/réalisations/à-propos/contact)
 // propres à certaines filiales. Consommé par le routage `[filiale]/*` et par la nav.
 export const SITE_EXTRA_PAGES: Partial<Record<FilialeSlug, readonly string[]>> = {
-  ccdpaa: ['restaurant'],
+  cdpaa: ['restaurant'],
   placement: ['offres'],
 }
 
@@ -60,7 +60,7 @@ export function publicNav(slug: SiteSlug): readonly NavItem[] {
     { label: 'Accueil', to: base },
     { label: 'Services', to: `${base}/services` },
   ]
-  if (slug === 'ccdpaa') items.push({ label: 'Restaurant', to: `${base}/restaurant` })
+  if (slug === 'cdpaa') items.push({ label: 'Restaurant', to: `${base}/restaurant` })
   if (slug === 'placement') items.push({ label: 'Offres', to: `${base}/offres` })
   items.push(
     { label: 'Réalisations', to: `${base}/realisations` },
@@ -71,7 +71,7 @@ export function publicNav(slug: SiteSlug): readonly NavItem[] {
 }
 
 /**
- * Cibles des liens du duo de la page d'accueil (placement : audiences, ccdpaa : métiers). Les
+ * Cibles des liens du duo de la page d'accueil (placement : audiences, cdpaa : métiers). Les
  * textes du duo sont éditables (section ACCUEIL `audiences`/`metiers`) ; seules les routes, qui
  * sont de la structure, vivent ici.
  */
@@ -79,5 +79,5 @@ export const FILIALE_DUO_LIENS: Partial<
   Record<FilialeSlug, { readonly cle: 'audiences' | 'metiers'; readonly a: string; readonly b: string }>
 > = {
   placement: { cle: 'audiences', a: contactPath('placement'), b: '/placement/offres' },
-  ccdpaa: { cle: 'metiers', a: '/ccdpaa/services', b: '/ccdpaa/restaurant' },
+  cdpaa: { cle: 'metiers', a: '/cdpaa/services', b: '/cdpaa/restaurant' },
 }

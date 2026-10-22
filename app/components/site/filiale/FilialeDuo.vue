@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Duo de cartes de l'accueil (Employeurs/Candidats — placement ; Import-export/Restaurant —
-// ccdpaa), spec lot1 §1 : affiché si la section `audiences`/`metiers` existe, aucun `if` par
+// cdpaa), spec lot1 §1 : affiché si la section `audiences`/`metiers` existe, aucun `if` par
 // slug. Carte image (bandeau bg-navy/85) si `imageKey`, sinon aplat plein (a : bg-navy,
 // b : bg-site-accent-strong) — jamais de dégradé (CLAUDE.md §Design).
 import { ArrowRight } from '@lucide/vue'

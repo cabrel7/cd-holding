@@ -47,8 +47,8 @@ describe('siteHref — site différent', () => {
       to: '/transport/services',
       externe: false,
     })
-    expect(siteHref(entretienTest, 'ccdpaa', '/restaurant')).toEqual({
-      to: '/ccdpaa/restaurant',
+    expect(siteHref(entretienTest, 'cdpaa', '/restaurant')).toEqual({
+      to: '/cdpaa/restaurant',
       externe: false,
     })
   })
@@ -141,8 +141,8 @@ describe('cibleRedirection', () => {
     expect(cibleRedirection('chauvierdelor.com', '/entretien/services', ORIGINE)).toBe(
       'https://entretien.chauvierdelor.com/services',
     )
-    expect(cibleRedirection('www.chauvierdelor.com', '/ccdpaa', ORIGINE)).toBe(
-      'https://ccdpaa.chauvierdelor.com/',
+    expect(cibleRedirection('www.chauvierdelor.com', '/cdpaa', ORIGINE)).toBe(
+      'https://cdpaa.chauvierdelor.com/',
     )
     expect(cibleRedirection('chauvierdelor.com', '/entretien/services?x=1', ORIGINE)).toBe(
       'https://entretien.chauvierdelor.com/services?x=1',

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// Réservation du restaurant (ccdpaa) — spec lot3 §3/§4. Carte `bg-site-accent-strong` (écart
+// Réservation du restaurant (cdpaa) — spec lot3 §3/§4. Carte `bg-site-accent-strong` (écart
 // assumé au prototype : texte blanc au lieu de #BA7517+blanc, contraste 3,6 → sous l'AA).
 // Champs nom/téléphone/courriel via
 // <ChampContact tone="sombre"> et mention via <MentionConfidentialite tone="sombre"> ; les champs
@@ -71,8 +71,8 @@ const { envoyer, envoiEnCours, verrouille, soumettre } = usePublicFormSubmit<Res
 const { notifierResultat } = usePublicFormFeedback()
 const { href } = useSiteLinks()
 
-// Lien contact (D7) : nu sur le sous-domaine ccdpaa, préfixé /ccdpaa ailleurs (dev inchangé).
-const lienContact = computed(() => href('ccdpaa', '/contact').to)
+// Lien contact (D7) : nu sur le sous-domaine cdpaa, préfixé /cdpaa ailleurs (dev inchangé).
+const lienContact = computed(() => href('cdpaa', '/contact').to)
 
 // Bornes de date posées seulement après hydratation : les figer au rendu serveur les daterait
 // du moment du build/ISR (même raison que ChampContact pour `date-future`).

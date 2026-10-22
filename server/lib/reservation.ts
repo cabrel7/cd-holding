@@ -1,4 +1,4 @@
-// Logique pure du pipeline de réservation (restaurant ccdpaa, spec
+// Logique pure du pipeline de réservation (restaurant cdpaa, spec
 // docs/specs/lot3-pages-specifiques.md §3). AUCUN accès à H3 ni à Prisma ici (skill nitro) :
 // directement testable (tests/unit/reservation-mapping.test.ts) sans booter Nitro.
 // `server/api/public/restaurant/{index.get,reservations.post}.ts` orchestrent (rate-limit,

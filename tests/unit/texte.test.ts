@@ -7,8 +7,8 @@ describe('interpoler', () => {
   })
 
   it('should replace several distinct variables', () => {
-    expect(interpoler('{nomCourt}, filiale de {nom}', { nomCourt: 'CCDPAA', nom: 'Groupe CD' })).toBe(
-      'CCDPAA, filiale de Groupe CD',
+    expect(interpoler('{nomCourt}, filiale de {nom}', { nomCourt: 'CDPAA', nom: 'Groupe CD' })).toBe(
+      'CDPAA, filiale de Groupe CD',
     )
   })
 
@@ -35,9 +35,9 @@ describe('mergerVars', () => {
   })
 
   it('should merge distinct keys from base and overrides', () => {
-    expect(mergerVars({ groupe: 'Groupe CD' }, { nomCourt: 'CCDPAA' })).toEqual({
+    expect(mergerVars({ groupe: 'Groupe CD' }, { nomCourt: 'CDPAA' })).toEqual({
       groupe: 'Groupe CD',
-      nomCourt: 'CCDPAA',
+      nomCourt: 'CDPAA',
     })
   })
 })

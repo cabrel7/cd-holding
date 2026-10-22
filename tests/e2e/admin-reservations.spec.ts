@@ -1,9 +1,9 @@
-// /admin/ccdpaa/reservations — liste + changement de statut, contrainte unique partielle
+// /admin/cdpaa/reservations — liste + changement de statut, contrainte unique partielle
 // (spec docs/specs/lot5-reservations.md §6, critères §9). Exécuté contre le BUILD DE
 // PRODUCTION (même outillage que admin-placement.spec.ts : loginAs, marqueurs, apiAs).
 //
 // Isolation : marqueur dédié `r…` (27 ReservationRestaurant seedées, courriels
-// `resa-<i>-<marqueur>@example.test` : 23 isolées ccdpaa + un couple même courriel + même
+// `resa-<i>-<marqueur>@example.test` : 23 isolées cdpaa + un couple même courriel + même
 // créneau pour le 409 + une ANNULEE isolée pour la réactivation légale + une ligne entretien
 // pour le 404 hors module) + courriels publics collectés et purgés via --reservation-email.
 // Les 3 lignes démo réelles (Fatou/Marc-André/Alliance) s'ajoutent au total : toutes les
@@ -14,7 +14,7 @@ import type { PublicRestaurantDto } from '#shared/types/public'
 import { ajouterJoursIso, dateDuJourQuebec } from '#shared/utils/dates'
 import { bornesDates, creneauxPourDate, type ReglagesReservation } from '#shared/utils/restaurant'
 import {
-  ADMIN_FILIALE_CCDPAA,
+  ADMIN_FILIALE_CDPAA,
   ADMIN_FILIALE_ENTRETIEN,
   EMPLOYE_ENTRETIEN,
   SUPER_ADMIN,
@@ -100,7 +100,7 @@ test.describe('API /api/admin/reservations', () => {
     const af = await apiAs(testInfo, ADMIN_FILIALE_ENTRETIEN)
     const employe = await apiAs(testInfo, EMPLOYE_ENTRETIEN)
     const sa = await apiAs(testInfo, SUPER_ADMIN)
-    const afCcdpaa = await apiAs(testInfo, ADMIN_FILIALE_CCDPAA)
+    const afCdpaa = await apiAs(testInfo, ADMIN_FILIALE_CDPAA)
     try {
       expect((await af.get('/api/admin/reservations')).status(), 'AF entretien GET').toBe(HTTP.FORBIDDEN)
       expect((await af.patch(`/api/admin/reservations/${UUID_INCONNU}`, { data: { statut: 'CONFIRMEE' } })).status(), 'AF entretien PATCH').toBe(
@@ -118,18 +118,18 @@ test.describe('API /api/admin/reservations', () => {
       expect(page.total).toBeGreaterThanOrEqual(25)
       expect(page.items).toHaveLength(20)
       expect(page.items.some((r) => r.email.endsWith(`-${marqueur}@example.test`))).toBe(true)
-      expect(page.items.every((r) => r.site.slug === 'ccdpaa')).toBe(true)
+      expect(page.items.every((r) => r.site.slug === 'cdpaa')).toBe(true)
       expect(clesInterdites(page)).toEqual([])
 
-      const listeCcdpaa = (await (await afCcdpaa.get('/api/admin/reservations')).json()) as AdminPage<AdminReservationDto>
-      expect(listeCcdpaa.total).toBeGreaterThanOrEqual(25)
-      expect(listeCcdpaa.items.some((r) => r.email.endsWith(`-${marqueur}@example.test`))).toBe(true)
-      expect(clesInterdites(listeCcdpaa)).toEqual([])
+      const listeCdpaa = (await (await afCdpaa.get('/api/admin/reservations')).json()) as AdminPage<AdminReservationDto>
+      expect(listeCdpaa.total).toBeGreaterThanOrEqual(25)
+      expect(listeCdpaa.items.some((r) => r.email.endsWith(`-${marqueur}@example.test`))).toBe(true)
+      expect(clesInterdites(listeCdpaa)).toEqual([])
     } finally {
       await af.dispose()
       await employe.dispose()
       await sa.dispose()
-      await afCcdpaa.dispose()
+      await afCdpaa.dispose()
     }
   })
 
@@ -273,11 +273,11 @@ test.describe('API /api/admin/reservations', () => {
     }
   })
 
-  test('PATCH : 404 hors module (autre filiale), succès AF ccdpaa', async ({}, testInfo) => {
+  test('PATCH : 404 hors module (autre filiale), succès AF cdpaa', async ({}, testInfo) => {
     const sa = await apiAs(testInfo, SUPER_ADMIN)
-    const afCcdpaa = await apiAs(testInfo, ADMIN_FILIALE_CCDPAA)
+    const afCdpaa = await apiAs(testInfo, ADMIN_FILIALE_CDPAA)
     try {
-      // La ligne entretien est invisible hors module (liste SA scopée ccdpaa).
+      // La ligne entretien est invisible hors module (liste SA scopée cdpaa).
       const invisible = (await (
         await sa.get(`/api/admin/reservations?q=${encodeURIComponent(emailTest('resa-autre', marqueur))}`)
       ).json()) as AdminPage<AdminReservationDto>
@@ -287,21 +287,21 @@ test.describe('API /api/admin/reservations', () => {
       expect((await sa.patch(`/api/admin/reservations/${uuidAutre}`, { data: { statut: 'CONFIRMEE' } })).status(), 'SA hors module').toBe(
         HTTP.NOT_FOUND,
       )
-      expect((await afCcdpaa.patch(`/api/admin/reservations/${uuidAutre}`, { data: { statut: 'CONFIRMEE' } })).status(), 'AF ccdpaa hors module').toBe(
+      expect((await afCdpaa.patch(`/api/admin/reservations/${uuidAutre}`, { data: { statut: 'CONFIRMEE' } })).status(), 'AF cdpaa hors module').toBe(
         HTTP.NOT_FOUND,
       )
 
       const avant = (await (
-        await afCcdpaa.get(`/api/admin/reservations?q=${encodeURIComponent(emailTest('resa-09', marqueur))}`)
+        await afCdpaa.get(`/api/admin/reservations?q=${encodeURIComponent(emailTest('resa-09', marqueur))}`)
       ).json()) as AdminPage<AdminReservationDto>
       expect(avant.items).toHaveLength(1)
       expect(avant.items[0]!.statut).toBe('EN_ATTENTE')
-      const maj = await afCcdpaa.patch(`/api/admin/reservations/${avant.items[0]!.uuid}`, { data: { statut: 'CONFIRMEE' } })
-      expect(maj.status(), 'AF ccdpaa').toBe(HTTP.OK)
+      const maj = await afCdpaa.patch(`/api/admin/reservations/${avant.items[0]!.uuid}`, { data: { statut: 'CONFIRMEE' } })
+      expect(maj.status(), 'AF cdpaa').toBe(HTTP.OK)
       expect(((await maj.json()) as AdminReservationDto).statut).toBe('CONFIRMEE')
     } finally {
       await sa.dispose()
-      await afCcdpaa.dispose()
+      await afCdpaa.dispose()
     }
   })
 
@@ -330,8 +330,8 @@ test.describe('API /api/admin/reservations', () => {
       const dates = dash.prochainesReservations.map((r) => r.dateReservation)
       expect([...dates].sort()).toEqual(dates)
       expect(
-        dash.prochainesReservations.every((r) => r.site.slug === 'ccdpaa' && r.statut !== 'ANNULEE' && r.dateReservation >= avant),
-        'ccdpaa, non annulées, à venir',
+        dash.prochainesReservations.every((r) => r.site.slug === 'cdpaa' && r.statut !== 'ANNULEE' && r.dateReservation >= avant),
+        'cdpaa, non annulées, à venir',
       ).toBe(true)
       expect(clesInterdites(dash.prochainesReservations)).toEqual([])
 
@@ -347,14 +347,14 @@ test.describe('API /api/admin/reservations', () => {
 // ---------------------------------------------------------------------------
 // UI
 // ---------------------------------------------------------------------------
-test.describe('UI /admin/ccdpaa/reservations', () => {
+test.describe('UI /admin/cdpaa/reservations', () => {
   test.describe('SUPER_ADMIN', () => {
     test.beforeEach(async ({ context }) => {
       await loginAs(context, SUPER_ADMIN)
     })
 
     test('liste seedée, pagination 2 pages, page survit au rechargement', async ({ page }) => {
-      await page.goto('/admin/ccdpaa/reservations')
+      await page.goto('/admin/cdpaa/reservations')
       await expect(page.getByRole('heading', { name: 'Réservations' })).toBeVisible()
       await expect(page.getByText(emailTest('resa-22', marqueur), { exact: true })).toBeVisible()
       await expect(page.getByText('Page 1 / 2')).toBeVisible()
@@ -374,7 +374,7 @@ test.describe('UI /admin/ccdpaa/reservations', () => {
     })
 
     test('recherche + filtre statut dans l’URL, conservés au rechargement, réinitialisables', async ({ page }) => {
-      await page.goto('/admin/ccdpaa/reservations')
+      await page.goto('/admin/cdpaa/reservations')
       await expect(page.getByRole('heading', { name: 'Réservations' })).toBeVisible()
 
       const filtres = page.getByRole('search', { name: 'Filtrer les réservations' })
@@ -402,7 +402,7 @@ test.describe('UI /admin/ccdpaa/reservations', () => {
 
     test('change le statut d’une ligne : toast exact + badge à jour', async ({ page }) => {
       const email = emailTest('resa-03', marqueur)
-      await page.goto(`/admin/ccdpaa/reservations?q=${encodeURIComponent(email)}`)
+      await page.goto(`/admin/cdpaa/reservations?q=${encodeURIComponent(email)}`)
       const ligne = page.locator('tbody tr, ul li').filter({ hasText: email })
       await expect(ligne).toHaveCount(1)
       await expect(ligne.locator('[data-slot="badge"]')).toHaveText('En attente')
@@ -416,7 +416,7 @@ test.describe('UI /admin/ccdpaa/reservations', () => {
 
     test('conflit 409 : toast d’erreur et badge inchangé', async ({ page }) => {
       const email = emailTest('resa-23', marqueur)
-      await page.goto(`/admin/ccdpaa/reservations?q=${encodeURIComponent(email)}`)
+      await page.goto(`/admin/cdpaa/reservations?q=${encodeURIComponent(email)}`)
       const ligne = page.locator('tbody tr, ul li').filter({ hasText: 'Client Resa Couple' })
       const annulee = ligne.filter({ hasText: 'Annulée' })
       await expect(annulee).toHaveCount(1)
@@ -429,21 +429,21 @@ test.describe('UI /admin/ccdpaa/reservations', () => {
     })
 
     test('pas de défilement horizontal', async ({ page }) => {
-      await page.goto('/admin/ccdpaa/reservations')
+      await page.goto('/admin/cdpaa/reservations')
       await expect(page.getByRole('heading', { name: 'Réservations' })).toBeVisible()
       const { sw, cw } = await page.evaluate(() => ({ sw: document.body.scrollWidth, cw: document.body.clientWidth }))
       expect(sw).toBeLessThanOrEqual(cw + 1)
     })
   })
 
-  test.describe('ADMIN_FILIALE ccdpaa', () => {
+  test.describe('ADMIN_FILIALE cdpaa', () => {
     test.beforeEach(async ({ context }) => {
-      await loginAs(context, ADMIN_FILIALE_CCDPAA)
+      await loginAs(context, ADMIN_FILIALE_CDPAA)
     })
 
     test('voit la page et ses réservations', async ({ page }) => {
       const shell = new AdminShell(page)
-      await page.goto('/admin/ccdpaa/reservations')
+      await page.goto('/admin/cdpaa/reservations')
       await expect(page.getByRole('heading', { name: 'Réservations' })).toBeVisible()
       await expect(page.getByText(emailTest('resa-22', marqueur), { exact: true })).toBeVisible()
       await shell.ouvrirNavigation()
@@ -463,7 +463,7 @@ test.describe('UI /admin/ccdpaa/reservations', () => {
       await expect(shell.navigation.getByRole('link', { name: 'Réservations', exact: true })).toHaveCount(0)
       await shell.fermerNavigation()
 
-      await page.goto('/admin/ccdpaa/reservations')
+      await page.goto('/admin/cdpaa/reservations')
       await expect(page.getByRole('alert')).toBeVisible()
       await expect(page.getByRole('button', { name: 'Réessayer' })).toBeVisible()
     })
@@ -476,7 +476,7 @@ test.describe('UI /admin/ccdpaa/reservations', () => {
       await expect(page.getByRole('heading', { name: 'Prochaines réservations' })).toBeVisible()
       const lien = page.getByRole('link', { name: 'Voir toutes les réservations' })
       await expect(lien).toBeVisible()
-      await expect(lien).toHaveAttribute('href', '/admin/ccdpaa/reservations')
+      await expect(lien).toHaveAttribute('href', '/admin/cdpaa/reservations')
       // Contenu : au moins une ligne seedée (nom · personnes), jamais une annulée.
       await expect(page.getByRole('link', { name: /Client Resa/ }).first()).toBeVisible()
     })

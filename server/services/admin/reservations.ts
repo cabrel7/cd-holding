@@ -1,4 +1,4 @@
-// Service admin "réservations" (lot 5) : réservations du restaurant CCDPAA — liste paginée
+// Service admin "réservations" (lot 5) : réservations du restaurant CDPAA — liste paginée
 // + changement de statut, rien de plus (spec docs/specs/lot5-reservations.md §3). Aucune
 // référence à l'event H3 : les handlers (server/api/admin/reservations/**) font `requireModule`
 // + validation zod, puis appellent ces fonctions. Scoping systématique sur `ctx.company.id`

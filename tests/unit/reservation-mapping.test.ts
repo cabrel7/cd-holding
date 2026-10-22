@@ -111,7 +111,7 @@ const ROW: ReservationMapRow = {
   notes: 'Allergie aux arachides',
   statut: 'EN_ATTENTE',
   createdAt: new Date('2026-10-07T12:00:00.000Z'),
-  company: { uuid: '0b3f1a2c-0000-4000-8000-000000000001', slug: 'ccdpaa', nom: 'Les Ambassades d’Afrique' },
+  company: { uuid: '0b3f1a2c-0000-4000-8000-000000000001', slug: 'cdpaa', nom: 'Les Ambassades d’Afrique' },
 }
 
 describe('toReservationDto', () => {
@@ -142,7 +142,7 @@ describe('toReservationDto', () => {
       dateReservation: '2026-10-14T23:30:00.000Z',
       notes: 'Allergie aux arachides',
       statut: 'EN_ATTENTE',
-      site: { uuid: ROW.company.uuid, slug: 'ccdpaa', nom: 'Les Ambassades d’Afrique' },
+      site: { uuid: ROW.company.uuid, slug: 'cdpaa', nom: 'Les Ambassades d’Afrique' },
       createdAt: '2026-10-07T12:00:00.000Z',
     })
   })
@@ -158,7 +158,7 @@ describe('toReservationDto', () => {
   it('exposes the site ref as an AdminSiteRef (uuid + slug + nom)', () => {
     const dto = toReservationDto(ROW)
     expect(Object.keys(dto.site!).sort()).toEqual(['nom', 'slug', 'uuid'])
-    expect(dto.site!.slug).toBe('ccdpaa')
+    expect(dto.site!.slug).toBe('cdpaa')
   })
 
   it('keeps notes nullable', () => {

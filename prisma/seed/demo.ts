@@ -89,7 +89,7 @@ async function seedSuggestions(prisma: PrismaClient, companies: SeededCompanies)
 }
 
 async function seedReservations(prisma: PrismaClient, companies: SeededCompanies, reference: Date): Promise<void> {
-  const cId = companyId(companies, 'ccdpaa')
+  const cId = companyId(companies, 'cdpaa')
   // Dates obsolètes dans le prototype (mockdata figé) : recalées sur J+7 / J+9 / J+15 par
   // rapport à la date du seed (spec §3.4), et non reprises telles quelles.
   const decalages = [7, 9, 15]

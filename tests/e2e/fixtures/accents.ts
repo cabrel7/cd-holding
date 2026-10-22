@@ -7,7 +7,7 @@ export const SITE_ACCENTS: Record<string, string> = {
   transport: '#D85A30',
   comptable: '#185FA5',
   placement: '#D4537E',
-  ccdpaa: '#BA7517',
+  cdpaa: '#BA7517',
   boissons: '#A32D2D',
 }
 

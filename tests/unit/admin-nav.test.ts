@@ -6,7 +6,7 @@ import { adminHref } from '../../shared/utils/site-links'
 
 const AUCUN_MODULE = new Set<never>()
 const TOUS_MODULES: ReadonlySet<ModuleKey> = new Set(Object.values(MODULES))
-const TOUS_SITES = new Set(['entretien', 'transport', 'comptable', 'placement', 'ccdpaa', 'boissons'] as const)
+const TOUS_SITES = new Set(['entretien', 'transport', 'comptable', 'placement', 'cdpaa', 'boissons'] as const)
 
 describe('admin-nav', () => {
   it("EMPLOYE ne voit que mon planning et les paramètres (le tableau de bord est redirigé, item masqué)", () => {
@@ -52,8 +52,8 @@ describe('admin-nav', () => {
     const items = visibleNavItems(ROLES.SUPER_ADMIN, TOUS_MODULES, TOUS_SITES).map((i) => i.to)
     expect(items).toContain('/admin/entretien/planning')
     expect(items).toContain('/admin/transport/planning')
-    expect(items).toContain('/admin/ccdpaa/planning')
-    expect(items).toContain('/admin/ccdpaa/reservations')
+    expect(items).toContain('/admin/cdpaa/planning')
+    expect(items).toContain('/admin/cdpaa/reservations')
     expect(items).toContain('/admin/placement')
     expect(items).toContain('/admin/comptable/dossiers')
     expect(items).not.toContain('/admin/mon-planning')
@@ -65,15 +65,15 @@ describe('admin-nav', () => {
     const items = visibleNavItems(ROLES.ADMIN_FILIALE, new Set([MODULES.PLANNING] as const), new Set(['entretien'] as const)).map((i) => i.to)
     expect(items).toContain('/admin/entretien/planning')
     expect(items).not.toContain('/admin/transport/planning')
-    expect(items).not.toContain('/admin/ccdpaa/planning')
-    expect(items).not.toContain('/admin/ccdpaa/reservations')
+    expect(items).not.toContain('/admin/cdpaa/planning')
+    expect(items).not.toContain('/admin/cdpaa/reservations')
     expect(items).not.toContain('/admin/placement')
   })
 
   it('libellés planning distincts par site (3 libellés identiques adjacents = inutilisable)', () => {
     expect(ADMIN_NAV.find((i) => i.to === '/admin/entretien/planning')!.label).toBe('Planning — Entretien')
     expect(ADMIN_NAV.find((i) => i.to === '/admin/transport/planning')!.label).toBe('Planning — Transport')
-    expect(ADMIN_NAV.find((i) => i.to === '/admin/ccdpaa/planning')!.label).toBe('Planning — CCDPAA')
+    expect(ADMIN_NAV.find((i) => i.to === '/admin/cdpaa/planning')!.label).toBe('Planning — CDPAA')
   })
 
   it('libellé du contenu selon le rôle', () => {

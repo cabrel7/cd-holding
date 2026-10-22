@@ -68,7 +68,7 @@ describe('destinataireInterne', () => {
 
 const cdEntretien: CibleContact = { id: 3, slug: 'entretien', nom: 'CD Entretien', email: 'contact@entretien.ca' }
 const cdPlacement: CibleContact = { id: 4, slug: 'placement', nom: 'Placement CD Pro', email: 'contact@placement.ca' }
-const cdCcdpaa: CibleContact = { id: 5, slug: 'ccdpaa', nom: 'CCDPAA', email: 'contact@ccdpaa.ca' }
+const cdCdpaa: CibleContact = { id: 5, slug: 'cdpaa', nom: 'CDPAA', email: 'contact@cdpaa.ca' }
 
 const bodyFilialeEntretien = {
   formulaire: 'entretien' as const,
@@ -91,7 +91,7 @@ const bodyFilialePlacement = {
 
 const bodySuggestion = {
   formulaire: 'suggestion' as const,
-  site: 'ccdpaa' as const,
+  site: 'cdpaa' as const,
   nom: 'Awa Diop',
   email: 'awa@exemple.ca',
   produitSouhaite: 'Fonio précuit',
@@ -131,11 +131,11 @@ describe('FORMULAIRES (filiales)', () => {
 
 describe('FORMULAIRES.suggestion', () => {
   it('targets the site chosen in the body', () => {
-    expect(FORMULAIRES.suggestion.cible(bodySuggestion)).toBe('ccdpaa')
+    expect(FORMULAIRES.suggestion.cible(bodySuggestion)).toBe('cdpaa')
   })
 
   it('builds a SUGGESTION_PRODUIT message with the fixed subject and product fields', () => {
-    const data = FORMULAIRES.suggestion.construire(bodySuggestion, cdCcdpaa, holding)
+    const data = FORMULAIRES.suggestion.construire(bodySuggestion, cdCdpaa, holding)
     expect(data.type).toBe('SUGGESTION_PRODUIT')
     expect(data.sujet).toBe('Suggestion de produit')
     expect(data.produitSouhaite).toBe('Fonio précuit')
@@ -168,7 +168,7 @@ describe('cleAccuseReception', () => {
   })
 })
 
-const cdCcdpaaAssistant: CibleContact = { id: 6, slug: 'ccdpaa', nom: 'CCDPAA', email: 'contact@ccdpaa.ca' }
+const cdCdpaaAssistant: CibleContact = { id: 6, slug: 'cdpaa', nom: 'CDPAA', email: 'contact@cdpaa.ca' }
 
 const bodyAssistant = {
   formulaire: 'assistant' as const,
@@ -184,12 +184,12 @@ const bodyAssistant = {
 }
 
 describe('FORMULAIRES.assistant', () => {
-  it('always targets ccdpaa, regardless of the body', () => {
-    expect(FORMULAIRES.assistant.cible(bodyAssistant)).toBe('ccdpaa')
+  it('always targets cdpaa, regardless of the body', () => {
+    expect(FORMULAIRES.assistant.cible(bodyAssistant)).toBe('cdpaa')
   })
 
   it('builds an ASSISTANT_IMPORT_EXPORT message with the fixed subject and a null phone/company fallback', () => {
-    const data = FORMULAIRES.assistant.construire(bodyAssistant, cdCcdpaaAssistant, holding)
+    const data = FORMULAIRES.assistant.construire(bodyAssistant, cdCdpaaAssistant, holding)
     expect(data.type).toBe('ASSISTANT_IMPORT_EXPORT')
     expect(data.sujet).toBe('Assistant import-export')
     expect(data.entreprise).toBe('Épicerie Roy')
@@ -198,19 +198,19 @@ describe('FORMULAIRES.assistant', () => {
 
   it('defaults telephone/entreprise to null when absent from the body', () => {
     const { entreprise: _entreprise, ...sansEntreprise } = bodyAssistant
-    const data = FORMULAIRES.assistant.construire(sansEntreprise, cdCcdpaaAssistant, holding)
+    const data = FORMULAIRES.assistant.construire(sansEntreprise, cdCdpaaAssistant, holding)
     expect(data.entreprise).toBeNull()
     expect(data.telephone).toBeNull()
   })
 
   it('builds a human-readable "Libellé : valeur" message from the answers', () => {
-    const data = FORMULAIRES.assistant.construire(bodyAssistant, cdCcdpaaAssistant, holding)
+    const data = FORMULAIRES.assistant.construire(bodyAssistant, cdCdpaaAssistant, holding)
     expect(data.message).toContain('Profil : Épicerie spécialisée')
     expect(data.message).toContain('Volume mensuel : 200 à 1 000 kg')
   })
 
   it('stamps details with the raw answers, the computed palier, and formulaire last', () => {
-    const data = FORMULAIRES.assistant.construire(bodyAssistant, cdCcdpaaAssistant, holding)
+    const data = FORMULAIRES.assistant.construire(bodyAssistant, cdCdpaaAssistant, holding)
     expect(data.details).toEqual({
       profil: 'epicerie',
       categorie: 'epices',

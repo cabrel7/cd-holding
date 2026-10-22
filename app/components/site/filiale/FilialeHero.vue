@@ -3,7 +3,7 @@
 // app/components/site/accueil/HoldingHero.vue. Layout 'image' (entretien, transport, comptable,
 // boissons) : blob décoratif hidden lg:block (jamais superposé au H1 en mobile — écart du
 // prototype SubHero corrigé, spec §0), image aside, CTA unique. Layout 'texte' (placement,
-// ccdpaa : un duo existe) : pas d'image ni de CTA (le duo les porte, spec §1), aplat d'accent à
+// cdpaa : un duo existe) : pas d'image ni de CTA (le duo les porte, spec §1), aplat d'accent à
 // droite sur lg à la place du blob. Ni le H1 ni l'image ne sont en `v-motion` (LCP).
 import { ArrowRight } from '@lucide/vue'
 import { contactPath } from '#shared/config/sites'
