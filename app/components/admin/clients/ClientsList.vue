@@ -35,7 +35,7 @@ const dateOuTiret = computed(() => (iso: string | null) => (iso ? formatDateQueb
     <TableHeader>
       <TableRow>
         <TableHead>Nom</TableHead>
-        <TableHead>Contact</TableHead>
+        <TableHead class="hidden 2xl:table-cell">Contact</TableHead>
         <TableHead v-if="showSite">Site</TableHead>
         <TableHead>Statut</TableHead>
         <TableHead>Dernière interaction</TableHead>
@@ -44,20 +44,20 @@ const dateOuTiret = computed(() => (iso: string | null) => (iso ? formatDateQueb
     </TableHeader>
     <TableBody>
       <TableRow v-for="client in clients" :key="client.uuid">
-        <TableCell class="whitespace-normal">
+        <TableCell class="min-w-0">
           <button
             type="button"
-            class="focus-visible:ring-ring text-foreground -mx-1 rounded-sm px-1 text-left font-medium underline-offset-2 outline-hidden hover:underline focus-visible:ring-2"
+            class="focus-visible:ring-ring text-foreground -mx-1 block max-w-full truncate rounded-sm px-1 text-left font-medium underline-offset-2 outline-hidden hover:underline focus-visible:ring-2"
             :title="`Modifier ${client.nom}`"
             @click="emit('edit', client)"
           >
             {{ client.nom }}
           </button>
-          <div v-if="client.entreprise" class="text-muted-foreground">{{ client.entreprise }}</div>
+          <div v-if="client.entreprise" class="truncate text-muted-foreground" :title="client.entreprise">{{ client.entreprise }}</div>
         </TableCell>
-        <TableCell class="whitespace-normal">
-          <div v-if="client.email" class="break-all">{{ client.email }}</div>
-          <div v-if="client.telephone" class="text-muted-foreground">{{ client.telephone }}</div>
+        <TableCell class="hidden min-w-0 2xl:table-cell">
+          <div v-if="client.email" class="truncate" :title="client.email">{{ client.email }}</div>
+          <div v-if="client.telephone" class="truncate text-muted-foreground" :title="client.telephone">{{ client.telephone }}</div>
           <span v-if="!client.email && !client.telephone" class="text-muted-foreground">—</span>
         </TableCell>
         <TableCell v-if="showSite">{{ client.site.nom }}</TableCell>

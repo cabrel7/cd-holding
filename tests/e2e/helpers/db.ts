@@ -35,6 +35,7 @@ export interface CandidatureInspectee {
 }
 
 export interface ReservationInspectee {
+  readonly uuid: string
   readonly nombrePersonnes: number
   readonly dateReservation: string
   readonly statut: string
@@ -45,10 +46,44 @@ export const creerOffreTest = (titre: string): string => extraire(runScript(['--
 export const retirerOffreTest = (uuid: string): void => void runScript(['--retirer-offre', uuid])
 export const supprimerOffreTest = (titre: string): void => void runScript(['--offre-titre', titre])
 export const compterFichiersPlacement = (): number => Number(extraire(runScript(['--count-fichiers-placement']), 'COUNT_FICHIERS='))
+export const semerPlacement = (marker: string): void => void runScript(['--seed-placement', marker])
+export const purgerPlacement = (marker: string): void => void runScript(['--purge-placement', marker])
+export const semerReservations = (marker: string): void => void runScript(['--seed-reservations', marker])
+export const purgerReservations = (marker: string): void => void runScript(['--purge-reservations', marker])
+export const compterReservations = (suffixe: string): number =>
+  Number(extraire(runScript(['--count-reservations', suffixe]), 'COUNT_RESERVATIONS='))
+export const semerPlanning = (marker: string): void => void runScript(['--seed-planning', marker])
+export const purgerPlanning = (marker: string): void => void runScript(['--purge-planning', marker])
+export const compterPlanning = (marker: string): { readonly employes: number; readonly quarts: number } => {
+  const brut = extraire(runScript(['--count-planning', marker]), 'COUNT_PLANNING=')
+  const [employes, quarts] = brut.split(',').map((partie) => Number(partie.slice(partie.indexOf(':') + 1)))
+  return { employes: employes!, quarts: quarts! }
+}
 export const inspecterCandidature = (email: string): CandidatureInspectee[] =>
   JSON.parse(extraire(runScript(['--inspect-candidature-email', email]), 'INSPECT_JSON=')) as CandidatureInspectee[]
 export const inspecterReservations = (email: string): ReservationInspectee[] =>
   JSON.parse(extraire(runScript(['--inspect-reservation-email', email]), 'INSPECT_JSON=')) as ReservationInspectee[]
+// Lot 5 paramètres : compte EMPLOYE dédié `parametres-<m>@example.test`, seul compte MUTÉ par
+// la suite. Le mot de passe est GÉNÉRÉ côté script (jamais écrit en dur) et remonté ici via
+// l'impression `MDP_E2E=` — à suivre dans la variable d'enchaînement du spec.
+export const semerCompteMdp = (marker: string): string => extraire(runScript(['--seed-compte-mdp', marker]), 'MDP_E2E=')
+export const purgerCompteMdp = (marker: string): void => void runScript(['--purge-compte-mdp', marker])
+// Lot 6 utilisateurs : 3 comptes dédiés `comptes-{emp,af,sa}-<m>@example.test`, SEULS mutés
+// par la suite (rôle, actif, mot de passe) — jamais `admin@groupecd.ca` ni les comptes seedés
+// partagés. Mots de passe GÉNÉRÉS côté script, remontés en JSON via `COMPTES_MDP_JSON=`.
+export interface CompteE2E {
+  readonly email: string
+  readonly motDePasse: string
+}
+export interface ComptesSemes {
+  readonly emp: CompteE2E
+  readonly af: CompteE2E
+  readonly sa: CompteE2E
+}
+export const semerComptes = (marker: string): ComptesSemes =>
+  JSON.parse(extraire(runScript(['--seed-comptes', marker]), 'COMPTES_MDP_JSON=')) as ComptesSemes
+export const purgerComptes = (marker: string): void => void runScript(['--purge-comptes', marker])
+export const purgerCompte = (email: string): void => void runScript(['--purge-compte', email])
 
 export function nettoyer(options: {
   candidatureEmails?: readonly string[]

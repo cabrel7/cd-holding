@@ -1,11 +1,14 @@
 // Composable générique CRUD + réordonnancement pour le CMS admin (spec phase 2 §4.6).
 // Ne lance jamais de toast (reste testable, voir tests/nuxt/use-admin-resource.nuxt.test.ts) —
 // les composants (CmsCollectionEditor, CmsSectionsEditor) traduisent `error`/les rejets en toast.
+// Seule exception côté effet : un 401 (session expirée) redirige vers la connexion via
+// `watchAdminUnauthorized`, sinon l'éditeur resterait affiché avec un cache admin périmé.
 import { z } from 'zod'
 import { computed, ref, toValue, type MaybeRefOrGetter, type Ref } from 'vue'
 import type { SiteSlug } from '#shared/config/sites'
 import type { AdminError } from '#shared/types/admin'
 import { toAdminError } from '@/utils/admin-error'
+import { watchAdminUnauthorized } from '@/utils/admin-unauthorized'
 
 export interface UseAdminResourceOptions {
   readonly endpoint: `/api/admin/${string}`
@@ -69,6 +72,11 @@ export function useAdminResource<TItem extends { uuid: string }, TCreate, TUpdat
 
   const mutating = ref(false)
   const mutationError = ref<AdminError | null>(null)
+
+  // Session expirée sur le chargement de la liste OU pendant une mutation (create/update/
+  // remove/reorder) : redirection unique vers la connexion, idempotente sous 401 simultanés.
+  watchAdminUnauthorized(fetchError)
+  watchAdminUnauthorized(mutationError)
 
   const items = computed<readonly TItem[]>(() => data.value ?? [])
   const status = computed<AdminResourceStatus>(() => fetchStatus.value)

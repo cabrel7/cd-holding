@@ -24,6 +24,11 @@ export interface RateLimitOptions {
   scope: string
   max: number
   windowMs: number
+  /**
+   * Composant optionnel de la clé (ex. `String(secure.userId)`) : borne chaque session sans
+   * punir un NAT partagé (D15). Absent ⇒ `${scope}:${ip}`, comportement historique inchangé.
+   */
+  cle?: string
 }
 
 // Reverse proxy de confiance = nginx/Caddy sur le même VPS (connexion via loopback).
@@ -80,9 +85,17 @@ export function hitBucket(buckets: Map<string, Bucket>, key: string, { max, wind
   return { allowed: true, retryAfterMs: 0 }
 }
 
-export function assertRateLimit(event: H3Event, { scope, max, windowMs }: RateLimitOptions): void {
+/**
+ * Clé de bucket, fonction pure : `${scope}:${ip}` sans `cle` (régression de tous les
+ * appelants historiques), `${scope}:${ip}:${cle}` avec — testée en unit.
+ */
+export function rateLimitKey(scope: string, ip: string, cle?: string): string {
+  return cle === undefined ? `${scope}:${ip}` : `${scope}:${ip}:${cle}`
+}
+
+export function assertRateLimit(event: H3Event, { scope, max, windowMs, cle }: RateLimitOptions): void {
   const ip = getClientIp(event)
-  const key = `${scope}:${ip}`
+  const key = rateLimitKey(scope, ip, cle)
   const result = hitBucket(buckets, key, { max, windowMs }, Date.now())
 
   if (!result.allowed) {
@@ -100,7 +113,7 @@ export function consumeRateLimit(key: string, options: HitBucketOptions): boolea
   return hitBucket(buckets, key, options, Date.now()).allowed
 }
 
-export function resetRateLimit(event: H3Event, scope: string): void {
+export function resetRateLimit(event: H3Event, scope: string, cle?: string): void {
   const ip = getClientIp(event)
-  buckets.delete(`${scope}:${ip}`)
+  buckets.delete(rateLimitKey(scope, ip, cle))
 }

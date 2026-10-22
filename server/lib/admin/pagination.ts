@@ -1,5 +1,6 @@
 // Pagination offset commune aux listes admin (pure, testée).
 import type { AdminPage } from '#shared/types/admin'
+import { estViolationUnique } from '../reservation'
 
 export function pageArgs(page: number, pageSize: number): { skip: number; take: number } {
   return { skip: (page - 1) * pageSize, take: pageSize }
@@ -10,6 +11,4 @@ export function buildPage<T>(items: readonly T[], total: number, page: number, p
   return { items, total, page, pageSize, pageCount: Math.max(1, Math.ceil(total / pageSize)) }
 }
 
-export function isUniqueViolation(error: unknown): boolean {
-  return typeof error === 'object' && error !== null && (error as { code?: unknown }).code === 'P2002'
-}
+export const isUniqueViolation: (error: unknown) => boolean = estViolationUnique

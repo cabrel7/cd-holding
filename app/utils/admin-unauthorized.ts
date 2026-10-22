@@ -32,8 +32,9 @@ export function handleAdminUnauthorized(): Promise<void> {
       session.value = null
     }
     clearAdminCache()
-    if (router.currentRoute.value.path === ADMIN_LOGIN_PATH) return
-    await navigateTo({ path: ADMIN_LOGIN_PATH, query: { redirect } })
+    // Forme servie sur l'hôte courant (D8) : comparaison et cible normalisées.
+    if (toAdminPath(router.currentRoute.value.path) === toAdminPath(ADMIN_LOGIN_PATH)) return
+    await navigateTo({ path: toAdminPath(ADMIN_LOGIN_PATH), query: { redirect } })
   })().finally(() => {
     inFlight = null
   })
@@ -42,7 +43,13 @@ export function handleAdminUnauthorized(): Promise<void> {
 
 /** Déclenche `handleAdminUnauthorized` quand l'erreur d'un `useFetch` passe à 401. */
 export function watchAdminUnauthorized(error: Readonly<Ref<unknown>>): void {
-  watch(error, (value) => {
-    if (value && isAdminUnauthorized(value)) void handleAdminUnauthorized()
-  })
+  watch(
+    error,
+    (value) => {
+      if (value && isAdminUnauthorized(value)) void handleAdminUnauthorized()
+    },
+    // `immediate` : après un `await useFetch(...)`, l'erreur 401 est déjà écrite à
+    // l'enregistrement du watcher — sans ça, la transition n'est jamais observée.
+    { immediate: true },
+  )
 }

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-// Tableau de bord : activité par site et derniers messages. Un employé n'a aucun module
-// dans ce lot : aucun appel de données, message explicite.
+// Tableau de bord : activité par site et derniers messages. Réservé aux gestionnaires —
+// tout EMPLOYE est redirigé vers /admin/mon-planning par le middleware admin (lot 5 planning).
 import { computed } from 'vue'
-import { STATUT_MESSAGE_LABELS } from '#shared/config/admin'
+import { STATUT_MESSAGE_LABELS, STATUT_RESERVATION_LABELS } from '#shared/config/admin'
 import { formatDateHeureQuebec } from '#shared/utils/dates'
-import type { AdminDashboardDto, StatutSiteDto } from '#shared/types/admin'
+import type { AdminDashboardDto, StatutReservationDto, StatutSiteDto } from '#shared/types/admin'
 import { toAdminError } from '@/utils/admin-error'
 import { watchAdminUnauthorized } from '@/utils/admin-unauthorized'
 import AdminPageHeader from '@/components/admin/AdminPageHeader.vue'
@@ -24,12 +24,20 @@ const STATUT_SITE_LABELS: Record<StatutSiteDto, string> = {
   EN_CONSTRUCTION: 'En construction',
 }
 
+const STATUT_RESERVATION_VARIANTS = {
+  EN_ATTENTE: 'default',
+  CONFIRMEE: 'secondary',
+  ANNULEE: 'outline',
+} as const satisfies Record<StatutReservationDto, 'default' | 'secondary' | 'outline'>
+
 const authStore = useAuthStore()
-const hasData = computed(() => authStore.user?.role !== ROLES.EMPLOYE)
+
+// Cibles normalisées vers la forme servie sur l'hôte admin (D8) : nu là-bas, préfixée ailleurs.
+const cheminMessages = toAdminPath('/admin/messages')
+const cheminReservations = toAdminPath('/admin/ccdpaa/reservations')
 
 const { data, status, error, refresh } = useFetch<AdminDashboardDto | null>('/api/admin/dashboard', {
   server: false,
-  immediate: hasData.value,
   key: 'admin-dashboard',
   default: () => null,
 })
@@ -46,9 +54,7 @@ const isLoading = computed(() => status.value === 'pending' || (data.value === n
   <div :class="[ADMIN_PAGE_WIDTH_CLASS, 'space-y-8']">
     <AdminPageHeader titre="Tableau de bord" :description="authStore.user ? `Bonjour ${authStore.user.nom}.` : undefined" />
 
-    <p v-if="!hasData" class="max-w-prose text-sm text-foreground">Aucun module disponible pour votre compte.</p>
-
-    <div v-else-if="errorMessage" role="alert" class="space-y-3 border-l-2 border-destructive py-2 pl-4">
+    <div v-if="errorMessage" role="alert" class="space-y-3 border-l-2 border-destructive py-2 pl-4">
       <p class="text-sm text-foreground">{{ errorMessage }}</p>
       <Button variant="outline" class="min-h-11 md:min-h-9" @click="refresh()">Réessayer</Button>
     </div>
@@ -91,7 +97,7 @@ const isLoading = computed(() => status.value === 'pending' || (data.value === n
                   <TableCell class="text-right tabular-nums">
                     <NuxtLink
                       v-if="row.messagesNouveaux > 0"
-                      :to="{ path: '/admin/messages', query: { site: row.site.slug, statut: 'NOUVEAU' } }"
+                      :to="{ path: cheminMessages, query: { site: row.site.slug, statut: 'NOUVEAU' } }"
                       class="inline-flex min-h-11 items-center font-medium underline underline-offset-2 md:min-h-0"
                     >
                       {{ row.messagesNouveaux }}
@@ -114,7 +120,7 @@ const isLoading = computed(() => status.value === 'pending' || (data.value === n
                 <p class="mt-1 text-sm text-muted-foreground">
                   <NuxtLink
                     v-if="row.messagesNouveaux > 0"
-                    :to="{ path: '/admin/messages', query: { site: row.site.slug, statut: 'NOUVEAU' } }"
+                    :to="{ path: cheminMessages, query: { site: row.site.slug, statut: 'NOUVEAU' } }"
                     class="inline-flex min-h-11 items-center font-medium text-foreground underline underline-offset-2"
                   >
                     {{ row.messagesNouveaux }} {{ row.messagesNouveaux > 1 ? 'nouveaux' : 'nouveau' }}
@@ -134,7 +140,7 @@ const isLoading = computed(() => status.value === 'pending' || (data.value === n
           <h2 id="dash-messages" class="font-display text-navy text-xl font-semibold">Derniers messages</h2>
           <NuxtLink
             v-if="totalNouveaux > 0"
-            :to="{ path: '/admin/messages', query: { statut: 'NOUVEAU' } }"
+            :to="{ path: cheminMessages, query: { statut: 'NOUVEAU' } }"
             class="inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-2 md:min-h-0"
           >
             Voir les messages non lus
@@ -144,7 +150,7 @@ const isLoading = computed(() => status.value === 'pending' || (data.value === n
         <ul v-else class="divide-y divide-border border-y border-border">
           <li v-for="message in data.derniersMessages" :key="message.uuid">
             <NuxtLink
-              :to="{ path: '/admin/messages', query: { site: message.site.slug, statut: message.statut } }"
+              :to="{ path: cheminMessages, query: { site: message.site.slug, statut: message.statut } }"
               class="hover:bg-accent focus-visible:ring-ring flex min-h-11 flex-wrap items-center justify-between gap-x-4 gap-y-1 px-1 py-3 outline-hidden focus-visible:ring-2"
             >
               <span class="min-w-0">
@@ -154,6 +160,37 @@ const isLoading = computed(() => status.value === 'pending' || (data.value === n
               <span class="flex items-center gap-3">
                 <Badge :variant="message.statut === 'NOUVEAU' ? 'default' : 'outline'">{{ STATUT_MESSAGE_LABELS[message.statut] }}</Badge>
                 <time :datetime="message.createdAt" class="text-sm text-muted-foreground">{{ formatDateHeureQuebec(message.createdAt) }}</time>
+              </span>
+            </NuxtLink>
+          </li>
+        </ul>
+      </section>
+
+      <section v-if="data.prochainesReservations.length > 0" aria-labelledby="dash-reservations" class="space-y-3">
+        <div class="flex flex-wrap items-baseline justify-between gap-2">
+          <h2 id="dash-reservations" class="font-display text-navy text-xl font-semibold">Prochaines réservations</h2>
+          <NuxtLink
+            :to="cheminReservations"
+            class="inline-flex min-h-11 items-center text-sm font-medium underline underline-offset-2 md:min-h-0"
+          >
+            Voir toutes les réservations
+          </NuxtLink>
+        </div>
+        <ul class="divide-y divide-border border-y border-border">
+          <li v-for="reservation in data.prochainesReservations" :key="reservation.uuid">
+            <NuxtLink
+              :to="cheminReservations"
+              class="hover:bg-accent focus-visible:ring-ring flex min-h-11 flex-wrap items-center justify-between gap-x-4 gap-y-1 px-1 py-3 outline-hidden focus-visible:ring-2"
+            >
+              <span class="min-w-0">
+                <span class="block truncate text-sm font-medium text-foreground">
+                  {{ reservation.nom }} · {{ reservation.nombrePersonnes }}
+                  {{ reservation.nombrePersonnes > 1 ? 'personnes' : 'personne' }}
+                </span>
+              </span>
+              <span class="flex items-center gap-3">
+                <Badge :variant="STATUT_RESERVATION_VARIANTS[reservation.statut]">{{ STATUT_RESERVATION_LABELS[reservation.statut] }}</Badge>
+                <time :datetime="reservation.dateReservation" class="text-sm text-muted-foreground">{{ formatDateHeureQuebec(reservation.dateReservation) }}</time>
               </span>
             </NuxtLink>
           </li>

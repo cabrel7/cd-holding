@@ -3,6 +3,8 @@ import { ref } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { loginSchema } from '#shared/validation/auth'
+import { MESSAGE_RATE_LIMIT_TENTATIVES } from '#shared/config/admin'
+import { HOLDING_SLUG } from '#shared/config/sites'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -16,7 +18,7 @@ const HTTP_TOO_MANY_REQUESTS = 429
 
 const MESSAGES_ERREUR = {
   [HTTP_UNAUTHORIZED]: 'Identifiants invalides. Vérifiez votre courriel et votre mot de passe.',
-  [HTTP_TOO_MANY_REQUESTS]: 'Trop de tentatives. Réessayez dans quelques minutes.',
+  [HTTP_TOO_MANY_REQUESTS]: MESSAGE_RATE_LIMIT_TENTATIVES,
 } as const
 const MESSAGE_ERREUR_DEFAUT = 'Connexion impossible pour le moment. Réessayez.'
 
@@ -30,7 +32,11 @@ const [password, passwordAttrs] = defineField('password')
 
 const route = useRoute()
 const authStore = useAuthStore()
+const { href } = useSiteLinks()
 const erreur = ref<string | null>(null)
+
+// Logo vers le site public : absolu depuis l'hôte admin en prod, `/` en dev (inchangé).
+const lienAccueilPublic = computed(() => href(HOLDING_SLUG, '/').to)
 
 function messagePourStatut(error: unknown): string {
   const status = (error as { statusCode?: number } | null)?.statusCode
@@ -51,7 +57,7 @@ const onSubmit = handleSubmit(async (values) => {
     erreur.value = messagePourStatut(error)
     return
   }
-  await navigateTo(safeAdminRedirect(route.query.redirect))
+  await navigateTo(safeAdminRedirect(route.query.redirect, hoteEstAdmin()))
 })
 
 useHead({ title: 'Connexion — Administration' })
@@ -60,7 +66,7 @@ useHead({ title: 'Connexion — Administration' })
 <template>
   <div class="bg-background flex min-h-svh">
     <aside class="bg-navy text-cream hidden w-1/2 flex-col justify-between p-12 lg:flex">
-      <NuxtLink to="/" class="focus-visible:ring-gold flex min-h-11 w-fit items-center rounded-md outline-hidden focus-visible:ring-2">
+      <NuxtLink :to="lienAccueilPublic" class="focus-visible:ring-gold flex min-h-11 w-fit items-center rounded-md outline-hidden focus-visible:ring-2">
         <span class="font-display text-lg font-semibold">{{ ADMIN_GROUP_NAME }}</span>
       </NuxtLink>
       <div>

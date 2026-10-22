@@ -161,7 +161,10 @@ test.describe('Tableau de bord /admin', () => {
 })
 
 test.describe('EMPLOYE', () => {
-  test('should see the empty-module state on /admin and trigger no admin data call', async ({ page, context }) => {
+  // Lot 5 planning : l'employé est redirigé du tableau de bord vers /admin/mon-planning
+  // (middleware admin, spec docs/specs/lot5-planning.md §3) — l'ancien état « Aucun module
+  // disponible » sur /admin n'existe plus.
+  test('should redirect an EMPLOYE from /admin to /admin/mon-planning and trigger no other admin data call', async ({ page, context }) => {
     const appelsDonnees: string[] = []
     page.on('request', (req) => {
       const url = new URL(req.url())
@@ -170,21 +173,23 @@ test.describe('EMPLOYE', () => {
     await loginAs(context, EMPLOYE_ENTRETIEN)
     const shell = new AdminShell(page)
     await page.goto('/admin')
+    await expect(page).toHaveURL(/\/admin\/mon-planning$/)
 
-    await expect(page.getByText('Aucun module disponible pour votre compte.')).toBeVisible()
     await shell.ouvrirNavigation()
+    await expect(shell.navigation.getByRole('link', { name: 'Tableau de bord' })).toHaveCount(0)
     await expect(shell.navigation.getByRole('link', { name: 'Messages' })).toHaveCount(0)
     await expect(shell.navigation.getByRole('link', { name: 'Clients' })).toHaveCount(0)
+    await expect(shell.navigation.getByRole('link', { name: 'Mon planning' })).toBeVisible()
     await page.waitForLoadState('networkidle')
-    expect(appelsDonnees, 'un EMPLOYE ne doit déclencher aucun appel /api/admin/**').toEqual([])
+    expect(appelsDonnees.filter((appel) => !appel.includes('/api/admin/mon-planning')), 'aucun appel /api/admin/** hors son planning').toEqual([])
   })
 
-  test('should redirect an EMPLOYE from /admin/messages and /admin/clients to /admin', async ({ page, context }) => {
+  test('should redirect an EMPLOYE from /admin/messages and /admin/clients to /admin/mon-planning', async ({ page, context }) => {
     await loginAs(context, EMPLOYE_ENTRETIEN)
     await page.goto('/admin/messages')
-    await expect(page).toHaveURL(/\/admin$/)
+    await expect(page).toHaveURL(/\/admin\/mon-planning$/)
     await page.goto('/admin/clients')
-    await expect(page).toHaveURL(/\/admin$/)
+    await expect(page).toHaveURL(/\/admin\/mon-planning$/)
   })
 
   test('should be refused (403) on every lot-4 API', async ({}, testInfo) => {

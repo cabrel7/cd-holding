@@ -3,6 +3,7 @@ import { computed, watch } from 'vue'
 import { Globe } from '@lucide/vue'
 import { isNavItemActive, navLabel, visibleNavItems, ADMIN_GROUP_NAME } from '@/config/admin-nav'
 import type { ModuleKey } from '#shared/config/modules'
+import { HOLDING_SLUG, type SiteSlug } from '#shared/config/sites'
 import {
   Sidebar,
   SidebarContent,
@@ -24,16 +25,24 @@ const route = useRoute()
 const { user } = useUserSession()
 const { sites, compteurs } = useAdminShell()
 const { isMobile, setOpenMobile } = useSidebar()
+const { href } = useSiteLinks()
+
+// Forme servie sur l'hôte courant (D8) : nu sur admin., préfixée ailleurs. Les items de nav
+// restent préfixés dans ADMIN_NAV (source unique) ; la traduction se fait au rendu, des DEUX
+// côtés de la comparaison d'état actif (path = préfixé après chargement complet, nu en SPA).
+const chemin = computed(() => toAdminPath(route.path))
+const lienAccueilPublic = computed(() => href(HOLDING_SLUG, '/').to)
 
 const modules = computed<ReadonlySet<ModuleKey>>(() => new Set(sites.value.flatMap((site) => site.modules)))
+const slugs = computed<ReadonlySet<SiteSlug>>(() => new Set(sites.value.map((site) => site.slug)))
 
 const items = computed(() => {
   const role = user.value?.role
   if (!role) return []
-  return visibleNavItems(role, modules.value).map((item) => ({
-    item,
+  return visibleNavItems(role, modules.value, slugs.value).map((item) => ({
+    item: { ...item, to: toAdminPath(item.to) },
     label: navLabel(item, role),
-    active: isNavItemActive(item, route.path),
+    active: isNavItemActive({ ...item, to: toAdminPath(item.to) }, chemin.value),
     nouveaux: item.compteur === 'messagesNouveaux' ? (compteurs.value?.nouveaux ?? 0) : 0,
   }))
 })
@@ -59,7 +68,7 @@ watch(
   <Sidebar collapsible="icon">
     <SidebarHeader class="border-border h-16 justify-center border-b px-4">
       <NuxtLink
-        to="/admin"
+        :to="toAdminPath(ADMIN_HOME_PATH)"
         class="focus-visible:ring-ring flex min-h-11 items-center gap-3 rounded-md outline-hidden focus-visible:ring-2"
       >
         <span
@@ -111,7 +120,7 @@ watch(
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton as-child tooltip="Voir le site public">
-            <NuxtLink to="/">
+            <NuxtLink :to="lienAccueilPublic">
               <Globe aria-hidden="true" />
               <span>Voir le site public</span>
             </NuxtLink>

@@ -17,7 +17,7 @@ export interface UseAdminPagedListOptions<TQuery> {
   readonly onPageOutOfRange?: (lastPage: number) => void
 }
 
-export interface UseAdminPagedListReturn<TItem extends { uuid: string }> {
+export interface UseAdminPagedListReturn<TItem extends { uuid: string }, TPage = AdminPage<TItem>> {
   readonly items: ComputedRef<readonly TItem[]>
   readonly total: ComputedRef<number>
   readonly page: ComputedRef<number>
@@ -25,18 +25,22 @@ export interface UseAdminPagedListReturn<TItem extends { uuid: string }> {
   readonly pageCount: ComputedRef<number>
   readonly state: ComputedRef<AdminListState>
   readonly error: ComputedRef<AdminError | null>
+  /** Page brute (null avant le premier chargement) — champs additionnels du DTO inclus. */
+  readonly data: ComputedRef<TPage | null>
   /** Rechargement avec données déjà affichées (changement de page/filtre, refresh). */
   readonly refreshing: ComputedRef<boolean>
   refresh(): Promise<void>
 }
 
-export function useAdminPagedList<TItem extends { uuid: string }, TQuery extends Record<string, string | number | undefined>>(
-  options: UseAdminPagedListOptions<TQuery>,
-): UseAdminPagedListReturn<TItem> {
+export function useAdminPagedList<
+  TItem extends { uuid: string },
+  TQuery extends Record<string, string | number | undefined>,
+  TPage extends AdminPage<TItem> = AdminPage<TItem>,
+>(options: UseAdminPagedListOptions<TQuery>): UseAdminPagedListReturn<TItem, TPage> {
   const query = computed(() => toValue(options.query))
 
   const {
-    data,
+    data: fetchData,
     status,
     error: fetchError,
     refresh: refreshFetch,
@@ -46,6 +50,10 @@ export function useAdminPagedList<TItem extends { uuid: string }, TQuery extends
     key: `admin-list:${options.endpoint}`,
     default: () => null,
   })
+
+  // `useFetch` infère un type de ref trop large : on re-typpe la page. L'assignation est sûre —
+  // l'appelant instancie `TPage` avec un sous-ensemble des champs d'`AdminPage<TItem>`.
+  const data = computed(() => fetchData.value) as ComputedRef<TPage | null>
 
   const error = computed<AdminError | null>(() => (fetchError.value ? toAdminError(fetchError.value) : null))
   const items = computed<readonly TItem[]>(() => data.value?.items ?? [])
@@ -74,6 +82,6 @@ export function useAdminPagedList<TItem extends { uuid: string }, TQuery extends
     await refreshFetch()
   }
 
-  return { items, total, page, pageSize, pageCount, state, error, refreshing, refresh }
+  return { items, total, page, pageSize, pageCount, state, error, data, refreshing, refresh }
 }
 

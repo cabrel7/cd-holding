@@ -1,22 +1,50 @@
 import type { H3Event } from 'h3'
 import type { SecureSessionData, User } from '#auth-utils'
+import { evaluerSession } from '../lib/session-guard'
 
 export interface AuthContext {
   user: User
   secure: SecureSessionData
 }
 
+const SESSION_INVALIDE = 'Session invalide, veuillez vous reconnecter'
+
 /**
  * Exige une session valide. `secure` est optionnel dans le typage nuxt-auth-utils
  * (`UserSessionRequired['secure']?: SecureSessionData`) — une session créée avant
  * l'introduction des données serveur-only n'en contiendrait pas. On le vérifie donc
- * explicitement plutôt que de le supposer présent, et on renvoie 401 si absent
- * (l'utilisateur doit se reconnecter pour obtenir une session à jour).
+ * explicitement plutôt que de le supposer présent, puis on valide le compte en base
+ * (D8 : garde central `actif`/rôle/filiale/mot de passe de toutes les routes admin) —
+ * une requête PK après le seul contrôle du cookie. Tout échec = 401 générique, le motif
+ * reste dans la fonction pure (server/lib/session-guard.ts, testée en unit).
  */
 export async function requireAuth(event: H3Event): Promise<AuthContext> {
-  const { user, secure } = await requireUserSession(event)
+  // `loggedInAt` est une claim racine de la session (posée par le login au même niveau que
+  // `user`/`secure`), PAS un champ de `user` — la lire de `user` la rendrait toujours
+  // undefined et déconnecterait toute session après un changement de mot de passe (D10).
+  // nuxt-auth-utils lève un 401 sans statusMessage (« Unauthorized », sérialisé
+  // « Server Error » en prod) quand il n'y a pas de session : on le remplace par le message
+  // générique unique de toute la surface admin (spec lot 6 §2.2 / §10.3). Un échec inattendu
+  // autre que 401 est conservé tel quel pour rester visible.
+  const session = await requireUserSession(event).catch((erreur: unknown) => {
+    const statusCode =
+      typeof erreur === 'object' && erreur !== null && 'statusCode' in erreur
+        ? (erreur as { statusCode?: unknown }).statusCode
+        : undefined
+    if (statusCode !== undefined && statusCode !== 401) throw erreur
+    throw createError({ statusCode: 401, statusMessage: SESSION_INVALIDE })
+  })
+  const { user, secure, loggedInAt } = session
   if (!secure) {
-    throw createError({ statusCode: 401, statusMessage: 'Session invalide, veuillez vous reconnecter' })
+    throw createError({ statusCode: 401, statusMessage: SESSION_INVALIDE })
+  }
+  const compte = await prisma.user.findUnique({
+    where: { id: secure.userId },
+    select: { actif: true, role: true, companyId: true, passwordChangedAt: true },
+  })
+  const resultat = evaluerSession(loggedInAt, { role: user.role, companyId: secure.companyId }, compte)
+  if (!resultat.ok) {
+    throw createError({ statusCode: 401, statusMessage: SESSION_INVALIDE })
   }
   return { user, secure }
 }

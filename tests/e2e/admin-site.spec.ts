@@ -9,6 +9,12 @@
 import { test, expect, type BrowserContext, type Locator, type Page } from '@playwright/test'
 import { loginAs, SUPER_ADMIN, ADMIN_FILIALE_ENTRETIEN } from './helpers/auth'
 
+const HTTP = { UNAUTHORIZED: 401 } as const
+
+// vue-router (stringifyQuery par défaut) ne code pas les `/` dans la query : le test tolère
+// les deux formes, comme `admin-shell.spec.ts`.
+const LOGIN_URL_401 = /\/admin\/login\?redirect=(%2F|\/)admin(%2F|\/)contenu(%2F|\/)site/
+
 interface AdminSiteSummaryDto {
   readonly uuid: string
   readonly slug: string
@@ -157,7 +163,10 @@ test.describe('Parcours CMS admin — fiche de la société (/admin/contenu/site
       await siteContent.goto()
 
       await expect(siteContent.siteSelector).toHaveCount(0)
-      await expect(page.getByText(own.nomCourt ?? own.nom)).toBeVisible()
+      // Scopé au bloc de la fiche : le nom apparaît AUSSI dans l'en-tête (`contexteNom`
+      // ADMIN_FILIALE = nom complet, même clé `admin-sites`) → strict violation à la racine.
+      const blocFiche = page.getByText('Fiche de la société').locator('..')
+      await expect(blocFiche).toContainText(own.nomCourt ?? own.nom)
 
       await siteContent.openEdit()
       await expect(siteContent.dialog.getByLabel('Nom légal')).toHaveCount(0)
@@ -229,6 +238,50 @@ test.describe('Parcours CMS admin — fiche de la société (/admin/contenu/site
       const after = await fetchEntretien(adminContext)
       expect(after.secteur).toBe(before.secteur)
       await page.close()
+    } finally {
+      await adminContext.close()
+    }
+  })
+
+  test('should redirect to the login page when the session expires on the sites list (401)', async ({ browser }) => {
+    const adminContext = await browser.newContext()
+    try {
+      await loginAs(adminContext, SUPER_ADMIN)
+      const page = await adminContext.newPage()
+      await page.route('**/api/admin/sites', (route) =>
+        route.fulfill({
+          status: HTTP.UNAUTHORIZED,
+          contentType: 'application/json',
+          body: JSON.stringify({ statusMessage: 'Session invalide' }),
+        }),
+      )
+
+      await page.goto('/admin/contenu/site')
+
+      // watchAdminUnauthorized vide la session ET le cache admin, puis navigue avec la cible.
+      await expect(page).toHaveURL(LOGIN_URL_401)
+    } finally {
+      await adminContext.close()
+    }
+  })
+
+  test('should redirect to the login page when the site detail load fails with 401', async ({ browser }) => {
+    const adminContext = await browser.newContext()
+    try {
+      await loginAs(adminContext, SUPER_ADMIN)
+      const page = await adminContext.newPage()
+      // Liste OK (le sélecteur se remplit), détail GET /api/admin/sites/<uuid> en 401.
+      await page.route('**/api/admin/sites/*', (route) =>
+        route.fulfill({
+          status: HTTP.UNAUTHORIZED,
+          contentType: 'application/json',
+          body: JSON.stringify({ statusMessage: 'Session invalide' }),
+        }),
+      )
+
+      await page.goto('/admin/contenu/site')
+
+      await expect(page).toHaveURL(LOGIN_URL_401)
     } finally {
       await adminContext.close()
     }

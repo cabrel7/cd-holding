@@ -28,12 +28,18 @@ const roleLabel = computed(() => (user.value ? ROLE_LABELS[user.value.role] : ''
 
 const route = useRoute()
 
+// Forme servie sur l'hôte courant (D8) : la recherche de l'item actif compare des chemins
+// normalisés des deux côtés (préfixé après chargement complet, nu en SPA sur admin.).
+const chemin = computed(() => toAdminPath(route.path))
+
 // Titre contextuel (le nom du groupe est déjà dans la barre latérale) : ADMIN_FILIALE → sa
 // filiale (seul site renvoyé par l'API) ; sinon la section courante.
 const contexteNom = computed(() => {
   const role = user.value?.role
   if (role === ROLES.ADMIN_FILIALE && sites.value[0]) return sites.value[0].nom
-  const item = ADMIN_NAV.find((entry) => isNavItemActive(entry, route.path))
+  const item = ADMIN_NAV.find((entry) =>
+    isNavItemActive({ ...entry, to: toAdminPath(entry.to) }, chemin.value),
+  )
   return item && role ? navLabel(item, role) : 'Console d\'administration'
 })
 

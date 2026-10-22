@@ -1,5 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { formatDateISO, formatMoisAnnee, isDateISOValide } from '#shared/utils/dates'
+import { formatDateCompacte, formatDateISO, formatDateLongue, formatMoisAnnee, isDateISOValide } from '#shared/utils/dates'
+
+describe('formatDateCompacte', () => {
+  it('should format as "15 juin" (sans année, sans glisser de jour en UTC)', () => {
+    expect(formatDateCompacte('2022-06-15')).toBe('15 juin')
+  })
+
+  it('should format the year boundary without rolling over', () => {
+    expect(formatDateCompacte('2023-01-01')).toBe('1 janv')
+  })
+})
+
+describe('formatDateLongue', () => {
+  it('should format with the year', () => {
+    expect(formatDateLongue('2022-06-15')).toBe('15 juin 2022')
+  })
+})
 
 describe('formatMoisAnnee', () => {
   it('should format a UTC midnight date string as "juin 2022", not "mai 2022"', () => {

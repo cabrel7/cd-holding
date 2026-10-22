@@ -4,7 +4,9 @@
 // c'est aux composants (CmsCollectionEditor, CmsSectionsEditor) de le faire avec ce message.
 import type { AdminError } from '#shared/types/admin'
 
-const GENERIC_MESSAGE = 'Une erreur est survenue. Réessayez.'
+/** Message de repli affichable — jamais de détail technique (CLAUDE.md § Erreurs). */
+export const ADMIN_ERROR_GENERIC_MESSAGE = 'Une erreur est survenue. Réessayez.'
+const GENERIC_MESSAGE = ADMIN_ERROR_GENERIC_MESSAGE
 
 interface FetchLikeError {
   readonly statusCode?: number

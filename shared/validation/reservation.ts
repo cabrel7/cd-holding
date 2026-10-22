@@ -1,5 +1,6 @@
 // Validation de la réservation du restaurant (ccdpaa). Imports relatifs uniquement (seed/tsx).
 import { z } from 'zod'
+import { ADMIN_PAGE_MAX, ADMIN_SEARCH_MAX } from '../config/admin'
 import { CONTROLE_PATTERN, emailContactSchema, honeypotSchema, nomContactSchema, telephoneContactSchema } from './contact'
 import { HEURE_PATTERN, creneauxPourDate, verifierDate, type RaisonDateInvalide, type ReglagesReservation } from '../utils/restaurant'
 
@@ -60,3 +61,22 @@ export function reservationSchema(r: ReglagesReservation, maintenant: () => Date
 
 export type ReservationFormValues = z.input<typeof reservationBaseSchema>
 export type ReservationBody = z.infer<typeof reservationBaseSchema>
+
+// --- Admin (lot 5) --------------------------------------------------------------------------
+
+const vide = (v: unknown): unknown => (typeof v === 'string' && v.trim() === '' ? undefined : v)
+
+export const statutReservationSchema = z.enum(['EN_ATTENTE', 'CONFIRMEE', 'ANNULEE'])
+
+export const reservationsQuerySchema = z
+  .object({
+    statut: statutReservationSchema.optional(),
+    q: z.preprocess(vide, z.string().trim().max(ADMIN_SEARCH_MAX).optional()),
+    page: z.coerce.number().int().min(1).max(ADMIN_PAGE_MAX).default(1),
+  })
+  .strict()
+
+export const reservationUpdateSchema = z.object({ statut: statutReservationSchema }).strict()
+
+export type ReservationsQuery = z.infer<typeof reservationsQuerySchema>
+export type ReservationUpdateInput = z.infer<typeof reservationUpdateSchema>

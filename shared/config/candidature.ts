@@ -71,6 +71,15 @@ export const TYPE_CONTRAT_SCHEMA_ORG = {
 
 export const CANDIDATURE_FORM = { bouton: 'Envoyer ma candidature', toastTitre: 'Candidature envoyée' } as const
 
+// Délais Loi 25 (décision utilisateur, PROJECT_STATE) : rejet ou candidature jamais traitée →
+// 6 mois après la date concernée ; retenue et vivier → 12 mois, renouvelables sur consentement.
+// Constantes éditées plus tard si le client le demande (pas de réglage admin — spec lot 5 §0).
+export const LOI25_DUREES = {
+  rejetMois: 6,
+  nonTraiteeMois: 6,
+  vivierMois: 12,
+} as const
+
 export const OFFRES_PATH = '/placement/offres'
 export const CANDIDATURE_SPONTANEE_PATH = `${OFFRES_PATH}/candidature-spontanee`
 export const offrePath = (uuid: string): string => `${OFFRES_PATH}/${uuid}`

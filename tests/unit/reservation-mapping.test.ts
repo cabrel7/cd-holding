@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 import { construireReservation, ecrireIdempotent, recapitulatifReservation, toRestaurantDto, type ReglagesRow } from '../../server/lib/reservation'
+import { toReservationDto, type ReservationMapRow } from '../../server/services/admin/reservations'
 import type { ReservationBody } from '#shared/validation/reservation'
 
 const body: ReservationBody = {
@@ -95,5 +96,72 @@ describe('ecrireIdempotent', () => {
     await expect(ecrireIdempotent(vi.fn().mockRejectedValue(conflit), async () => false)).rejects.toBe(conflit)
     const autre = new Error('boom')
     await expect(ecrireIdempotent(vi.fn().mockRejectedValue(autre), async () => true)).rejects.toBe(autre)
+  })
+})
+
+// --- Lot 5 : mapping admin (toReservationDto) --------------------------------------------------
+
+const ROW: ReservationMapRow = {
+  uuid: '0b3f1a2c-0000-4000-8000-000000000020',
+  nom: 'Awa Diop',
+  email: 'awa@exemple.ca',
+  telephone: '514-000-0000',
+  nombrePersonnes: 4,
+  dateReservation: new Date('2026-10-14T23:30:00.000Z'),
+  notes: 'Allergie aux arachides',
+  statut: 'EN_ATTENTE',
+  createdAt: new Date('2026-10-07T12:00:00.000Z'),
+  company: { uuid: '0b3f1a2c-0000-4000-8000-000000000001', slug: 'ccdpaa', nom: 'Les Ambassades d’Afrique' },
+}
+
+describe('toReservationDto', () => {
+  it('maps every field with the exact DTO keys and never exposes internal ids', () => {
+    const dto = toReservationDto(ROW)
+    expect(Object.keys(dto).sort()).toEqual(
+      [
+        'createdAt',
+        'dateReservation',
+        'email',
+        'nom',
+        'nombrePersonnes',
+        'notes',
+        'site',
+        'statut',
+        'telephone',
+        'uuid',
+      ].sort(),
+    )
+    expect(dto).not.toHaveProperty('id')
+    expect(dto).not.toHaveProperty('companyId')
+    expect(dto).toEqual({
+      uuid: ROW.uuid,
+      nom: 'Awa Diop',
+      email: 'awa@exemple.ca',
+      telephone: '514-000-0000',
+      nombrePersonnes: 4,
+      dateReservation: '2026-10-14T23:30:00.000Z',
+      notes: 'Allergie aux arachides',
+      statut: 'EN_ATTENTE',
+      site: { uuid: ROW.company.uuid, slug: 'ccdpaa', nom: 'Les Ambassades d’Afrique' },
+      createdAt: '2026-10-07T12:00:00.000Z',
+    })
+  })
+
+  it('serializes both dates as ISO 8601 UTC strings', () => {
+    const dto = toReservationDto(ROW)
+    expect(dto.dateReservation).toBe('2026-10-14T23:30:00.000Z')
+    expect(dto.createdAt).toBe('2026-10-07T12:00:00.000Z')
+    expect(new Date(dto.dateReservation).toISOString()).toBe(dto.dateReservation)
+    expect(new Date(dto.createdAt).toISOString()).toBe(dto.createdAt)
+  })
+
+  it('exposes the site ref as an AdminSiteRef (uuid + slug + nom)', () => {
+    const dto = toReservationDto(ROW)
+    expect(Object.keys(dto.site!).sort()).toEqual(['nom', 'slug', 'uuid'])
+    expect(dto.site!.slug).toBe('ccdpaa')
+  })
+
+  it('keeps notes nullable', () => {
+    expect(toReservationDto({ ...ROW, notes: null }).notes).toBeNull()
   })
 })

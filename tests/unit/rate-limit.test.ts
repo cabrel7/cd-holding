@@ -1,7 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { hitBucket, type Bucket } from '../../server/utils/rate-limit'
+import { hitBucket, rateLimitKey, type Bucket } from '../../server/utils/rate-limit'
 
 const OPTIONS = { max: 3, windowMs: 1000 } as const
+
+describe('rateLimitKey', () => {
+  it('sans clé : scope:ip — clé historique de tous les appelants existants (régression)', () => {
+    expect(rateLimitKey('login', '203.0.113.10')).toBe('login:203.0.113.10')
+  })
+
+  it('avec clé : scope:ip:cle — quota par session en plus de l’IP (D15)', () => {
+    expect(rateLimitKey('admin-comptes', '203.0.113.10', '42')).toBe('admin-comptes:203.0.113.10:42')
+  })
+
+  it('deux sessions distinctes sur la même IP ont des clés indépendantes', () => {
+    expect(rateLimitKey('admin-comptes', '203.0.113.10', '1')).not.toBe(rateLimitKey('admin-comptes', '203.0.113.10', '2'))
+  })
+})
 
 describe('hitBucket', () => {
   it('allows the first hit and creates a bucket for the key', () => {

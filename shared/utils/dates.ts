@@ -14,6 +14,22 @@ const DATE_ISO_FORMATTER = new Intl.DateTimeFormat('fr-CA', {
   timeZone: 'UTC',
 })
 
+const DATE_COMPACTE_FORMATTER = new Intl.DateTimeFormat('fr-CA', {
+  day: 'numeric',
+  month: 'short',
+  timeZone: 'UTC',
+})
+
+/** "2022-06-15" ou un Date UTC → "15 juin 2022". */
+export function formatDateLongue(value: Date | string): string {
+  return DATE_ISO_FORMATTER.format(toDate(value))
+}
+
+/** "2022-06-15" ou un Date UTC → "15 juin" (sans année) — en-têtes compacts (planning). */
+export function formatDateCompacte(value: Date | string): string {
+  return DATE_COMPACTE_FORMATTER.format(toDate(value)).replace(/\.$/, '')
+}
+
 function toDate(value: Date | string): Date {
   return typeof value === 'string' ? new Date(value) : value
 }
@@ -21,11 +37,6 @@ function toDate(value: Date | string): Date {
 /** "2022-06-15" ou un Date UTC → "juin 2022". */
 export function formatMoisAnnee(value: Date | string): string {
   return MOIS_ANNEE_FORMATTER.format(toDate(value))
-}
-
-/** "2022-06-15" ou un Date UTC → "15 juin 2022". */
-export function formatDateLongue(value: Date | string): string {
-  return DATE_ISO_FORMATTER.format(toDate(value))
 }
 
 /** Date/Date-string → "YYYY-MM-DD" (UTC), ou null si absente. Forme attendue par les DTO publics. */

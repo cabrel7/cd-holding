@@ -26,7 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
       return false
     }
     clearShellData()
-    await navigateTo(ADMIN_LOGIN_PATH)
+    await navigateTo(toAdminPath(ADMIN_LOGIN_PATH))
     return true
   }
 

@@ -189,6 +189,9 @@ model User {
   companyId    Int?
   company      Company? @relation(fields: [companyId], references: [id])
   actif        Boolean  @default(true)
+  // Horloge d'invalidation paresseuse des sessions (lot 6, D9-D11) : une session est valable
+  // tant que `loggedInAt >= passwordChangedAt` (null = pas encore de changement = valable).
+  passwordChangedAt DateTime?
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
@@ -458,24 +461,27 @@ model Candidat {
   uuid           String          @unique @default(uuid(7)) @db.Uuid
   companyId      Int
   company        Company         @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  nomComplet     String
-  email          String
-  telephone      String?
-  posteRecherche String?
-  categorie      CategoriePoste
-  disponibilite  String?
-  statut         StatutCandidat  @default(DISPONIBLE)
-  origine        OrigineCandidat
-  cvKey          String?
-  cv             Fichier?        @relation(fields: [cvKey], references: [key], onDelete: SetNull)
-  notes          String?         @db.Text
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  nomComplet              String?
+  email                   String?
+  telephone               String?
+  posteRecherche          String?
+  categorie               CategoriePoste
+  disponibilite           String?
+  statut                  StatutCandidat  @default(DISPONIBLE)
+  origine                 OrigineCandidat
+  cvKey                   String?
+  cv                      Fichier?        @relation(fields: [cvKey], references: [key], onDelete: SetNull)
+  notes                   String?         @db.Text
+  anonymiseLe             DateTime? // Loi 25 : posé à l'anonymisation du vivier (12 mois, renouvelable)
+  consentementRenouveleLe DateTime? // renouvellement : base = COALESCE(consentementRenouveleLe, createdAt)
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
 
   candidatures Candidature[]
   affectations Affectation[]
 
   // Dédoublonnage « Ajouter au vivier » → 409 (une candidature devient un candidat unique par filiale/email).
+  // email nullable (anonymisation) : Postgres traite les NULL comme distincts, le vivier reste sans doublon.
   @@unique([companyId, email])
   @@index([companyId, statut])
 }
@@ -522,22 +528,26 @@ model Candidature {
   demande             DemandeClient?    @relation(fields: [demandeId], references: [id], onDelete: SetNull)
   candidatId          Int?
   candidat            Candidat?         @relation(fields: [candidatId], references: [id], onDelete: SetNull)
-  nomComplet          String
-  email               String
-  telephone           String
-  adresseComplete     String
+  nomComplet          String?
+  email               String?
+  telephone           String?
+  adresseComplete     String?
   posteRecherche      String
   posteAutrePrecision String?
   categorie           CategoriePoste
   experience          NiveauExperience?
   pays                String
   message             String?           @db.Text
-  cvKey               String
-  cv                  Fichier           @relation(fields: [cvKey], references: [key], onDelete: Restrict)
+  cvKey               String?
+  cv                  Fichier?          @relation(fields: [cvKey], references: [key], onDelete: Restrict)
   autresDocumentsKeys String[]          @default([])
   statut              StatutCandidature @default(NOUVELLE)
   consentementLe      DateTime
   dateEnvoi           DateTime          @default(now())
+  // Loi 25 : réception → 6 mois (rejet) ou 6 mois (jamais traitée) ; retenue → 12 mois renouvelable.
+  rejeteLe            DateTime? // posé quand statut → REJETEE (horloge 6 mois), effacé si l'on quitte REJETEE
+  retenueLe           DateTime? // posé quand statut → RETENUE (horloge 12 mois) ou renouvellement
+  anonymiseLe         DateTime? // posé à l'anonymisation (garde l'écran, cache les PII)
   updatedAt           DateTime          @updatedAt
 
   @@index([companyId, statut])
@@ -560,4 +570,13 @@ model Affectation {
   @@unique([candidatId, demandeId])
   @@index([companyId])
   @@index([demandeId])
+}
+
+// Garde-fou des tâches planifiées (cluster) : `claimTaskExecution` verrouille par
+// `updateMany` conditionnel sur la ligne de `cle` — 100 % Prisma, jamais de SQL brut.
+model TaskExecution {
+  id           Int      @id @default(autoincrement())
+  cle          String   @unique
+  dateDerniere DateTime
+  updatedAt    DateTime @updatedAt
 }

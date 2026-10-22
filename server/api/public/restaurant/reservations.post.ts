@@ -94,9 +94,11 @@ export default defineEventHandler(async (event) => {
   // Courriel normalisé (casse/espaces) : clé d'idempotence et stockage cohérents.
   const courriel = validated.data.email.trim().toLowerCase()
 
-  // 9-10. Idempotence + persistance : findFirst puis create en transaction Serializable (pas de
-  // contrainte unique sans migration — à ajouter au lot 5) ; deux POST simultanés identiques ne
-  // créent qu'une ligne, le perdant relit et répond comme un renvoi. Aucun courriel dans la transaction.
+  // 9-10. Idempotence + persistance : findFirst puis create en transaction Serializable, avec
+  // l'index unique partiel `ReservationRestaurant_doublon_key` en garde-fou (le perdant d'une
+  // course lève P2002, absorbé en 'existante' par `ecrireIdempotent`) ; deux POST simultanés
+  // identiques ne créent qu'une ligne, le perdant répond comme un renvoi. Aucun courriel dans
+  // la transaction.
   const where = { companyId, email: courriel, dateReservation, statut: { not: 'ANNULEE' } } as const
   const data = construireReservation({ ...validated.data, email: courriel }, companyId, dateReservation)
   const issue = await ecrireIdempotent(

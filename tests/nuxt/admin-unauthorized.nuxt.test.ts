@@ -26,6 +26,17 @@ registerEndpoint('/api/admin/test-unauthorized', {
   }),
 })
 
+// useAdminResource : GET = chargement de la liste (vide, sans erreur) ; POST = mutation (401).
+// On veut exercer UNIQUEMENT la branche mutationError du watcher.
+registerEndpoint('/api/admin/test-unauthorized-resource', {
+  handler: defineEventHandler((event) => {
+    if (event.method === 'POST') {
+      throw createError({ statusCode: 401, statusMessage: 'Non authentifié' })
+    }
+    return []
+  }),
+})
+
 describe('handleAdminUnauthorized', () => {
   beforeEach(() => {
     clear.mockClear()
@@ -53,5 +64,21 @@ describe('handleAdminUnauthorized', () => {
     await vi.waitFor(() => expect(navigate).toHaveBeenCalled())
     expect(clear).toHaveBeenCalled()
     expect(navigate).toHaveBeenCalledWith({ path: ADMIN_LOGIN_PATH, query: { redirect: '/admin/messages' } })
+  })
+
+  it('useAdminResource : un 401 pendant une mutation déclenche le traitement (session vidée + navigation)', async () => {
+    const Host = defineComponent({
+      setup() {
+        const resource = useAdminResource<{ uuid: string }, Record<string, unknown>>({
+          endpoint: '/api/admin/test-unauthorized-resource',
+        })
+        void resource.create({}).catch(() => undefined)
+        return () => null
+      },
+    })
+    await mountSuspended(Host, { route: '/admin/contenu' })
+    await vi.waitFor(() => expect(navigate).toHaveBeenCalled())
+    expect(clear).toHaveBeenCalled()
+    expect(navigate).toHaveBeenCalledWith({ path: ADMIN_LOGIN_PATH, query: { redirect: '/admin/contenu' } })
   })
 })
