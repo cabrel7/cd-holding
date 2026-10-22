@@ -3,7 +3,7 @@
 // du prototype (Header.tsx / SubHeader.tsx) par un seul composant générique piloté par `variant`.
 import { ArrowLeft, Menu, X } from '@lucide/vue'
 import { useWindowScroll } from '@vueuse/core'
-import { contactPath, type NavItem } from '#shared/config/sites'
+import { contactPath, HOLDING_SLUG, type NavItem } from '#shared/config/sites'
 import type { PublicSite } from '#shared/types/public'
 
 const props = defineProps<{
@@ -44,10 +44,29 @@ const groupeWords = computed(() => props.groupe.trim().split(/\s+/).filter(Boole
 const groupeLead = computed(() => groupeWords.value.slice(0, -1).join(' '))
 const groupeLast = computed(() => groupeWords.value.at(-1) ?? props.groupe)
 
-const contactTo = computed(() => contactPath(props.site.slug))
+// CTA contact : via siteHref (spec lot 8, D7) — nu en mode sous-domaine, préfixé en chemin.
+const { href } = useSiteLinks()
+const contactTo = computed(() => href(props.site.slug, contactPath(props.site.slug)).to)
+
+// « Retour au {{ groupe }} » : en mode sous-domaine `/` est l'accueil de la FILIALE
+// (dispatcher), plus celui du groupe — même traduction que le footer (href holding).
+const lienGroupe = computed(() => href(HOLDING_SLUG, '/').to)
+
+// En prod sous-domaine, le path SSR arrive préfixé (réécriture Nginx amont) alors que les
+// href de nav sont nus : normaliser le path courant (strip du préfixe de site) avant
+// comparaison — sinon aucun item actif au premier paint + mismatch d'hydratation (revue M1).
+const cheminCourant = computed(() => {
+  const { mode, slug } = useSiteHost().value
+  const prefixe = `/${props.site.slug}`
+  if (mode === 'sous-domaine' && slug === props.site.slug) {
+    if (route.path === prefixe) return '/'
+    if (route.path.startsWith(`${prefixe}/`)) return route.path.slice(prefixe.length)
+  }
+  return route.path
+})
 
 function isActive(item: NavItem): boolean {
-  return !item.hash && route.path === item.to
+  return !item.hash && cheminCourant.value === item.to
 }
 </script>
 
@@ -66,7 +85,7 @@ function isActive(item: NavItem): boolean {
         </template>
         <template v-else>
           <NuxtLink
-            to="/"
+            :to="lienGroupe"
             class="hidden min-h-11 items-center gap-1 text-xs font-medium uppercase tracking-widest text-ink/75 transition-colors hover:text-navy lg:inline-flex"
           >
             <ArrowLeft :size="14" aria-hidden="true" /> {{ groupe }}
@@ -85,6 +104,7 @@ function isActive(item: NavItem): boolean {
           :to="item.hash ? { path: item.to, hash: item.hash } : item.to"
           class="inline-flex min-h-11 items-center whitespace-nowrap text-sm font-medium transition-colors hover:text-navy"
           :class="isActive(item) ? 'text-navy' : 'text-ink/75'"
+          :aria-current="isActive(item) ? 'page' : undefined"
         >
           {{ item.label }}
         </NuxtLink>
@@ -119,7 +139,7 @@ function isActive(item: NavItem): boolean {
         <div class="flex flex-col gap-1 px-6 py-4">
           <NuxtLink
             v-if="variant === 'filiale'"
-            to="/"
+            :to="lienGroupe"
             class="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-ink/70"
           >
             <ArrowLeft :size="14" aria-hidden="true" /> Retour au {{ groupe }}
@@ -129,6 +149,7 @@ function isActive(item: NavItem): boolean {
             :key="item.label"
             :to="item.hash ? { path: item.to, hash: item.hash } : item.to"
             class="inline-flex min-h-11 items-center text-base font-medium text-navy"
+            :aria-current="isActive(item) ? 'page' : undefined"
           >
             {{ item.label }}
           </NuxtLink>

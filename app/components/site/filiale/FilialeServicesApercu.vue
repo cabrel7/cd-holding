@@ -24,6 +24,7 @@ const props = defineProps<{
 defineEmits<{ retry: [] }>()
 
 const { reveal } = useReveal()
+const { href } = useSiteLinks()
 
 const apercu = computed(() => props.services?.slice(0, APERCU_COLLECTION) ?? null)
 const empty = computed(() => !props.pending && !props.error && !apercu.value?.length)
@@ -39,7 +40,7 @@ function numero(index: number): string {
       <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <SectionHeading v-if="heading" :section="heading" tone="clair" class="max-w-xl" />
         <NuxtLink
-          :to="`/${slug}/services`"
+          :to="href(props.slug, '/services').to"
           class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-navy hover:opacity-80"
         >
           Voir tous les services

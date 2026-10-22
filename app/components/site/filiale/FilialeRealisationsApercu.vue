@@ -22,6 +22,7 @@ const props = defineProps<{
 defineEmits<{ retry: [] }>()
 
 const { reveal } = useReveal()
+const { href } = useSiteLinks()
 
 const empty = computed(() => !props.pending && !props.error && !props.realisations?.length)
 
@@ -39,7 +40,7 @@ const colsClass = computed(() => {
       <div class="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <SectionHeading v-if="heading" :section="heading" tone="sombre" class="max-w-xl" />
         <NuxtLink
-          :to="`/${slug}/realisations`"
+          :to="href(props.slug, '/realisations').to"
           class="inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-cream hover:opacity-80"
         >
           Voir toutes les réalisations

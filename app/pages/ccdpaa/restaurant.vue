@@ -5,11 +5,18 @@
 // /api/public/restaurant) — jamais en dur (écart assumé au prototype, qui les codait en dur).
 import type { FormulaireData, HeroData, SeoData } from '@/composables/useSiteSections'
 import type { PublicRestaurantDto } from '#shared/types/public'
-import { libelleHeure, libelleJoursOuverture } from '#shared/utils/restaurant'
+import { libelleHeure, libelleJoursOuverture, RESTAURANT_SLUG } from '#shared/utils/restaurant'
 import SiteImage from '@/components/site/SiteImage.vue'
 import TexteAccentue from '@/components/site/TexteAccentue.vue'
 import ReservationForm from '@/components/site/restaurant/ReservationForm.vue'
 import { Button } from '@/components/ui/button'
+
+definePageMeta({
+  // Gate du mode chemin (spec lot 8, D4) : forme préfixée (mode chemin, prod réécrit par Nginx)
+  // ou chemin nu `/restaurant` servi sur `ccdpaa.<domaine>`. Ailleurs → 404, comme aujourd'hui.
+  validate: (route) =>
+    route.path.startsWith(`/${RESTAURANT_SLUG}/`) || useSiteHost().value.slug === RESTAURANT_SLUG,
+})
 
 /** Type catalogue `galerie` (RESTAURANT:menu), miroir de `galerieSchema` (shared/content/sections/types.ts). */
 interface GalerieItemData {
@@ -25,6 +32,10 @@ interface GalerieData {
 }
 
 const slug = useCurrentSiteSlug()
+const liens = useSiteLinks()
+// Chemin **nu** vers le contact de la filiale : `siteHref` applique lui-même le préfixe (mode
+// chemin), le laisse nu (sous-domaine) ou construit l'URL absolue (hôte connu) — spec lot 8 D7.
+const lienContact = computed(() => liens.href(RESTAURANT_SLUG, '/contact').to)
 
 const { data: site } = await useSite(slug)
 const {
@@ -173,7 +184,7 @@ useSeoMeta({
             <a :href="`tel:${telephoneHref}`" class="font-semibold underline underline-offset-2 hover:text-site-accent-strong">{{ site.telephone }}</a>
           </template>
           ou via la
-          <NuxtLink to="/ccdpaa/contact" class="underline underline-offset-2 hover:text-site-accent-strong">page contact</NuxtLink>.
+          <NuxtLink :to="lienContact" class="underline underline-offset-2 hover:text-site-accent-strong">page contact</NuxtLink>.
         </p>
       </div>
     </section>

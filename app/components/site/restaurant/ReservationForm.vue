@@ -69,6 +69,10 @@ const { handleSubmit, resetForm, values, setFieldValue } = useForm<ReservationFo
 
 const { envoyer, envoiEnCours, verrouille, soumettre } = usePublicFormSubmit<ReservationBody>('/api/public/restaurant/reservations')
 const { notifierResultat } = usePublicFormFeedback()
+const { href } = useSiteLinks()
+
+// Lien contact (D7) : nu sur le sous-domaine ccdpaa, préfixé /ccdpaa ailleurs (dev inchangé).
+const lienContact = computed(() => href('ccdpaa', '/contact').to)
 
 // Bornes de date posées seulement après hydratation : les figer au rendu serveur les daterait
 // du moment du build/ISR (même raison que ChampContact pour `date-future`).
@@ -212,7 +216,7 @@ const onSubmit = soumettre(handleSubmit(
           </div>
           <p class="-mt-2 text-xs text-white/85">
             Plus de {{ reglages.capaciteMaxReservation }} personnes ?
-            <NuxtLink to="/ccdpaa/contact" class="rounded-sm py-3 underline underline-offset-2 hover:text-white" :class="FOCUS_CARTE_SOMBRE">Écrivez-nous</NuxtLink>
+            <NuxtLink :to="lienContact" class="rounded-sm py-3 underline underline-offset-2 hover:text-white" :class="FOCUS_CARTE_SOMBRE">Écrivez-nous</NuxtLink>
           </p>
 
           <FormField v-slot="{ componentField }" name="notes">

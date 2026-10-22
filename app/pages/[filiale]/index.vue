@@ -3,7 +3,8 @@
 // charpente que a-propos.vue). Un seul composant pour les 3 formes (standard, duo audiences ou
 // métiers) : le duo s'affiche si `sections.audiences ?? sections.metiers` existe, aucun `if` par
 // slug — seules les cibles de ses liens viennent de `FILIALE_DUO_LIENS` (spec §0, §4).
-import { contactPath, FILIALE_DUO_LIENS, isFilialeSlug } from '#shared/config/sites'
+import { contactPath, FILIALE_DUO_LIENS, FILIALE_SLUGS, isFilialeSlug } from '#shared/config/sites'
+import { cheminRelatif } from '#shared/utils/site-links'
 import type { FilialeSlug } from '#shared/config/sites'
 import { APERCU_COLLECTION } from '#shared/config/public'
 import type { PublicRealisationDto, PublicServiceDto } from '#shared/types/public'
@@ -16,12 +17,23 @@ import SectionCta from '@/components/site/SectionCta.vue'
 import { Button } from '@/components/ui/button'
 
 definePageMeta({
-  validate: (route) => isFilialeSlug(String(route.params.filiale)),
+  // Gate du mode chemin (spec lot 8, D4) : paramètre de route (forme préfixée) ou slug résolu
+  // de l'hôte (forme nue sur un sous-domaine filiale). Un paramètre présent mais invalide reste
+  // un 404 — on ne retombe jamais sur l'hôte.
+  validate: (route) => {
+    const param = route.params.filiale
+    if (typeof param === 'string') return isFilialeSlug(param)
+    const hote = useSiteHost().value.slug
+    return hote !== undefined && isFilialeSlug(hote)
+  },
 })
 
-const route = useRoute()
-// Validé par `definePageMeta.validate` ci-dessus : le paramètre est toujours un FilialeSlug ici.
-const slug = computed<FilialeSlug>(() => String(route.params.filiale) as FilialeSlug)
+// Résolu par l'hôte autant que par le paramètre : le dispatcher racine rend aussi ce composant
+// (`<filiale>.localhost/` n'a aucun paramètre de route).
+const slugCourant = useCurrentSiteSlug()
+// `validate` garantit une filiale avant le rendu — repli jamais atteint (holding ne rend jamais
+// cette page), il n'est là que pour satisfaire le type.
+const slug = computed<FilialeSlug>(() => (isFilialeSlug(slugCourant.value) ? slugCourant.value : FILIALE_SLUGS[0]))
 
 const { data: site } = await useSite(slug)
 const {
@@ -42,12 +54,23 @@ const {
   refresh: refreshRealisations,
 } = await useSiteCollection<PublicRealisationDto, 'realisations'>(slug, 'realisations', { limit: APERCU_COLLECTION })
 
-const nomCourt = computed(() => site.value?.nomCourt ?? site.value?.nom ?? String(route.params.filiale))
+const nomCourt = computed(() => site.value?.nomCourt ?? site.value?.nom ?? slug.value)
 
 const seo = computed(() => sections.value?.seo as SeoData | undefined)
 const hero = computed(() => sections.value?.hero as HeroData | undefined)
 const duo = computed(() => (sections.value?.audiences ?? sections.value?.metiers) as DuoData | undefined)
-const duoLiens = computed(() => FILIALE_DUO_LIENS[slug.value])
+// Liens du duo et CTA traduits via siteHref (revue M3) : nu en sous-domaine, préfixé en chemin.
+const { href } = useSiteLinks()
+const duoLiens = computed(() => {
+  const liens = FILIALE_DUO_LIENS[slug.value]
+  if (!liens) return undefined
+  return {
+    ...liens,
+    a: href(slug.value, cheminRelatif(slug.value, liens.a)).to,
+    b: href(slug.value, cheminRelatif(slug.value, liens.b)).to,
+  }
+})
+const lienContact = computed(() => href(slug.value, contactPath(slug.value)).to)
 const servicesHeading = computed(() => sections.value?.services as SectionData | undefined)
 const realisationsHeading = computed(() => sections.value?.realisations as SectionData | undefined)
 const cta = computed(() => sections.value?.cta as CtaData | undefined)
@@ -93,6 +116,6 @@ useSeoMeta({
       @retry="refreshRealisations()"
     />
 
-    <SectionCta v-if="cta" :cta="cta" :to="contactPath(slug)" />
+    <SectionCta v-if="cta" :cta="cta" :to="lienContact" />
   </template>
 </template>

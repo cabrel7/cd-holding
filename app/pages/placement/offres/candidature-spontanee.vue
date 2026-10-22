@@ -2,10 +2,18 @@
 // Candidature spontanée (spec docs/specs/lot3-pages-specifiques.md §4, écart assumé #2 : route
 // dédiée plutôt qu'une ancre sous la liste des offres — le formulaire est trop long pour tenir
 // sous une simple ancre, et la règle du projet est « routes réelles, jamais d'ancre »).
+import { PLACEMENT_SLUG } from '#shared/config/candidature'
 import { interpoler } from '#shared/utils/texte'
 import type { FormulaireData, SeoData } from '@/composables/useSiteSections'
 import CandidatureForm from '@/components/site/placement/CandidatureForm.vue'
 import { Button } from '@/components/ui/button'
+
+definePageMeta({
+  // Gate du mode chemin (spec lot 8, D4) : forme préfixée (mode chemin, prod réécrit par Nginx)
+  // ou chemin nu servi sur `placement.<domaine>`. Ailleurs → 404, comme aujourd'hui.
+  validate: (route) =>
+    route.path.startsWith(`/${PLACEMENT_SLUG}/`) || useSiteHost().value.slug === PLACEMENT_SLUG,
+})
 
 const slug = useCurrentSiteSlug()
 const { data: site } = await useSite(slug)

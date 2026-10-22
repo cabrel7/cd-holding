@@ -13,10 +13,19 @@ import EtatCollection from '@/components/site/EtatCollection.vue'
 import { Button } from '@/components/ui/button'
 
 definePageMeta({
-  validate: (route) => isFilialeSlug(String(route.params.filiale)),
+  // Gate du mode chemin (spec lot 8, D4) : paramètre de route (forme préfixée) ou slug résolu
+  // de l'hôte (forme nue sur un sous-domaine filiale). Un paramètre présent mais invalide reste
+  // un 404 — on ne retombe jamais sur l'hôte.
+  validate: (route) => {
+    const param = route.params.filiale
+    if (typeof param === 'string') return isFilialeSlug(param)
+    const hote = useSiteHost().value.slug
+    return hote !== undefined && isFilialeSlug(hote)
+  },
 })
 
-const route = useRoute()
+// Résolu aussi par l'hôte : le dispatcher racine rend ce composant sans paramètre de route
+// (`<filiale>.localhost/a-propos`).
 const slug = useCurrentSiteSlug()
 
 const { data: site } = await useSite(slug)
@@ -40,7 +49,7 @@ const {
 
 const { reveal } = useReveal()
 
-const nomCourt = computed(() => site.value?.nomCourt ?? site.value?.nom ?? String(route.params.filiale))
+const nomCourt = computed(() => site.value?.nomCourt ?? site.value?.nom ?? slug.value)
 const vars = computed(() => ({ nomCourt: nomCourt.value, nom: site.value?.nom }))
 
 const seo = computed(() => sections.value?.seo as SeoData | undefined)

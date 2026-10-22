@@ -22,6 +22,7 @@ const props = defineProps<{
 defineEmits<{ retry: [] }>()
 
 const { reveal } = useReveal()
+const { href } = useSiteLinks()
 
 const empty = computed(() => !props.pending && !props.error && !props.filiales?.length)
 
@@ -106,7 +107,7 @@ const enTete = computed<SectionData | undefined>(() =>
               <p v-if="f.description" class="mt-5 leading-relaxed text-ink/75">{{ f.description }}</p>
 
               <NuxtLink
-                :to="`/${f.slug}`"
+                :to="href(f.slug, '/').to"
                 class="group mt-3 -mb-3 inline-flex min-h-11 items-center gap-2 py-3 font-display text-sm font-semibold text-navy"
               >
                 <span class="border-b-2 border-site-accent pb-0.5 transition-colors">

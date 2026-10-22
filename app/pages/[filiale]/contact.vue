@@ -13,13 +13,21 @@ import SuggestionProduitForm from '@/components/site/contact/SuggestionProduitFo
 import { Button } from '@/components/ui/button'
 
 definePageMeta({
-  validate: (route) => isFilialeSlug(String(route.params.filiale)),
+  // Gate du mode chemin (spec lot 8, D4) : paramètre de route (forme préfixée) ou slug résolu
+  // de l'hôte (forme nue sur un sous-domaine filiale). Un paramètre présent mais invalide reste
+  // un 404 — on ne retombe jamais sur l'hôte.
+  validate: (route) => {
+    const param = route.params.filiale
+    if (typeof param === 'string') return isFilialeSlug(param)
+    const hote = useSiteHost().value.slug
+    return hote !== undefined && isFilialeSlug(hote)
+  },
 })
 
-const route = useRoute()
 // `useCurrentSiteSlug` renvoie `SiteSlug` (holding compris) : narrowé ici vers les 6 filiales à
-// formulaire. Le repli n'est jamais atteint en pratique — `definePageMeta.validate` (isFilialeSlug)
-// bloque toute autre valeur avant que ce composant ne se monte.
+// formulaire. Le repli n'est jamais atteint en pratique — `definePageMeta.validate` (paramètre ou
+// hôte) bloque toute autre valeur avant que ce composant ne se monte. Le dispatcher racine rend
+// aussi ce composant sans paramètre de route, d'où la résolution par l'hôte.
 const slugBrut = useCurrentSiteSlug()
 const slug = computed<FormulaireFilialeSlug>(() =>
   estFormulaireFiliale(slugBrut.value) ? slugBrut.value : FORMULAIRES_FILIALES[0],
@@ -33,7 +41,7 @@ const {
   refresh: refreshSections,
 } = await useSiteSections(slug, 'CONTACT')
 
-const nomCourt = computed(() => site.value?.nomCourt ?? site.value?.nom ?? String(route.params.filiale))
+const nomCourt = computed(() => site.value?.nomCourt ?? site.value?.nom ?? slug.value)
 const vars = computed(() => ({ nomCourt: nomCourt.value, nom: site.value?.nom }))
 
 const seo = computed(() => sections.value?.seo as SeoData | undefined)

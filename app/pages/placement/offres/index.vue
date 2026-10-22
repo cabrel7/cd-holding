@@ -3,7 +3,7 @@
 // #1-#2 : H1 éditable + compteur séparé — jamais « 0 mandats » comme le prototype — et CTA vers
 // une page de candidature spontanée dédiée). Route statique : `/placement` reste servi par
 // `[filiale]/index.vue`, `useCurrentSiteSlug` résout `placement` au premier segment du chemin.
-import { CANDIDATURE_SPONTANEE_PATH } from '#shared/config/candidature'
+import { CANDIDATURE_SPONTANEE_PATH, PLACEMENT_SLUG } from '#shared/config/candidature'
 import { interpoler } from '#shared/utils/texte'
 import type { PublicOffreDto } from '#shared/types/public'
 import type { CtaData, SectionData, SeoData } from '@/composables/useSiteSections'
@@ -12,6 +12,13 @@ import SectionCta from '@/components/site/SectionCta.vue'
 import TexteAccentue from '@/components/site/TexteAccentue.vue'
 import OffreLigne from '@/components/site/placement/OffreLigne.vue'
 import { Button } from '@/components/ui/button'
+
+definePageMeta({
+  // Gate du mode chemin (spec lot 8, D4) : forme préfixée (mode chemin, prod réécrit par Nginx)
+  // ou chemin nu servi sur `placement.<domaine>`. Ailleurs → 404, comme aujourd'hui.
+  validate: (route) =>
+    route.path.startsWith(`/${PLACEMENT_SLUG}/`) || useSiteHost().value.slug === PLACEMENT_SLUG,
+})
 
 const VIDE_TITRE = 'Aucune offre ouverte pour le moment'
 const VIDE_TEXTE = 'Nos postes changent souvent : envoyez-nous votre candidature et nous vous recontacterons dès qu’un poste correspond à votre profil.'

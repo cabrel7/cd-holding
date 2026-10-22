@@ -3,6 +3,7 @@
 // pied de page holding (liste des 6 filiales) ; son absence bascule vers le lien "Retour au
 // Groupe CD" du prototype filiale (SubFooter.tsx).
 import { ArrowUpRight, ExternalLink, Mail, MapPin, Phone } from '@lucide/vue'
+import { HOLDING_SLUG } from '#shared/config/sites'
 import type { PublicSite, PublicSiteSummary } from '#shared/types/public'
 import TexteAccentue from './TexteAccentue.vue'
 
@@ -12,6 +13,13 @@ const props = defineProps<{
   filiales?: readonly PublicSiteSummary[]
 }>()
 
+const { href } = useSiteLinks()
+
+// Liens traduits (lot 8, D7) : inter-sites absolus depuis un hôte connu, préfixés en dev
+// (inchangé), nus depuis le sous-domaine lui-même. Le « retour au groupe » vise la holding.
+const lienRetourGroupe = computed(() => href(HOLDING_SLUG, '/').to)
+const lienMentionsLegales = computed(() => href(props.site.slug, '/mentions-legales').to)
+
 const isHolding = computed(() => props.filiales !== undefined)
 const annee = new Date().getFullYear()
 
@@ -19,6 +27,15 @@ const piedDePageTexte = computed(() => {
   const donnees = props.site.commun.piedDePage
   const texte = donnees?.texte
   return typeof texte === 'string' ? texte : null
+})
+
+// Mention alcool (catalogue COMMUN:mentionAlcool, portée boissons — RACJ/Éduc'alcool, Q-07).
+// Sa présence sert aussi de condition au lien « Mentions légales » : seuls les sites qui
+// affichent la mention réglementaire ont la page /{slug}/mentions-legales (spec
+// lot7-mentions-legales.md, D5 — emplacement à confirmer par le client, dossier juriste q. 10).
+const mentionAlcool = computed(() => {
+  const texte = props.site.commun.mentionAlcool?.texte
+  return typeof texte === 'string' && texte !== '' ? texte : null
 })
 
 const reseaux = computed(() =>
@@ -66,7 +83,7 @@ const reseaux = computed(() =>
           </div>
           <NuxtLink
             v-else
-            to="/"
+            :to="lienRetourGroupe"
             class="group mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-semibold text-cream"
           >
             <span class="border-b border-cream/40 pb-0.5">Retour au {{ groupe }}</span>
@@ -82,7 +99,10 @@ const reseaux = computed(() =>
           <h5 class="font-display text-xs font-semibold uppercase tracking-widest text-gold">Nos filiales</h5>
           <ul class="mt-2 text-sm">
             <li v-for="filiale in filiales" :key="filiale.uuid">
-              <NuxtLink :to="`/${filiale.slug}`" class="inline-flex min-h-11 items-center text-cream/80 transition-colors hover:text-gold">
+              <NuxtLink
+                :to="href(filiale.slug, '/').to"
+                class="inline-flex min-h-11 items-center text-cream/80 transition-colors hover:text-gold"
+              >
                 {{ filiale.nom }}
               </NuxtLink>
             </li>
@@ -97,7 +117,7 @@ const reseaux = computed(() =>
           </ul>
         </div>
 
-        <div :class="isHolding ? 'md:col-span-3' : 'md:col-span-3'">
+        <div v-if="reseaux.length" :class="isHolding ? 'md:col-span-3' : 'md:col-span-3'">
           <h5
             class="font-display text-xs font-semibold uppercase tracking-widest"
             :class="isHolding ? 'text-gold' : 'text-cream/60'"
@@ -121,13 +141,23 @@ const reseaux = computed(() =>
         </div>
       </div>
 
-      <div
-        class="mt-14 flex flex-col justify-between gap-4 border-t border-cream/10 pt-6 text-xs text-cream/60 md:flex-row"
-      >
-        <p v-if="isHolding">© {{ annee }} {{ groupe }}. Tous droits réservés.</p>
-        <p v-else>© {{ annee }} {{ site.nom }} — Une filiale du {{ groupe }}.</p>
-        <div class="flex gap-6">
-          <NuxtLink to="/confidentialite" class="inline-flex min-h-11 items-center hover:text-gold">Politique de confidentialité</NuxtLink>
+      <div class="mt-14 border-t border-cream/10 pt-6 text-xs text-cream/60">
+        <p v-if="mentionAlcool" class="mb-4 max-w-2xl leading-relaxed">
+          <TexteAccentue :texte="mentionAlcool" as="span" />
+        </p>
+        <div class="flex flex-col justify-between gap-4 md:flex-row">
+          <p v-if="isHolding">© {{ annee }} {{ groupe }}. Tous droits réservés.</p>
+          <p v-else>© {{ annee }} {{ site.nom }} — Une filiale du {{ groupe }}.</p>
+          <div class="flex gap-6">
+            <NuxtLink
+              v-if="mentionAlcool"
+              :to="lienMentionsLegales"
+              class="inline-flex min-h-11 items-center hover:text-gold"
+            >
+              Mentions légales
+            </NuxtLink>
+            <NuxtLink to="/confidentialite" class="inline-flex min-h-11 items-center hover:text-gold">Politique de confidentialité</NuxtLink>
+          </div>
         </div>
       </div>
     </div>

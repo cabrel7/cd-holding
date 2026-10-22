@@ -5,7 +5,14 @@ import { isFilialeSlug } from '#shared/config/sites'
 import RealisationsListe from '@/components/site/realisations/RealisationsListe.vue'
 
 definePageMeta({
-  validate: (route) => isFilialeSlug(String(route.params.filiale)),
+  // Gate du mode chemin (spec lot 8, D4) : paramètre de route (forme préfixée) ou slug résolu
+  // de l'hôte. Un paramètre présent mais invalide reste un 404.
+  validate: (route) => {
+    const param = route.params.filiale
+    if (typeof param === 'string') return isFilialeSlug(param)
+    const hote = useSiteHost().value.slug
+    return hote !== undefined && isFilialeSlug(hote)
+  },
 })
 
 const slug = useCurrentSiteSlug()

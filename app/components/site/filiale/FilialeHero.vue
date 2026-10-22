@@ -22,6 +22,9 @@ const props = defineProps<{
 }>()
 
 const siteVars = useSiteTextVars()
+// CTA contact via siteHref (spec lot 8, D7) — nu en mode sous-domaine, préfixé en chemin.
+const { href } = useSiteLinks()
+const lienContact = computed(() => href(props.slug, contactPath(props.slug)).to)
 const imageKey = computed(() => props.hero?.imageKey ?? props.fallbackImageKey)
 const imageAlt = computed(() => interpoler(props.hero?.imageAlt ?? props.nomCourt, siteVars.value))
 </script>
@@ -71,7 +74,7 @@ const imageAlt = computed(() => interpoler(props.hero?.imageAlt ?? props.nomCour
           class="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 mt-10"
         >
           <NuxtLink
-            :to="contactPath(slug)"
+            :to="lienContact"
             class="group inline-flex min-h-11 items-center gap-2 rounded-full bg-navy px-7 py-4 text-sm font-semibold text-cream transition-transform hover:-translate-y-0.5"
           >
             {{ hero.ctaLibelle ?? 'Nous contacter' }}

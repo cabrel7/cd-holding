@@ -5,10 +5,12 @@
 import 'dotenv/config'
 import { defineConfig } from '@playwright/test'
 
-// Révision Chromium attendue par @playwright/test (1234) non installée dans le cache par
-// défaut de la version courante — chemin exact fourni par l'environnement d'exécution.
-// N'installe JAMAIS de navigateur ici (`playwright install` interdit, voir skill playwright).
-const CHROMIUM_PATH_DEFAULT = '/home/cabrel/.cache/ms-playwright/chromium-1234/chrome-linux64/chrome'
+// Navigateur : la révision Chromium attendue par @playwright/test (1234, cf. `chromium-1234`)
+// n'est PAS installée sur cette machine (`~/.cache/ms-playwright` est vide). Selon `PW_CHROMIUM_PATH`
+// ou la valeur ci-dessous, on pointe un binaire Chromium-family pilotable : c'est Brave (chromium)
+// qui est disponible ici. N'installe JAMAIS de navigateur (`playwright install` interdit, voir skill
+// playwright) — fournir le chemin via l'environnement d'exécution.
+const CHROMIUM_PATH_DEFAULT = '/opt/brave.com/brave/brave'
 
 export default defineConfig({
   testDir: 'tests/e2e',
@@ -31,6 +33,8 @@ export default defineConfig({
     navigationTimeout: 45_000,
     launchOptions: {
       executablePath: process.env.PW_CHROMIUM_PATH || CHROMIUM_PATH_DEFAULT,
+      // Brave (comme Chromium en conteneur) exige --no-sandbox hors environnement graphique standard.
+      args: ['--no-sandbox'],
     },
   },
 
@@ -41,13 +45,15 @@ export default defineConfig({
   // et doivent tourner desktop + mobile. Idem pour les pages filiales du lot 1
   // (`filiale-accueil`, `filiale-services`, `realisations`, `confidentialite`, spec
   // docs/specs/lot1-pages-filiales.md §5 T3) — parcours publics à revalider aux 2 largeurs.
+  // `admin-parametres.spec.ts` (lot 5, docs/specs/lot5-parametres.md §8) a un critère mobile
+  // explicite : dialog de changement de mot de passe et cibles ≥ 44 px vérifiés à 375 px.
   // Les autres fichiers (mutations CMS, sécurité API, maintenance) ne gagnent rien à tourner
   // 3 fois sur un état DB partagé — ils ne tournent que sur le projet "desktop".
   projects: [
     {
       name: 'mobile',
       use: { viewport: { width: 375, height: 812 } },
-      testMatch: /(layout-accent|home|admin-site|admin-shell|admin-messages|admin-clients|contact|contact-filiales|filiale-accueil|filiale-services|realisations|confidentialite)\.spec\.ts/,
+      testMatch: /(layout-accent|home|admin-site|admin-shell|admin-messages|admin-clients|admin-placement|admin-reservations|admin-planning|admin-comptable|admin-parametres|admin-utilisateurs|contact|contact-filiales|filiale-accueil|filiale-services|realisations|confidentialite|mentions-legales)\.spec\.ts/,
     },
     { name: 'tablet', use: { viewport: { width: 768, height: 1024 } }, testMatch: /(layout-accent|admin-shell)\.spec\.ts/ },
     { name: 'desktop', use: { viewport: { width: 1440, height: 900 } } },

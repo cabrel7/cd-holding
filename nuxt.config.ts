@@ -25,7 +25,17 @@ export default defineNuxtConfig({
   compatibilityDate: '2026-01-01',
   devtools: { enabled: true },
 
-  modules: ['@pinia/nuxt', '@vueuse/nuxt', '@vueuse/motion/nuxt', 'nuxt-auth-utils', 'shadcn-nuxt', 'nuxt-security'],
+  // `bare-routes` (lot 8, D4) : duplique les pages en chemins nus + arborescence admin sans
+  // préfixe — chemin relatif, un module local n'est pas résolu comme une dépendance npm.
+  modules: [
+    '@pinia/nuxt',
+    '@vueuse/nuxt',
+    '@vueuse/motion/nuxt',
+    'nuxt-auth-utils',
+    'shadcn-nuxt',
+    'nuxt-security',
+    './modules/bare-routes.ts',
+  ],
 
   css: ['~/assets/css/main.css'],
 
@@ -118,6 +128,18 @@ export default defineNuxtConfig({
         // ce qui couvre le CSRF sans dépendre d'un token (voir skill nitro).
         sameSite: 'strict',
       },
+    },
+  },
+
+  // Tâches planifiées (lot 5, Loi 25). `experimental.tasks` est requis pour que Nitro scanne
+  // `server/tasks/**` (sans lui, `scheduledTasks` référence une tâche inexistante et Nitro avertit
+  // sans jamais l'exécuter). Le nom vient du fichier : `server/tasks/anonymisation-loi25.ts`.
+  // Le garde-fou cluster (TaskExecution, server/services/tasks.ts) empêche une double exécution
+  // en PM2 `-i max` — le cron, lui, se déclenche sur chaque worker.
+  nitro: {
+    experimental: { tasks: true },
+    scheduledTasks: {
+      '0 2 * * *': ['anonymisation-loi25'],
     },
   },
 

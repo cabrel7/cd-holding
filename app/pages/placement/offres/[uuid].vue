@@ -4,7 +4,7 @@
 // 375px, le lien est partageable, et la page porte le JSON-LD JobPosting). 404 (fatal) si l'uuid
 // est malformé (garde `validate`) ou si l'offre est absente/retirée/incomplète côté serveur.
 import { ArrowLeft, Banknote, Briefcase, MapPin } from '@lucide/vue'
-import { OFFRES_PATH, TYPE_CONTRAT_SCHEMA_ORG, TYPES_CONTRAT } from '#shared/config/candidature'
+import { OFFRES_PATH, PLACEMENT_SLUG, TYPE_CONTRAT_SCHEMA_ORG, TYPES_CONTRAT } from '#shared/config/candidature'
 import type { PublicOffreDto } from '#shared/types/public'
 import type { FormulaireData } from '@/composables/useSiteSections'
 import CandidatureForm from '@/components/site/placement/CandidatureForm.vue'
@@ -12,12 +12,18 @@ import CandidatureForm from '@/components/site/placement/CandidatureForm.vue'
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
 
 definePageMeta({
-  validate: (route) => UUID_PATTERN.test(String(route.params.uuid)),
+  // Garde uuid (malformé → 404) + gate du mode chemin (spec lot 8, D4) : forme préfixée (mode
+  // chemin, prod réécrit par Nginx) ou chemin nu servi sur `placement.<domaine>`.
+  validate: (route) => {
+    if (!UUID_PATTERN.test(String(route.params.uuid))) return false
+    return route.path.startsWith(`/${PLACEMENT_SLUG}/`) || useSiteHost().value.slug === PLACEMENT_SLUG
+  },
 })
 
 const route = useRoute()
 const uuid = computed(() => String(route.params.uuid))
 const slug = useCurrentSiteSlug()
+const liens = useSiteLinks()
 
 const { data: site } = await useSite(slug)
 const { data: sections } = await useSiteSections(slug, 'OFFRES')
@@ -42,28 +48,35 @@ useSeoMeta({
 // JSON-LD JobPosting — jamais `entrepriseCliente` (le DTO public ne l'expose de toute façon
 // pas) : l'organisme qui recrute affiché aux moteurs de recherche est toujours Placement CD Pro.
 // Échappement `<` → `<` : évite qu'une valeur éditée injecte une balise dans le script inline.
-useHead(() => ({
-  script: offre.value
-    ? [
-        {
-          type: 'application/ld+json',
-          innerHTML: JSON.stringify({
-            '@context': 'https://schema.org/',
-            '@type': 'JobPosting',
-            title: offre.value.titre,
-            description: offre.value.description,
-            datePosted: offre.value.publieeLe,
-            employmentType: TYPE_CONTRAT_SCHEMA_ORG[offre.value.typeContrat],
-            hiringOrganization: { '@type': 'Organization', name: 'Placement CD Pro' },
-            jobLocation: {
-              '@type': 'Place',
-              address: { '@type': 'PostalAddress', addressLocality: offre.value.lieu, addressCountry: 'CA' },
-            },
-          }).replace(/</g, '\\u003c'),
-        },
-      ]
-    : [],
-}))
+useHead(() => {
+  // D9 : `url` = canonique de l'offre (chemin nu sur l'hôte placement). `canonical` renvoie
+  // null tant que l'hôte est inconnu (dev/e2e) — aucune URL absolue n'est alors émise.
+  const lien = liens.canonical(route.path)
+  const url = lien === null ? null : liens.absolute(PLACEMENT_SLUG, lien)
+  return {
+    script: offre.value
+      ? [
+          {
+            type: 'application/ld+json',
+            innerHTML: JSON.stringify({
+              '@context': 'https://schema.org/',
+              '@type': 'JobPosting',
+              ...(url ? { url } : {}),
+              title: offre.value.titre,
+              description: offre.value.description,
+              datePosted: offre.value.publieeLe,
+              employmentType: TYPE_CONTRAT_SCHEMA_ORG[offre.value.typeContrat],
+              hiringOrganization: { '@type': 'Organization', name: 'Placement CD Pro' },
+              jobLocation: {
+                '@type': 'Place',
+                address: { '@type': 'PostalAddress', addressLocality: offre.value.lieu, addressCountry: 'CA' },
+              },
+            }).replace(/</g, '\\u003c'),
+          },
+        ]
+      : [],
+  }
+})
 </script>
 
 <template>

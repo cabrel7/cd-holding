@@ -1,10 +1,12 @@
 <script setup lang="ts">
-// Réalisations — holding (spec §0 : absente du prototype mais liée depuis le header, DEC-39).
-// Ne montre que les réalisations propres à la holding, pas un agrégat des filiales.
-import { HOLDING_SLUG } from '#shared/config/sites'
-import RealisationsListe from '@/components/site/realisations/RealisationsListe.vue'
+// Dispatcher racine (spec lot 8, D4) : `/realisations` sert la holding (apex, mode chemin,
+// tests) ou la filiale résolue par l'hôte. Imports synchrone → hydration stricte.
+import HoldingRealisations from '@/site-pages/holding/realisations.vue'
+import FilialeRealisations from '@/pages/[filiale]/realisations.vue'
+
+const filialeSlug = useFilialeSlug()
 </script>
 
 <template>
-  <RealisationsListe :slug="HOLDING_SLUG" />
+  <component :is="filialeSlug ? FilialeRealisations : HoldingRealisations" />
 </template>

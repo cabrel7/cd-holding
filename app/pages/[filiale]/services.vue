@@ -17,10 +17,22 @@ import SectionCta from '@/components/site/SectionCta.vue'
 import { Button } from '@/components/ui/button'
 
 definePageMeta({
-  validate: (route) => isFilialeSlug(String(route.params.filiale)),
+  // Gate du mode chemin (spec lot 8, D4) : le chemin nu `/services` n'existe que sur un
+  // sous-domaine filiale — sur l'apex ou en mode chemin, validate échoue → 404 identique à
+  // aujourd'hui. Un paramètre présent mais invalide reste un 404 (pas de repli sur l'hôte).
+  validate: (route) => {
+    const param = route.params.filiale
+    if (typeof param === 'string') return isFilialeSlug(param)
+    const hote = useSiteHost().value.slug
+    return hote !== undefined && isFilialeSlug(hote)
+  },
 })
 
 const slug = useCurrentSiteSlug()
+
+// CTA traduit via siteHref (revue M3) : nu en sous-domaine, préfixé en chemin.
+const { href } = useSiteLinks()
+const lienContact = computed(() => href(slug.value, contactPath(slug.value)).to)
 
 const { data: site } = await useSite(slug)
 const {
@@ -106,6 +118,6 @@ useSeoMeta({
       :email-secours="site?.email ?? null"
     />
 
-    <SectionCta v-if="cta" :cta="cta" :to="contactPath(slug)" variant="encadre" />
+    <SectionCta v-if="cta" :cta="cta" :to="lienContact" variant="encadre" />
   </template>
 </template>
