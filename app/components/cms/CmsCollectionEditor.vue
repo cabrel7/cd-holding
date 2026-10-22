@@ -3,6 +3,7 @@
 // spec phase 2 §4.5. Autonome : consomme useAdminResource lui-même, pas d'emits. Le site à
 // gérer est choisi une fois (sélecteur si SUPER_ADMIN a plusieurs sites), pour que la liste,
 // le réordonnancement et la création restent toujours scopés à un site sans ambiguïté.
+// Listes éditoriales courtes volontairement non paginées : réordonnancement nécessite la liste complète.
 import { computed, ref, watch } from 'vue'
 import { toast } from 'vue-sonner'
 import { ArrowDown, ArrowUp, Pencil, Plus, Trash2 } from '@lucide/vue'
@@ -18,17 +19,19 @@ import { Switch } from '@/components/ui/switch'
 import CmsDeleteDialog from './CmsDeleteDialog.vue'
 import CmsFormDialog from './CmsFormDialog.vue'
 import CmsImageThumbnail from './CmsImageThumbnail.vue'
+import { isAdminUnauthorized, watchAdminUnauthorized } from '@/utils/admin-unauthorized'
 
 const props = defineProps<{
   config: CmsResourceConfig<TItem, TForm>
 }>()
 
 // --- Sites accessibles (scopés côté serveur ; filtrés côté client par allowHolding) ---
-const { data: sitesData, status: sitesStatus } = await useFetch<AdminSiteSummary[]>('/api/admin/sites', {
+const { data: sitesData, status: sitesStatus, error: sitesError } = await useFetch<AdminSiteSummary[]>('/api/admin/sites', {
   server: false,
   key: 'admin-sites',
   default: () => [] as AdminSiteSummary[],
 })
+watchAdminUnauthorized(sitesError)
 
 const availableSites = computed<AdminSiteSummary[]>(() => {
   const sites = sitesData.value ?? []
@@ -96,6 +99,9 @@ async function handleSubmit(values: Record<string, unknown>): Promise<void> {
     formOpen.value = false
     editingItem.value = null
   } catch (e) {
+    // 401 : la redirection est déjà déclenchée par `watchAdminUnauthorized(mutationError)`
+    // dans useAdminResource — pas de toast en plus (motif des handlers).
+    if (isAdminUnauthorized(e)) return
     toast.error((e as { message: string }).message)
   } finally {
     formSubmitting.value = false
@@ -133,6 +139,7 @@ async function handleDelete(): Promise<void> {
   } catch (e) {
     // On laisse le dialog ouvert (cible conservée) pour permettre de réessayer
     // sans avoir à resélectionner la fiche ; l'utilisateur peut aussi l'annuler.
+    if (isAdminUnauthorized(e)) return
     toast.error((e as { message: string }).message)
   } finally {
     deleteSubmitting.value = false
@@ -157,6 +164,7 @@ async function move(item: TItem, direction: -1 | 1): Promise<void> {
   try {
     await reorder(next.map((i) => i.uuid))
   } catch (e) {
+    if (isAdminUnauthorized(e)) return
     toast.error((e as { message: string }).message)
   } finally {
     reordering.value = false
@@ -193,6 +201,7 @@ async function toggleFeatured(item: TItem): Promise<void> {
   try {
     await update(item.uuid, { [toggle.field]: !toggleValue(item) } as unknown as Partial<TForm>)
   } catch (e) {
+    if (isAdminUnauthorized(e)) return
     toast.error((e as { message: string }).message)
   } finally {
     togglingUuid.value = null

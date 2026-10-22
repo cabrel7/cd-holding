@@ -8,20 +8,21 @@ import type { AdminSiteSummary } from '#shared/types/admin'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import CmsSectionsEditor from '@/components/cms/CmsSectionsEditor.vue'
+import { watchAdminUnauthorized } from '@/utils/admin-unauthorized'
 
-// Chaque page /admin/contenu/** déclare son propre meta (le meta du parent `contenu.vue`
-// n'est pas hérité par les pages enfants dans le routage par fichiers de Nuxt).
+// Le meta est fusionné parent+enfant (Nuxt) : ne jamais déclarer `layout: false` ici, sinon
+// l'enfant écrase le `layout: 'admin'` du parent `contenu.vue` et la sidebar disparaît.
 definePageMeta({
-  layout: false,
   middleware: 'admin',
   roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN_FILIALE],
 })
 
-const { data: sites, status } = await useFetch<AdminSiteSummary[]>('/api/admin/sites', {
+const { data: sites, status, error } = await useFetch<AdminSiteSummary[]>('/api/admin/sites', {
   server: false,
   key: 'admin-sites',
   default: () => [] as AdminSiteSummary[],
 })
+watchAdminUnauthorized(error)
 
 const selectedSlug = ref<SiteSlug | undefined>(undefined)
 

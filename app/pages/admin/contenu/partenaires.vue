@@ -2,9 +2,9 @@
 import CmsCollectionEditor from '@/components/cms/CmsCollectionEditor.vue'
 import { partenairesConfig } from '@/config/cms-resources'
 
-// Chaque page /admin/contenu/** déclare son propre meta (non hérité du parent contenu.vue).
+// Le meta est fusionné parent+enfant (Nuxt) : ne jamais déclarer `layout: false` ici, sinon
+// l'enfant écrase le `layout: 'admin'` du parent `contenu.vue` et la sidebar disparaît.
 definePageMeta({
-  layout: false,
   middleware: 'admin',
   roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN_FILIALE],
 })

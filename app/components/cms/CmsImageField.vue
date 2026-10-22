@@ -6,6 +6,7 @@ import { ref } from 'vue'
 import { ImagePlus, Loader2, X } from '@lucide/vue'
 import { MAX_UPLOAD_BYTES, PUBLIC_IMAGE_MIMES } from '#shared/config/upload'
 import { Button } from '@/components/ui/button'
+import { handleAdminUnauthorized, isAdminUnauthorized } from '@/utils/admin-unauthorized'
 
 const props = defineProps<{
   modelValue: string | null
@@ -52,8 +53,9 @@ async function handleFileChange(event: Event): Promise<void> {
   try {
     const result = await $fetch<{ key: string }>('/api/admin/files', { method: 'POST', body })
     emit('update:modelValue', result.key)
-  } catch {
+  } catch (e) {
     uploadError.value = 'Échec du téléversement. Réessayez.'
+    if (isAdminUnauthorized(e)) void handleAdminUnauthorized()
   } finally {
     uploading.value = false
   }

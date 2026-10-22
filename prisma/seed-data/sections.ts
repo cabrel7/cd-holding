@@ -687,6 +687,9 @@ function offresPlacement(): Record<string, Donnees> {
       titre: 'Aucun poste ne correspond à votre profil ?',
       texte: 'Envoyez-nous votre candidature : nous la conservons en vue des prochains mandats à pourvoir.',
       messageSucces: 'Merci, votre candidature a bien été transmise. Un accusé de réception vous est envoyé par courriel.',
+      // À FAIRE VALIDER PAR UN JURISTE — brouillon Loi 25 (Québec), même texte que
+      // `candidature.consentement` (le composant garde un repli codé pour les bases semées avant).
+      consentement: 'J’accepte que mes renseignements soient utilisés pour traiter ma candidature, conformément à la politique de confidentialité.',
     },
   }
 }

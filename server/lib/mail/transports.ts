@@ -48,6 +48,8 @@ export function createSmtpTransport(config: SmtpTransportConfig): MailTransport 
     host: config.host,
     port: config.port,
     secure: config.secure,
+    // Auth en clair interdite : force STARTTLS (RFC 3207) hors TLS implicite (port 465).
+    requireTLS: !config.secure,
     auth: { user: config.user, pass: config.password },
     connectionTimeout: SMTP_TIMEOUT_MS,
     greetingTimeout: SMTP_TIMEOUT_MS,

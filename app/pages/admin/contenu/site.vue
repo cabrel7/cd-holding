@@ -14,15 +14,16 @@ import { Pencil } from '@lucide/vue'
 import type { SiteSlug } from '#shared/config/sites'
 import type { AdminError, AdminSiteReglages, AdminSiteSummary } from '#shared/types/admin'
 import { toAdminError } from '@/utils/admin-error'
+import { handleAdminUnauthorized, isAdminUnauthorized, watchAdminUnauthorized } from '@/utils/admin-unauthorized'
 import { siteFieldsForRole, buildSiteFormSchema } from '@/config/cms-site-fields'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Button } from '@/components/ui/button'
 import CmsFormDialog from '@/components/cms/CmsFormDialog.vue'
 
-// Chaque page /admin/contenu/** déclare son propre meta (non hérité du parent contenu.vue).
+// Le meta est fusionné parent+enfant (Nuxt) : ne jamais déclarer `layout: false` ici, sinon
+// l'enfant écrase le `layout: 'admin'` du parent `contenu.vue` et la sidebar disparaît.
 definePageMeta({
-  layout: false,
   middleware: 'admin',
   roles: [ROLES.SUPER_ADMIN, ROLES.ADMIN_FILIALE],
 })
@@ -31,11 +32,12 @@ const { user } = useUserSession()
 const isSuperAdmin = computed(() => user.value?.role === ROLES.SUPER_ADMIN)
 
 // --- Sélecteur de site : même motif que contenu/index.vue (Sections). ---
-const { data: sites, status: sitesStatus } = await useFetch<AdminSiteSummary[]>('/api/admin/sites', {
+const { data: sites, status: sitesStatus, error: sitesError } = await useFetch<AdminSiteSummary[]>('/api/admin/sites', {
   server: false,
   key: 'admin-sites',
   default: () => [] as AdminSiteSummary[],
 })
+watchAdminUnauthorized(sitesError)
 
 const selectedSlug = ref<SiteSlug | undefined>(undefined)
 
@@ -68,6 +70,9 @@ async function loadSite(uuid: string): Promise<void> {
   } catch (e) {
     siteError.value = toAdminError(e)
     siteStatus.value = 'error'
+    // Session expirée pendant le chargement : redirection (après l'état d'erreur, il ne reste
+    // qu'un écran « Réessayer » qui échouerait à nouveau).
+    if (isAdminUnauthorized(e)) void handleAdminUnauthorized()
   }
 }
 
@@ -136,6 +141,12 @@ async function handleSubmit(values: Record<string, unknown>): Promise<void> {
     toast.success('Fiche mise à jour.')
     editing.value = false
   } catch (e) {
+    // 401 : redirection vers la connexion SANS toast (motif des handlers — le toast
+    // vue-sonner survivrait au changement de page et afficherait « Session invalide »).
+    if (isAdminUnauthorized(e)) {
+      void handleAdminUnauthorized()
+      return
+    }
     toast.error(toAdminError(e).message)
   } finally {
     submitting.value = false
