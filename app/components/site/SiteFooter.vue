@@ -96,7 +96,7 @@ const reseaux = computed(() =>
         </div>
 
         <div v-if="isHolding" class="md:col-span-4">
-          <h5 class="font-display text-xs font-semibold uppercase tracking-widest text-gold">Nos filiales</h5>
+          <p class="font-display text-xs font-semibold uppercase tracking-widest text-gold">Nos filiales</p>
           <ul class="mt-2 text-sm">
             <li v-for="filiale in filiales" :key="filiale.uuid">
               <NuxtLink
@@ -109,7 +109,7 @@ const reseaux = computed(() =>
           </ul>
         </div>
         <div v-else class="md:col-span-3">
-          <h5 class="font-display text-xs font-semibold uppercase tracking-widest text-cream/60">Nous joindre</h5>
+          <p class="font-display text-xs font-semibold uppercase tracking-widest text-cream/60">Nous joindre</p>
           <ul class="mt-4 space-y-2 text-sm text-cream/85">
             <li v-if="site.email">{{ site.email }}</li>
             <li v-if="site.telephone">{{ site.telephone }}</li>
@@ -118,12 +118,12 @@ const reseaux = computed(() =>
         </div>
 
         <div v-if="reseaux.length" :class="isHolding ? 'md:col-span-3' : 'md:col-span-3'">
-          <h5
+          <p
             class="font-display text-xs font-semibold uppercase tracking-widest"
             :class="isHolding ? 'text-gold' : 'text-cream/60'"
           >
             {{ isHolding ? 'Suivez-nous' : 'Suivre' }}
-          </h5>
+          </p>
           <ul v-if="reseaux.length" class="mt-2 text-sm">
             <li v-for="r in reseaux" :key="r.label">
               <a
