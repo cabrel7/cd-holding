@@ -19,7 +19,7 @@ Nginx ; les hôtes ne sont qu'une affaire de DNS + `server_name` + réécritures
 
 Propagation : `dig +short entretien.chauvierdelor.com` pour chaque hôte.
 
-## 2. Préparation de l'app (PM2)
+## 2. Préparation de l'app (systemd — PM2 abandonné 2026-10-22)
 
 ```bash
 # .env de prod (base sur .env.example) — jamais de secret dans le dépôt
@@ -34,9 +34,14 @@ pnpm exec prisma migrate deploy                # migrations versionnées (user :
 SEED_DEMO_DATA=true pnpm db:seed              # amorçage seulement, jamais sur base déjà éditée
 pnpm build
 
-pm2 start node --name cd-holding --update-env --cwd /opt/cd-holding \
-  -- --env-file=.env .output/server/index.mjs
-pm2 save && pm2 startup   # redémarrage au reboot (user cabrel)
+# Service systemd (/etc/systemd/system/cd-holding.service) — pas PM2 :
+# pm2 startup en user ne survit pas au reboot (unit système non installable sans root,
+# Linger=no) → Bad Gateway après reboot (incident 2026-10-22). systemd system unit :
+#   User=cabrel  WorkingDirectory=/opt/cd-holding
+#   ExecStart=/usr/bin/node --env-file=/opt/cd-holding/.env .output/server/index.mjs
+#   Restart=on-failure  After=network-online.target postgresql.service
+sudo systemctl enable --now cd-holding
+# Après un build : sudo systemctl restart cd-holding
 ```
 
 Vérif locale sur le VPS : `curl -sI 127.0.0.1:3000/ | head -1` → `200`.
@@ -255,17 +260,17 @@ git pull --ff-only
 pnpm install --frozen-lockfile
 pnpm exec prisma migrate deploy          # jamais migrate reset en prod
 pnpm build
-pm2 reload cd-holding --update-env       # reload ≠ restart : zéro coupure
+sudo systemctl restart cd-holding        # ~5 s de démarrage Nitro
 ```
 
 Rejouer la §5 en accéléré (3 curl : 301, 200 sous-domaine, canonical). Rollback :
-`git checkout <tag> && pnpm build && pm2 reload cd-holding`.
+`git checkout <tag> && pnpm build && sudo systemctl restart cd-holding`.
 
 ## 8. Dépannage
 
 | Symptôme | Cause probable |
 |---|---|
-| `502` | app pas démarrée / `PORT`≠3000 → `pm2 logs cd-holding` |
+| `502` | service arrêté → `systemctl status cd-holding` / `journalctl -u cd-holding -n 50` |
 | Page vide + asset 404 sur sous-domaine | `^~ /_nuxt/` absent ou réécrit → vérifier `location` |
 | Double préfixe `404` | pass-through `^~ /<slug>/` manquant (R5) |
 | `413` sur upload | `client_max_body_size` < `MAX_UPLOAD_REQUEST_BYTES` |
